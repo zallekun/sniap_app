@@ -191,7 +191,7 @@ class HealthApiController extends BaseController
             
             // Get database info
             $dbInfo = [
-                'driver' => $db->getDriver(),
+                'driver' => $db->DBDriver,
                 'database' => $db->getDatabase(),
                 'hostname' => $db->hostname,
                 'platform' => $db->getPlatform(),

@@ -94,6 +94,12 @@ $routes->group('api/v1', ['namespace' => 'App\Controllers\API'], function($route
         $routes->get('stats', 'PaymentApiController::stats');            
     });
 
+    $routes->post('admin/fix-registration-status', 'AdminFixController::fixRegistrationStatus');
+$routes->get('admin/check-sync-status', 'AdminFixController::checkSyncStatus');
+
+$routes->get('admin/enum-values', 'AdminFixController::getEnumValues');
+$routes->get('admin/system-health', 'AdminFixController::systemHealth');
+
     // =================
     // WEBHOOKS (no auth)
     // =================

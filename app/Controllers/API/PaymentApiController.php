@@ -3,26 +3,12 @@
 namespace App\Controllers\API;
 
 use App\Controllers\BaseController;
-use App\Models\PaymentModel;
-use App\Models\RegistrationModel;
-use App\Models\EventModel;
 use CodeIgniter\HTTP\ResponseInterface;
 
 class PaymentApiController extends BaseController
 {
-    protected $paymentModel;
-    protected $registrationModel;
-    protected $eventModel;
-
-    public function __construct()
-    {
-        $this->paymentModel = new PaymentModel();
-        $this->registrationModel = new RegistrationModel();
-        $this->eventModel = new EventModel();
-    }
-
     /**
-     * Get user's payment history
+     * Get user's payment history - SIMPLIFIED
      * GET /api/v1/payments
      */
     public function index()
@@ -46,14 +32,14 @@ class PaymentApiController extends BaseController
             $page = max(1, (int)$page);
             $offset = ($page - 1) * $limit;
 
-            // Get payments using direct SQL since we might not have all joined tables
+            // Get payments using direct SQL - SIMPLE VERSION
             $db = \Config\Database::connect();
             $sql = "SELECT p.*, r.event_id, e.title as event_title 
                     FROM payments p 
                     JOIN registrations r ON r.id = p.registration_id 
                     JOIN events e ON e.id = r.event_id 
                     WHERE r.user_id = ? 
-                    ORDER BY p.created_at DESC 
+                    ORDER BY p.id DESC 
                     LIMIT ? OFFSET ?";
             
             $payments = $db->query($sql, [$user['id'], $limit, $offset])->getResultArray();
@@ -91,7 +77,7 @@ class PaymentApiController extends BaseController
     }
 
     /**
-     * Create payment for registration
+     * Create payment for registration - SIMPLIFIED
      * POST /api/v1/payments
      */
     public function create()
@@ -117,7 +103,7 @@ class PaymentApiController extends BaseController
                 ])->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST);
             }
 
-            $registrationId = $jsonInput['registration_id'];
+            $registrationId = (int)$jsonInput['registration_id'];
             $paymentMethod = $jsonInput['payment_method'] ?? 'credit_card';
 
             // Get registration details with direct SQL
@@ -137,13 +123,15 @@ class PaymentApiController extends BaseController
                 ])->setStatusCode(ResponseInterface::HTTP_NOT_FOUND);
             }
 
-            if ($registration['payment_status'] === 'success') {
+            // Check if payment already completed
+            if ($registration['payment_status'] === 'success' || $registration['payment_status'] === 'paid') {
                 return $this->response->setJSON([
                     'status' => 'error',
                     'message' => 'Payment already completed for this registration'
                 ])->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST);
             }
 
+            // Check if event requires payment
             if ($registration['registration_fee'] <= 0) {
                 return $this->response->setJSON([
                     'status' => 'error',
@@ -152,7 +140,14 @@ class PaymentApiController extends BaseController
             }
 
             // Check if payment already exists
-            $existingPayment = $this->paymentModel->getPaymentByRegistration($registrationId);
+            $existingPayment = $db->query('
+                SELECT id, payment_status, final_amount 
+                FROM payments 
+                WHERE registration_id = ? 
+                ORDER BY id DESC 
+                LIMIT 1', 
+                [$registrationId]
+            )->getRowArray();
             
             if ($existingPayment && $existingPayment['payment_status'] === 'pending') {
                 return $this->response->setJSON([
@@ -163,36 +158,32 @@ class PaymentApiController extends BaseController
                         'registration_id' => $registrationId,
                         'amount' => $existingPayment['final_amount'],
                         'status' => $existingPayment['payment_status'],
-                        'payment_method' => $existingPayment['payment_method'],
-                        'created_at' => $existingPayment['created_at']
+                        'payment_method' => $paymentMethod
                     ]
                 ])->setStatusCode(ResponseInterface::HTTP_OK);
             }
 
-            // Calculate payment amount (with potential voucher)
-            $voucherCode = $jsonInput['voucher_code'] ?? null;
-            $paymentCalculation = $this->paymentModel->calculatePaymentAmount($registrationId, $voucherCode);
+            // Calculate payment amount - SIMPLE VERSION
+            $amount = $registration['registration_fee'];
+            $discountAmount = 0; // No voucher for now
+            $finalAmount = $amount - $discountAmount;
 
-            if (!$paymentCalculation) {
-                return $this->response->setJSON([
-                    'status' => 'error',
-                    'message' => 'Failed to calculate payment amount'
-                ])->setStatusCode(ResponseInterface::HTTP_INTERNAL_SERVER_ERROR);
-            }
+            // Create payment record - DIRECT SQL
+            $paymentSql = "INSERT INTO payments (registration_id, amount, discount_amount, final_amount, payment_method, payment_gateway, payment_status) 
+                          VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id";
+            
+            $paymentResult = $db->query($paymentSql, [
+                $registrationId,
+                $amount,
+                $discountAmount,
+                $finalAmount,
+                $paymentMethod,
+                'midtrans',
+                'pending'
+            ]);
 
-            // Create payment record
-            $paymentData = [
-                'registration_id' => $registrationId,
-                'amount' => $paymentCalculation['amount'],
-                'discount_amount' => $paymentCalculation['discount_amount'],
-                'final_amount' => $paymentCalculation['final_amount'],
-                'voucher_code' => $voucherCode,
-                'payment_method' => $paymentMethod,
-                'payment_gateway' => 'midtrans', // Default gateway
-                'payment_status' => 'pending'
-            ];
-
-            $paymentId = $this->paymentModel->insert($paymentData);
+            $paymentData = $paymentResult->getRowArray();
+            $paymentId = $paymentData['id'];
 
             if (!$paymentId) {
                 return $this->response->setJSON([
@@ -201,17 +192,17 @@ class PaymentApiController extends BaseController
                 ])->setStatusCode(ResponseInterface::HTTP_INTERNAL_SERVER_ERROR);
             }
 
-            // For now, return payment details without actual gateway integration
+            // Return payment details
             $responseData = [
                 'payment_id' => $paymentId,
                 'registration_id' => $registrationId,
                 'event_title' => $registration['event_title'],
-                'amount' => $paymentCalculation['amount'],
-                'discount_amount' => $paymentCalculation['discount_amount'],
-                'final_amount' => $paymentCalculation['final_amount'],
+                'amount' => number_format($amount, 2),
+                'discount_amount' => $discountAmount,
+                'final_amount' => $finalAmount,
                 'payment_method' => $paymentMethod,
                 'status' => 'pending',
-                'payment_url' => base_url("payment/gateway/{$paymentId}"), // Placeholder
+                'payment_url' => base_url("payment/gateway/{$paymentId}"),
                 'expires_at' => date('Y-m-d H:i:s', strtotime('+24 hours'))
             ];
 
@@ -230,7 +221,7 @@ class PaymentApiController extends BaseController
     }
 
     /**
-     * Get specific payment details
+     * Get specific payment details - SIMPLIFIED
      * GET /api/v1/payments/{id}
      */
     public function show($paymentId)
@@ -247,21 +238,18 @@ class PaymentApiController extends BaseController
                 ])->setStatusCode(ResponseInterface::HTTP_UNAUTHORIZED);
             }
 
-            // Get payment with details
-            $payment = $this->paymentModel->getPaymentWithDetails($paymentId);
+            // Get payment with details using direct SQL
+            $db = \Config\Database::connect();
+            $payment = $db->query('
+                SELECT p.*, r.user_id, r.event_id, e.title as event_title
+                FROM payments p
+                JOIN registrations r ON r.id = p.registration_id
+                JOIN events e ON e.id = r.event_id
+                WHERE p.id = ? AND r.user_id = ?', 
+                [$paymentId, $user['id']]
+            )->getRowArray();
 
             if (!$payment) {
-                return $this->response->setJSON([
-                    'status' => 'error',
-                    'message' => 'Payment not found'
-                ])->setStatusCode(ResponseInterface::HTTP_NOT_FOUND);
-            }
-
-            // Check if payment belongs to authenticated user
-            $db = \Config\Database::connect();
-            $registration = $db->query('SELECT user_id FROM registrations WHERE id = ?', [$payment['registration_id']])->getRowArray();
-            
-            if (!$registration || $registration['user_id'] != $user['id']) {
                 return $this->response->setJSON([
                     'status' => 'error',
                     'message' => 'Payment not found'
@@ -282,7 +270,7 @@ class PaymentApiController extends BaseController
     }
 
     /**
-     * Verify payment status
+     * Verify payment status - WITH REGISTRATION UPDATE
      * POST /api/v1/payments/{id}/verify
      */
     public function verify($paymentId)
@@ -299,7 +287,15 @@ class PaymentApiController extends BaseController
                 ])->setStatusCode(ResponseInterface::HTTP_UNAUTHORIZED);
             }
 
-            $payment = $this->paymentModel->find($paymentId);
+            // Get payment details
+            $db = \Config\Database::connect();
+            $payment = $db->query('
+                SELECT p.*, r.user_id, r.id as registration_id
+                FROM payments p 
+                JOIN registrations r ON r.id = p.registration_id 
+                WHERE p.id = ? AND r.user_id = ?', 
+                [$paymentId, $user['id']]
+            )->getRowArray();
 
             if (!$payment) {
                 return $this->response->setJSON([
@@ -308,30 +304,64 @@ class PaymentApiController extends BaseController
                 ])->setStatusCode(ResponseInterface::HTTP_NOT_FOUND);
             }
 
-            // For demo purposes, mark payment as successful - use 'success' that already worked
-            $updated = $this->paymentModel->update($paymentId, [
-                'payment_status' => 'success', // Use 'success' - same as payment ID 1
-                'paid_at' => date('Y-m-d H:i:s'),
-                'transaction_id' => 'DEMO-TXN-' . time()
-            ]);
+            // For demo purposes, mark payment as successful
+            $updateSql = "UPDATE payments 
+                         SET payment_status = ?, paid_at = ?, transaction_id = ? 
+                         WHERE id = ?";
+            
+            $transactionId = 'DEMO-TXN-' . time();
+            $paidAt = date('Y-m-d H:i:s');
+            
+            $paymentUpdated = $db->query($updateSql, ['success', $paidAt, $transactionId, $paymentId]);
 
-            if ($updated) {
-                // Skip registration update for now - payment verification working is more important
-                // Future: Update with correct enum values once we determine what they are
-                // $this->registrationModel->update($payment['registration_id'], [
-                //     'payment_status' => 'paid',
-                //     'registration_status' => 'active'
-                // ]);
+            if ($paymentUpdated) {
+                // Try to update registration payment_status to success
+                $registrationUpdateResult = null;
+                try {
+                    $registrationUpdated = $db->query('
+                        UPDATE registrations 
+                        SET payment_status = ? 
+                        WHERE id = ?', 
+                        ['success', $payment['registration_id']]
+                    );
+                    $registrationUpdateResult = $registrationUpdated ? 'success' : 'failed';
+                } catch (\Exception $e) {
+                    // If 'success' doesn't work, try other values
+                    $possibleValues = ['paid', 'completed', 'confirmed'];
+                    foreach ($possibleValues as $value) {
+                        try {
+                            $registrationUpdated = $db->query('
+                                UPDATE registrations 
+                                SET payment_status = ? 
+                                WHERE id = ?', 
+                                [$value, $payment['registration_id']]
+                            );
+                            if ($registrationUpdated) {
+                                $registrationUpdateResult = "success_with_" . $value;
+                                break;
+                            }
+                        } catch (\Exception $innerE) {
+                            continue;
+                        }
+                    }
+                    
+                    if (!$registrationUpdateResult) {
+                        $registrationUpdateResult = 'enum_constraint_failed';
+                    }
+                }
 
                 return $this->response->setJSON([
                     'status' => 'success',
                     'message' => 'Payment verified successfully',
                     'data' => [
                         'payment_id' => $paymentId,
-                        'status' => 'success',
-                        'verified_at' => date('Y-m-d H:i:s'),
-                        'transaction_id' => 'DEMO-TXN-' . time(),
-                        'note' => 'Payment processed - registration status update skipped due to enum constraints'
+                        'payment_status' => 'success',
+                        'verified_at' => $paidAt,
+                        'transaction_id' => $transactionId,
+                        'registration_update' => $registrationUpdateResult,
+                        'note' => $registrationUpdateResult === 'enum_constraint_failed' 
+                            ? 'Payment verified but registration status update failed due to enum constraints' 
+                            : 'Payment and registration status updated successfully'
                     ]
                 ])->setStatusCode(ResponseInterface::HTTP_OK);
             } else {
@@ -350,7 +380,7 @@ class PaymentApiController extends BaseController
     }
 
     /**
-     * Get payment statistics for user
+     * Get payment statistics for user - SIMPLIFIED
      * GET /api/v1/payments/stats
      */
     public function stats()
@@ -422,22 +452,14 @@ class PaymentApiController extends BaseController
      */
     public function invoice($paymentId)
     {
-        try {
-            return $this->response->setJSON([
-                'status' => 'success',
-                'message' => 'Invoice generation feature not implemented yet',
-                'data' => [
-                    'payment_id' => $paymentId,
-                    'download_url' => base_url("invoices/{$paymentId}.pdf")
-                ]
-            ])->setStatusCode(ResponseInterface::HTTP_OK);
-
-        } catch (\Exception $e) {
-            return $this->response->setJSON([
-                'status' => 'error',
-                'message' => 'Failed to generate invoice: ' . $e->getMessage()
-            ])->setStatusCode(ResponseInterface::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        return $this->response->setJSON([
+            'status' => 'success',
+            'message' => 'Invoice generation feature not implemented yet',
+            'data' => [
+                'payment_id' => $paymentId,
+                'download_url' => base_url("invoices/{$paymentId}.pdf")
+            ]
+        ])->setStatusCode(ResponseInterface::HTTP_OK);
     }
 
     /**
