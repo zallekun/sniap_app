@@ -18,16 +18,18 @@ class Filters extends BaseConfig
      * @var array<string, class-string|list<class-string>>
      */
     public array $aliases = [
-        'csrf'          => CSRF::class,
-        'toolbar'       => DebugToolbar::class,
-        'honeypot'      => Honeypot::class,
-        'invalidchars'  => InvalidChars::class,
-        'secureheaders' => SecureHeaders::class,
-        
-        // Custom Authentication Filters
-        'auth'          => \App\Filters\AuthFilter::class,
-        'api_auth'      => \App\Filters\ApiAuthFilter::class,
-    ];
+    'csrf'          => \CodeIgniter\Filters\CSRF::class,
+    'toolbar'       => \CodeIgniter\Filters\DebugToolbar::class,
+    'honeypot'      => \CodeIgniter\Filters\Honeypot::class,
+    'invalidchars'  => \CodeIgniter\Filters\InvalidChars::class,
+    'secureheaders' => \CodeIgniter\Filters\SecureHeaders::class,
+    
+    // Custom filters - TAMBAHKAN INI
+    'auth'          => \App\Filters\AuthFilter::class,
+    'apiauth'       => \App\Filters\ApiAuthFilter::class,  // ⭐ INI YANG PENTING
+];
+
+    
 
     /**
      * List of filter aliases that are always
@@ -77,23 +79,24 @@ class Filters extends BaseConfig
      * @var array<string, array<string, list<string>>>
      */
     public array $filters = [
-        // Authentication filter for protected routes
-        'auth' => [
-            'before' => [
-                'dashboard',
-                'dashboard/*',
-                'admin/*',
-                'reviewer/*',
-                'presenter/*',
-                'profile/*',
-            ]
-        ],
+    'auth' => [
+        'before' => [
+            'admin/*',
+            'user/*', 
+            'presenter/*',
+            'reviewer/*',
+            'dashboard',
+        ]
+    ],
         
-        // API Authentication filter
-        'api_auth' => [
-            'before' => [
-                'api/auth/*',
-            ]
-        ],
-    ];
+        'apiauth' => [
+        'before' => [
+            'api/v1/registrations',
+            'api/v1/registrations/*',
+            'api/v1/payments',
+            'api/v1/payments/*',
+            'api/v1/auth/profile',
+        ]
+        ]
+        ];
 }
