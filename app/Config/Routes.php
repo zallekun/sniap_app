@@ -23,7 +23,7 @@ $routes->group('api/v1', ['namespace' => 'App\Controllers\API'], function($route
     $routes->post('test/insert', 'SimpleDebugController::testInsert');           
     $routes->post('test/model-insert', 'SimpleDebugController::testModelInsert');
     $routes->post('test/json', 'SimpleDebugController::testJson');               
-    $routes->post('test/simple-register', 'SimpleDebugController::simpleRegister'); 
+    $routes->post('test/simple-register', 'SimpleDebugController::simpleRegister');
 
     // =================
     // HEALTH ENDPOINTS (no auth required)
@@ -49,12 +49,21 @@ $routes->group('api/v1', ['namespace' => 'App\Controllers\API'], function($route
     $routes->get('simple/profile', 'SimpleProfileController::profile');
 
     // =================
+    // ADMIN ROUTES (no auth for now)
+    // =================
+    $routes->post('admin/fix-registration-status', 'AdminFixController::fixRegistrationStatus');
+    $routes->get('admin/check-sync-status', 'AdminFixController::checkSyncStatus');
+    $routes->get('admin/enum-values', 'AdminFixController::getEnumValues');
+    $routes->get('admin/system-health', 'AdminFixController::systemHealth');
+
+    // =================
     // AUTH API ROUTES (no auth required)
     // =================
     $routes->group('auth', function($routes) {
         $routes->post('login', 'AuthApiController::login');
         $routes->post('register', 'AuthApiController::register');
         $routes->post('verify', 'AuthApiController::verify');
+        $routes->post('verify-user', 'AuthApiController::verifyUser');  // Add manual verification
         $routes->post('refresh', 'AuthApiController::refresh');
         $routes->post('logout', 'AuthApiController::logout');
         $routes->get('profile', 'AuthApiController::profile'); // NO FILTER
@@ -94,18 +103,24 @@ $routes->group('api/v1', ['namespace' => 'App\Controllers\API'], function($route
         $routes->get('stats', 'PaymentApiController::stats');            
     });
 
-    $routes->post('admin/fix-registration-status', 'AdminFixController::fixRegistrationStatus');
-$routes->get('admin/check-sync-status', 'AdminFixController::checkSyncStatus');
-
-$routes->get('admin/enum-values', 'AdminFixController::getEnumValues');
-$routes->get('admin/system-health', 'AdminFixController::systemHealth');
+    // =================
+    // ABSTRACT MANAGEMENT (require JWT)
+    // =================
+    $routes->group('abstracts', ['filter' => 'apiauth'], function($routes) {
+        $routes->get('/', 'AbstractApiController::index');              // List my abstracts
+        $routes->post('/', 'AbstractApiController::create');            // Submit abstract
+        $routes->get('categories', 'AbstractApiController::categories'); // Get categories (before (:num))
+        $routes->get('stats', 'AbstractApiController::stats');          // Get statistics (before (:num))
+        $routes->get('(:num)', 'AbstractApiController::show/$1');       // Get abstract details
+        $routes->put('(:num)', 'AbstractApiController::update/$1');     // Update abstract
+    });
 
     // =================
     // WEBHOOKS (no auth)
     // =================
     $routes->post('webhooks/midtrans', 'PaymentApiController::midtransWebhook');
 
-}); // <- INI KURUNG KURAWAL YANG MISSING!
+});
 
 // ==========================================
 // WEB ROUTES (if needed)

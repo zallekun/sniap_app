@@ -125,7 +125,7 @@ class RegistrationApiController extends BaseController
             $registrationData = [
                 'user_id' => (int)$user['id'],
                 'event_id' => $eventId,
-                'registration_type' => 'audience', // Fixed enum value
+                'registration_type' => ($user['role'] === 'presenter') ? 'presenter' : 'audience', // ← FIXED!
                 'registration_status' => 'pending', // Fixed enum value
                 'payment_status' => ($event['registration_fee'] > 0) ? 'pending' : 'free'
             ];
