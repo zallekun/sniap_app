@@ -115,6 +115,35 @@ $routes->group('api/v1', ['namespace' => 'App\Controllers\API'], function($route
         $routes->put('(:num)', 'AbstractApiController::update/$1');     // Update abstract
     });
 
+    // Add to existing API routes group - REVIEW SYSTEM
+$routes->group('abstracts', ['filter' => 'apiauth'], function($routes) {
+    $routes->get('/', 'AbstractApiController::index');                    // List my abstracts
+    $routes->post('/', 'AbstractApiController::create');                  // Submit abstract
+    $routes->get('categories', 'AbstractApiController::categories');       // Get categories (before (:num))
+    $routes->get('stats', 'AbstractApiController::stats');                // Get statistics (before (:num))
+    $routes->get('(:num)', 'AbstractApiController::show/$1');             // Get abstract details
+    $routes->put('(:num)', 'AbstractApiController::update/$1');           // Update abstract
+    $routes->get('(:num)/reviews', 'AbstractApiController::getReviews/$1'); // Get reviews for abstract
+    $routes->post('(:num)/revision', 'AbstractApiController::submitRevision/$1'); // Submit revision
+});
+
+// LOA TEST ROUTES (TAMBAH INI SEBELUM CLOSING BRACE)
+    // =================
+    $routes->get('test-loa/generate/(:num)', 'LoaController::generateLoa/$1');
+    $routes->get('test-loa/download/(:num)', 'LoaController::downloadLoa/$1');
+    $routes->get('test-loa/my-loas', 'LoaController::getMyLoas');
+$routes->get('test-loa/admin/all', 'LoaController::getAllLoas');
+
+    // LOA routes with auth (nanti untuk production)
+    $routes->group('loa', ['filter' => 'apiauth'], function($routes) {
+        $routes->get('generate/(:num)', 'LoaController::generateLoa/$1');
+        $routes->get('download/(:num)', 'LoaController::downloadLoa/$1');
+        $routes->get('my-loas', 'LoaController::getMyLoas');
+        $routes->get('test-loa/admin/all', 'LoaController::getAllLoas');
+    });
+
+    
+
     // =================
     // WEBHOOKS (no auth)
     // =================

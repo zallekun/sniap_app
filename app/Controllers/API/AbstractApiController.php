@@ -537,4 +537,260 @@ class AbstractApiController extends BaseController
             ]);
         }
     }
+
+    /**
+     * Get reviews for an abstract (Presenter can see feedback)
+     * GET /api/v1/abstracts/{id}/reviews
+     */
+    public function getReviews($abstractId)
+    {
+        try {
+            // Get authenticated user
+            $request = service('request');
+            $user = $request->api_user ?? null;
+            
+            if (!$user) {
+                return $this->response->setStatusCode(401)->setJSON([
+                    'status' => 'error',
+                    'message' => 'Unauthorized'
+                ]);
+            }
+            
+            $db = \Config\Database::connect();
+            
+            // Verify abstract belongs to user (presenter)
+            $abstractQuery = $db->query("
+                SELECT a.*, r.user_id
+                FROM abstracts a
+                JOIN registrations r ON a.registration_id = r.id
+                WHERE a.id = ?
+            ", [$abstractId]);
+            
+            $abstract = $abstractQuery->getRowArray();
+            
+            if (!$abstract) {
+                return $this->response->setStatusCode(404)->setJSON([
+                    'status' => 'error',
+                    'message' => 'Abstract not found'
+                ]);
+            }
+            
+            // Check authorization - presenter can see own reviews, admin can see all
+            $canView = false;
+            if ($user['role'] === 'presenter' && $abstract['user_id'] == $user['id']) {
+                $canView = true;
+            } elseif ($user['role'] === 'admin') {
+                $canView = true;
+            }
+            
+            if (!$canView) {
+                return $this->response->setStatusCode(403)->setJSON([
+                    'status' => 'error',
+                    'message' => 'Unauthorized to view reviews for this abstract'
+                ]);
+            }
+            
+            // Get all reviews for this abstract
+            $reviewsQuery = $db->query("
+                SELECT DISTINCT
+                    rv.*,
+                    u.first_name as reviewer_first_name,
+                    u.last_name as reviewer_last_name
+                FROM reviews rv
+                LEFT JOIN users u ON rv.reviewer_id = u.id
+                WHERE rv.abstract_id = ?
+                ORDER BY rv.reviewed_at DESC
+            ", [$abstractId]);
+            
+            $reviews = $reviewsQuery->getResultArray();
+            
+            // Get abstract current status
+            $abstractStatus = [
+                'id' => $abstract['id'],
+                'title' => $abstract['title'],
+                'review_status' => $abstract['review_status'],
+                'final_status' => $abstract['final_status'],
+                'can_resubmit' => (bool)$abstract['can_resubmit'],
+                'submission_version' => $abstract['submission_version']
+            ];
+            
+            // Determine next steps for presenter
+            $nextSteps = '';
+            switch ($abstract['review_status']) {
+                case 'pending':
+                    $nextSteps = 'Your abstract is under review. Please wait for reviewer feedback.';
+                    break;
+                case 'accepted':
+                    $nextSteps = 'Congratulations! Your abstract has been accepted. You can now proceed to payment.';
+                    break;
+                case 'accepted_with_revision':
+                    $nextSteps = 'Your abstract needs revision. Please review the feedback below and submit a revised version.';
+                    break;
+                case 'rejected':
+                    if ($abstract['can_resubmit']) {
+                        $nextSteps = 'Your abstract was not accepted. You may resubmit with significant changes.';
+                    } else {
+                        $nextSteps = 'Your abstract was not accepted and resubmission is not allowed.';
+                    }
+                    break;
+            }
+            
+            return $this->response->setJSON([
+                'status' => 'success',
+                'data' => [
+                    'abstract' => $abstractStatus,
+                    'reviews' => $reviews,
+                    'review_summary' => [
+                        'total_reviews' => count($reviews),
+                        'current_status' => $abstract['review_status'],
+                        'final_status' => $abstract['final_status'],
+                        'can_revise' => $abstract['review_status'] === 'accepted_with_revision',
+                        'can_proceed_to_payment' => $abstract['final_status'] === 'final_accepted'
+                    ],
+                    'next_steps' => $nextSteps
+                ]
+            ]);
+            
+        } catch (\Exception $e) {
+            return $this->response->setStatusCode(500)->setJSON([
+                'status' => 'error',
+                'message' => 'Failed to get reviews: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Submit revision for abstract (after reviewer feedback)
+     * POST /api/v1/abstracts/{id}/revision
+     */
+    public function submitRevision($abstractId)
+    {
+        try {
+            // Get authenticated user
+            $request = service('request');
+            $user = $request->api_user ?? null;
+            
+            if (!$user) {
+                return $this->response->setStatusCode(401)->setJSON([
+                    'status' => 'error',
+                    'message' => 'Unauthorized'
+                ]);
+            }
+            
+            // Only presenters can submit revisions
+            if ($user['role'] !== 'presenter') {
+                return $this->response->setStatusCode(403)->setJSON([
+                    'status' => 'error',
+                    'message' => 'Only presenters can submit revisions'
+                ]);
+            }
+            
+            $data = $this->request->getJSON(true) ?? [];
+            
+            $db = \Config\Database::connect();
+            
+            // Verify abstract belongs to user and needs revision
+            $abstractQuery = $db->query("
+                SELECT a.*, r.user_id
+                FROM abstracts a
+                JOIN registrations r ON a.registration_id = r.id
+                WHERE a.id = ? AND r.user_id = ?
+            ", [$abstractId, $user['id']]);
+            
+            $abstract = $abstractQuery->getRowArray();
+            
+            if (!$abstract) {
+                return $this->response->setStatusCode(404)->setJSON([
+                    'status' => 'error',
+                    'message' => 'Abstract not found or unauthorized'
+                ]);
+            }
+            
+            // Check if revision is allowed
+            if ($abstract['review_status'] !== 'accepted_with_revision') {
+                return $this->response->setStatusCode(409)->setJSON([
+                    'status' => 'error',
+                    'message' => 'Abstract is not in revision status',
+                    'current_status' => $abstract['review_status']
+                ]);
+            }
+            
+            // Build update data
+            $updateFields = [];
+            $updateValues = [];
+            
+            if (isset($data['title'])) {
+                $updateFields[] = 'title = ?';
+                $updateValues[] = $data['title'];
+            }
+            
+            if (isset($data['abstract_text'])) {
+                $updateFields[] = 'abstract_text = ?';
+                $updateValues[] = $data['abstract_text'];
+            }
+            
+            if (isset($data['keywords'])) {
+                $updateFields[] = 'keywords = ?';
+                $updateValues[] = $data['keywords'];
+            }
+            
+            if (empty($updateFields)) {
+                return $this->response->setStatusCode(400)->setJSON([
+                    'status' => 'error',
+                    'message' => 'No revision data provided'
+                ]);
+            }
+            
+            // Update submission version and reset review status
+            $updateFields[] = 'submission_version = submission_version + 1';
+            $updateFields[] = 'review_status = ?';
+            $updateValues[] = 'pending';
+            $updateFields[] = 'final_status = ?';
+            $updateValues[] = 'pending';
+            $updateFields[] = 'updated_at = NOW()';
+            $updateValues[] = $abstractId;
+            
+            // Update abstract
+            $updateQuery = $db->query("
+                UPDATE abstracts 
+                SET " . implode(', ', $updateFields) . "
+                WHERE id = ?
+            ", $updateValues);
+            
+            if ($updateQuery) {
+                // Get updated abstract info
+                $updatedQuery = $db->query("
+                    SELECT submission_version, review_status, final_status, updated_at
+                    FROM abstracts 
+                    WHERE id = ?
+                ", [$abstractId]);
+                
+                $updated = $updatedQuery->getRowArray();
+                
+                return $this->response->setJSON([
+                    'status' => 'success',
+                    'message' => 'Revision submitted successfully',
+                    'data' => [
+                        'abstract_id' => (int)$abstractId,
+                        'submission_version' => (int)$updated['submission_version'],
+                        'review_status' => $updated['review_status'],
+                        'final_status' => $updated['final_status'],
+                        'updated_at' => $updated['updated_at'],
+                        'next_steps' => 'Your revision has been submitted and is now under review again.'
+                    ]
+                ]);
+            } else {
+                return $this->response->setStatusCode(500)->setJSON([
+                    'status' => 'error',
+                    'message' => 'Failed to submit revision'
+                ]);
+            }
+            
+        } catch (\Exception $e) {
+            return $this->response->setStatusCode(500)->setJSON([
+                'status' => 'error',
+                'message' => 'Failed to submit revision: ' . $e->getMessage()
+            ]);
+        }
+    }
 }
