@@ -8,6 +8,10 @@ class CreateQrScans extends Migration
 {
     public function up()
     {
+        // Create ENUM types for QR scan system (PostgreSQL specific)
+        $this->db->query("DO $$ BEGIN CREATE TYPE scan_type AS ENUM ('check_in', 'check_out', 'session_access', 'certificate', 'verification'); EXCEPTION WHEN duplicate_object THEN null; END $$;");
+        $this->db->query("DO $$ BEGIN CREATE TYPE scan_result AS ENUM ('success', 'failed', 'expired', 'invalid', 'duplicate'); EXCEPTION WHEN duplicate_object THEN null; END $$;");
+        
         // Create qr_scans table for tracking scan history
         $this->forge->addField([
             'id' => [
@@ -27,8 +31,7 @@ class CreateQrScans extends Migration
                 'unsigned' => true,
             ],
             'scan_type' => [
-                'type' => 'ENUM',
-                'constraint' => ['check_in', 'check_out', 'session_access', 'certificate', 'verification'],
+                'type' => 'scan_type',
                 'default' => 'check_in',
             ],
             'scanner_user_id' => [
@@ -56,8 +59,7 @@ class CreateQrScans extends Migration
                 'comment' => 'Browser/device info'
             ],
             'scan_result' => [
-                'type' => 'ENUM',
-                'constraint' => ['success', 'failed', 'expired', 'invalid', 'duplicate'],
+                'type' => 'scan_result',
                 'default' => 'success',
             ],
             'notes' => [
@@ -99,5 +101,7 @@ class CreateQrScans extends Migration
     public function down()
     {
         $this->forge->dropTable('qr_scans');
+        $this->db->query("DROP TYPE IF EXISTS scan_type CASCADE;");
+        $this->db->query("DROP TYPE IF EXISTS scan_result CASCADE;");
     }
 }

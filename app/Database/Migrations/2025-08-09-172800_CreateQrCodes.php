@@ -8,6 +8,9 @@ class CreateQrCodes extends Migration
 {
     public function up()
     {
+        // Create ENUM type for QR code status (PostgreSQL specific)
+        $this->db->query("DO $$ BEGIN CREATE TYPE qr_status AS ENUM ('active', 'inactive', 'expired'); EXCEPTION WHEN duplicate_object THEN null; END $$;");
+        
         // Create qr_codes table
         $this->forge->addField([
             'id' => [
@@ -27,7 +30,7 @@ class CreateQrCodes extends Migration
                 'comment' => 'JSON encoded QR data'
             ],
             'qr_image' => [
-                'type' => 'LONGTEXT',
+                'type' => 'TEXT',
                 'null' => false,
                 'comment' => 'Base64 encoded QR image'
             ],
@@ -38,8 +41,7 @@ class CreateQrCodes extends Migration
                 'comment' => 'SHA256 hash of QR data'
             ],
             'status' => [
-                'type' => 'ENUM',
-                'constraint' => ['active', 'inactive', 'expired'],
+                'type' => 'qr_status',
                 'default' => 'active',
             ],
             'is_verified' => [
@@ -98,5 +100,6 @@ class CreateQrCodes extends Migration
     public function down()
     {
         $this->forge->dropTable('qr_codes');
+        $this->db->query("DROP TYPE IF EXISTS qr_status CASCADE;");
     }
 }
