@@ -4,6 +4,7 @@ namespace App\Controllers\API;
 
 use App\Controllers\BaseController;
 use CodeIgniter\HTTP\ResponseInterface;
+use App\Services\EmailService;
 
 class LoaController extends BaseController
 {
@@ -133,6 +134,27 @@ class LoaController extends BaseController
             if ($insertLoaQuery) {
                 $result = $insertLoaQuery->getRowArray();
                 $loaId = $result['id'];
+                
+                // 🚀 EMAIL NOTIFICATION AFTER LOA GENERATION:
+                try {
+                    $emailService = new EmailService();
+                    $presenterName = $abstract['first_name'] . ' ' . $abstract['last_name'];
+                    
+                    $emailResult = $emailService->sendLOADelivery(
+                        $abstract['email'],
+                        $presenterName,
+                        $abstract['title'],
+                        $pdfPath // LOA file path
+                    );
+                    
+                    if ($emailResult['success']) {
+                        log_message('info', "LOA delivery email sent to: " . $abstract['email']);
+                    } else {
+                        log_message('error', "Failed to send LOA delivery email: " . $emailResult['message']);
+                    }
+                } catch (\Exception $emailException) {
+                    log_message('error', 'LOA email notification error: ' . $emailException->getMessage());
+                }
                 
                 return $this->response->setJSON([
                     'status' => 'success',
@@ -320,90 +342,90 @@ class LoaController extends BaseController
      * Create LOA HTML content
      */
     private function createLoaContent($abstract, $loaNumber)
-{
-    $eventDate = date('F d, Y', strtotime($abstract['event_date']));
-    $generatedDate = date('F d, Y');
-    
-    // Handle location based on format
-    $eventLocation = $abstract['event_format'] === 'online' ? 
-        'Online Event' : 
-        ($abstract['event_location'] ?: 'To be announced');
-    
-    $html = "
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset='UTF-8'>
-        <title>Letter of Acceptance - {$loaNumber}</title>
-        <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; margin: 40px; }
-            .header { text-align: center; margin-bottom: 40px; }
-            .letterhead { font-size: 24px; font-weight: bold; color: #2c3e50; }
-            .loa-number { font-size: 14px; color: #7f8c8d; margin-top: 10px; }
-            .content { margin: 30px 0; }
-            .abstract-details { background: #f8f9fa; padding: 20px; border-left: 4px solid #3498db; margin: 20px 0; }
-            .signature { margin-top: 60px; }
-            .footer { margin-top: 40px; font-size: 12px; color: #7f8c8d; }
-        </style>
-    </head>
-    <body>
-        <div class='header'>
-            <div class='letterhead'>LETTER OF ACCEPTANCE</div>
-            <div class='loa-number'>LOA Number: {$loaNumber}</div>
-        </div>
+    {
+        $eventDate = date('F d, Y', strtotime($abstract['event_date']));
+        $generatedDate = date('F d, Y');
         
-        <div class='content'>
-            <p><strong>Date:</strong> {$generatedDate}</p>
-            
-            <p><strong>To:</strong><br>
-            {$abstract['first_name']} {$abstract['last_name']}<br>
-            {$abstract['institution']}<br>
-            {$abstract['email']}</p>
-            
-            <p>Dear {$abstract['first_name']} {$abstract['last_name']},</p>
-            
-            <p>We are pleased to inform you that your abstract has been <strong>ACCEPTED</strong> for presentation at <strong>{$abstract['event_title']}</strong>.</p>
-            
-            <div class='abstract-details'>
-                <h3>Abstract Details:</h3>
-                <p><strong>Title:</strong> {$abstract['title']}</p>
-                <p><strong>Event:</strong> {$abstract['event_title']}</p>
-                <p><strong>Event Date:</strong> {$eventDate}</p>
-                <p><strong>Event Format:</strong> " . ucfirst($abstract['event_format']) . "</p>
-                <p><strong>Location:</strong> {$eventLocation}</p>
-                <p><strong>Presenter:</strong> {$abstract['first_name']} {$abstract['last_name']}</p>
-                <p><strong>Institution:</strong> {$abstract['institution']}</p>
+        // Handle location based on format
+        $eventLocation = $abstract['event_format'] === 'online' ? 
+            'Online Event' : 
+            ($abstract['event_location'] ?: 'To be announced');
+        
+        $html = "
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset='UTF-8'>
+            <title>Letter of Acceptance - {$loaNumber}</title>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; margin: 40px; }
+                .header { text-align: center; margin-bottom: 40px; }
+                .letterhead { font-size: 24px; font-weight: bold; color: #2c3e50; }
+                .loa-number { font-size: 14px; color: #7f8c8d; margin-top: 10px; }
+                .content { margin: 30px 0; }
+                .abstract-details { background: #f8f9fa; padding: 20px; border-left: 4px solid #3498db; margin: 20px 0; }
+                .signature { margin-top: 60px; }
+                .footer { margin-top: 40px; font-size: 12px; color: #7f8c8d; }
+            </style>
+        </head>
+        <body>
+            <div class='header'>
+                <div class='letterhead'>LETTER OF ACCEPTANCE</div>
+                <div class='loa-number'>LOA Number: {$loaNumber}</div>
             </div>
             
-            <p>Your abstract has successfully completed the peer review process and has been approved by our scientific committee. You are now confirmed as a presenter at this event.</p>
-            
-            <p><strong>Next Steps:</strong></p>
-            <ul>
-                <li>Prepare your presentation according to the conference guidelines</li>
-                <li>Register for the conference if you haven't already done so</li>
-                <li>Complete your payment if not already done</li>
-                <li>Submit your final presentation materials by the specified deadline</li>
-            </ul>
-            
-            <p>We look forward to your valuable contribution to the conference.</p>
-            
-            <div class='signature'>
-                <p>Sincerely,</p>
-                <p><strong>Conference Organizing Committee</strong><br>
-                SNIA (Indonesian Computer Science Students Association)<br>
-                {$abstract['event_title']}</p>
+            <div class='content'>
+                <p><strong>Date:</strong> {$generatedDate}</p>
+                
+                <p><strong>To:</strong><br>
+                {$abstract['first_name']} {$abstract['last_name']}<br>
+                {$abstract['institution']}<br>
+                {$abstract['email']}</p>
+                
+                <p>Dear {$abstract['first_name']} {$abstract['last_name']},</p>
+                
+                <p>We are pleased to inform you that your abstract has been <strong>ACCEPTED</strong> for presentation at <strong>{$abstract['event_title']}</strong>.</p>
+                
+                <div class='abstract-details'>
+                    <h3>Abstract Details:</h3>
+                    <p><strong>Title:</strong> {$abstract['title']}</p>
+                    <p><strong>Event:</strong> {$abstract['event_title']}</p>
+                    <p><strong>Event Date:</strong> {$eventDate}</p>
+                    <p><strong>Event Format:</strong> " . ucfirst($abstract['event_format']) . "</p>
+                    <p><strong>Location:</strong> {$eventLocation}</p>
+                    <p><strong>Presenter:</strong> {$abstract['first_name']} {$abstract['last_name']}</p>
+                    <p><strong>Institution:</strong> {$abstract['institution']}</p>
+                </div>
+                
+                <p>Your abstract has successfully completed the peer review process and has been approved by our scientific committee. You are now confirmed as a presenter at this event.</p>
+                
+                <p><strong>Next Steps:</strong></p>
+                <ul>
+                    <li>Prepare your presentation according to the conference guidelines</li>
+                    <li>Register for the conference if you haven't already done so</li>
+                    <li>Complete your payment if not already done</li>
+                    <li>Submit your final presentation materials by the specified deadline</li>
+                </ul>
+                
+                <p>We look forward to your valuable contribution to the conference.</p>
+                
+                <div class='signature'>
+                    <p>Sincerely,</p>
+                    <p><strong>Conference Organizing Committee</strong><br>
+                    SNIA (Indonesian Computer Science Students Association)<br>
+                    {$abstract['event_title']}</p>
+                </div>
             </div>
-        </div>
+            
+            <div class='footer'>
+                <p>This Letter of Acceptance is digitally generated and valid without signature.<br>
+                LOA Number: {$loaNumber} | Generated on: {$generatedDate}</p>
+            </div>
+        </body>
+        </html>";
         
-        <div class='footer'>
-            <p>This Letter of Acceptance is digitally generated and valid without signature.<br>
-            LOA Number: {$loaNumber} | Generated on: {$generatedDate}</p>
-        </div>
-    </body>
-    </html>";
-    
-    return $html;
-}
+        return $html;
+    }
 
     /**
      * Generate LOA file path (placeholder)

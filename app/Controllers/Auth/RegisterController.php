@@ -5,6 +5,8 @@ namespace App\Controllers\Auth;
 use App\Controllers\BaseController;
 use App\Models\UserModel;
 use CodeIgniter\HTTP\ResponseInterface;
+use App\Services\EmailService;
+use App\Services\QRCodeService;
 
 class RegisterController extends BaseController
 {
@@ -259,36 +261,28 @@ class RegisterController extends BaseController
      * Send email verification
      */
     private function sendVerificationEmail($email, $name, $userId)
-    {
+{
+    try {
         $token = $this->generateVerificationToken($userId);
-        $verifyUrl = base_url("auth/verify-email/{$token}");
-
-        $emailService = \Config\Services::email();
-
-        $message = "
-            <h2>Welcome to SNIA Conference!</h2>
-            <p>Hello {$name},</p>
-            <p>Thank you for registering for the SNIA Conference. To complete your registration, please verify your email address by clicking the button below:</p>
-            <p><a href='{$verifyUrl}' style='background: #28a745; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 10px 0;'>Verify Email Address</a></p>
-            <p>Or copy and paste this URL into your browser:</p>
-            <p>{$verifyUrl}</p>
-            <p>If you didn't create an account with us, please ignore this email.</p>
-            <br>
-            <p>Best regards,<br>SNIA Conference Team</p>
-        ";
-
-        $emailService->setTo($email);
-        $emailService->setSubject('Please Verify Your Email - SNIA Conference');
-        $emailService->setMessage($message);
-
-        try {
-            $emailService->send();
+        
+        // Use professional EmailService instead of basic email
+        $emailService = new EmailService();
+        
+        $result = $emailService->sendVerificationEmail($email, $name, $token);
+        
+        if ($result['success']) {
+            log_message('info', "Verification email sent successfully to: {$email}");
             return true;
-        } catch (\Exception $e) {
-            log_message('error', 'Failed to send verification email: ' . $e->getMessage());
+        } else {
+            log_message('error', "Failed to send verification email: " . $result['message']);
             return false;
         }
+        
+    } catch (\Exception $e) {
+        log_message('error', 'Verification email error: ' . $e->getMessage());
+        return false;
     }
+}
 
     /**
      * Generate verification token

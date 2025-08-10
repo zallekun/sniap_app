@@ -117,8 +117,9 @@ class AbstractApiController extends BaseController
                 ]);
             }
             
-            // Get JSON data
-            $data = $this->request->getJSON(true) ?? [];
+            // Handle both multipart form data and JSON
+            $data = $this->request->getPost() ?? $this->request->getJSON(true) ?? [];
+            $files = $this->request->getFiles() ?? [];
             
             // Basic validation
             if (empty($data['registration_id'])) {
@@ -196,10 +197,35 @@ class AbstractApiController extends BaseController
             
             $userInfo = $userQuery->getRowArray();
             
+            // Handle file upload if present
+            $filePath = null;
+            $fileInfo = null;
+            
+            if (!empty($files['abstract_file'])) {
+                $uploadService = new \App\Services\FileUploadService();
+                $fileResult = $uploadService->uploadAbstractFile(
+                    $files['abstract_file'],
+                    $user['id'],
+                    (int)$data['registration_id'],
+                    'abstract'
+                );
+                
+                if (!$fileResult['success']) {
+                    return $this->response->setStatusCode(400)->setJSON([
+                        'status' => 'error',
+                        'message' => 'File upload failed',
+                        'error_details' => $fileResult['message']
+                    ]);
+                }
+                
+                $filePath = $fileResult['file_info']['file_path'];
+                $fileInfo = $fileResult['file_info'];
+            }
+            
             // Use default category_id = 1 (assume it exists)
             $categoryId = isset($data['category_id']) ? (int)$data['category_id'] : 1;
             
-            // Insert abstract with VALID category_id
+            // Insert abstract with file path
             $insertQuery = $db->query("
                 INSERT INTO abstracts (
                     registration_id, first_name, last_name, email, affiliation,
@@ -218,7 +244,7 @@ class AbstractApiController extends BaseController
                 $data['title'],
                 $data['abstract_text'],
                 $data['keywords'] ?? '',
-                'abstracts/placeholder_' . time() . '.txt', // file_path placeholder
+                $filePath ?? ('abstracts/placeholder_' . time() . '.txt'), // real file path or placeholder
                 1, // submission_version
                 'pending', // review_status
                 'pending', // final_status
@@ -229,18 +255,30 @@ class AbstractApiController extends BaseController
                 $result = $insertQuery->getRowArray();
                 $abstractId = $result['id'];
                 
+                $responseData = [
+                    'abstract_id' => (int)$abstractId,
+                    'registration_id' => (int)$data['registration_id'],
+                    'event_title' => $registration['event_title'],
+                    'title' => $data['title'],
+                    'status' => 'submitted',
+                    'submitted_at' => date('Y-m-d H:i:s'),
+                    'file_uploaded' => !empty($fileInfo),
+                    'next_steps' => 'Your abstract will be reviewed. You will receive notification about the review status.'
+                ];
+                
+                if ($fileInfo) {
+                    $responseData['file_info'] = [
+                        'original_name' => $fileInfo['original_name'],
+                        'file_size' => $fileInfo['file_size'],
+                        'file_type' => $fileInfo['extension'],
+                        'uploaded_at' => $fileInfo['uploaded_at']
+                    ];
+                }
+                
                 return $this->response->setStatusCode(201)->setJSON([
                     'status' => 'success',
                     'message' => 'Abstract submitted successfully',
-                    'data' => [
-                        'abstract_id' => (int)$abstractId,
-                        'registration_id' => (int)$data['registration_id'],
-                        'event_title' => $registration['event_title'],
-                        'title' => $data['title'],
-                        'status' => 'submitted',
-                        'submitted_at' => date('Y-m-d H:i:s'),
-                        'next_steps' => 'Your abstract will be reviewed. You will receive notification about the review status.'
-                    ]
+                    'data' => $responseData
                 ]);
             } else {
                 return $this->response->setStatusCode(500)->setJSON([
@@ -790,6 +828,124 @@ class AbstractApiController extends BaseController
             return $this->response->setStatusCode(500)->setJSON([
                 'status' => 'error',
                 'message' => 'Failed to submit revision: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Download abstract file
+     * GET /api/v1/abstracts/{id}/download
+     */
+    public function downloadFile($abstractId)
+    {
+        try {
+            // Get authenticated user
+            $request = service('request');
+            $user = $request->api_user ?? null;
+            
+            if (!$user) {
+                return $this->response->setStatusCode(401)->setJSON([
+                    'status' => 'error',
+                    'message' => 'Unauthorized'
+                ]);
+            }
+            
+            $db = \Config\Database::connect();
+            
+            // Get abstract with proper authorization check
+            $abstractQuery = $db->query("
+                SELECT a.*, r.user_id, u.first_name, u.last_name
+                FROM abstracts a
+                JOIN registrations r ON a.registration_id = r.id
+                JOIN users u ON r.user_id = u.id
+                WHERE a.id = ? AND (r.user_id = ? OR ? IN ('admin', 'reviewer'))
+            ", [$abstractId, $user['id'], $user['role']]);
+            
+            $abstract = $abstractQuery->getRowArray();
+            
+            if (!$abstract) {
+                return $this->response->setStatusCode(404)->setJSON([
+                    'status' => 'error',
+                    'message' => 'Abstract not found or unauthorized'
+                ]);
+            }
+            
+            if (empty($abstract['file_path']) || strpos($abstract['file_path'], 'placeholder') !== false) {
+                return $this->response->setStatusCode(404)->setJSON([
+                    'status' => 'error',
+                    'message' => 'No file attached to this abstract'
+                ]);
+            }
+            
+            // Use FileUploadService to serve file
+            $uploadService = new \App\Services\FileUploadService();
+            $fileData = $uploadService->serveFile(
+                $abstract['file_path'],
+                'abstract_' . $abstractId . '_' . $abstract['title'] . '.pdf'
+            );
+            
+            if (!$fileData) {
+                return $this->response->setStatusCode(404)->setJSON([
+                    'status' => 'error',
+                    'message' => 'File not found on server'
+                ]);
+            }
+            
+            // Serve file for download
+            return $this->response
+                ->setHeader('Content-Type', $fileData['mime_type'])
+                ->setHeader('Content-Disposition', 'attachment; filename="' . $fileData['download_name'] . '"')
+                ->setHeader('Content-Length', $fileData['file_size'])
+                ->setBody(file_get_contents($fileData['file_path']));
+                
+        } catch (\Exception $e) {
+            log_message('error', 'Abstract file download failed: ' . $e->getMessage());
+            return $this->response->setStatusCode(500)->setJSON([
+                'status' => 'error',
+                'message' => 'File download failed',
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Get file upload information and validation
+     * GET /api/v1/abstracts/upload-info
+     */
+    public function getUploadInfo()
+    {
+        try {
+            $uploadService = new \App\Services\FileUploadService();
+            $stats = $uploadService->getUploadStats();
+            
+            return $this->response->setJSON([
+                'status' => 'success',
+                'data' => [
+                    'upload_requirements' => [
+                        'max_file_size' => $stats['max_file_size'],
+                        'max_file_size_mb' => $stats['max_file_size_mb'],
+                        'allowed_extensions' => $stats['allowed_extensions'],
+                        'allowed_mime_types' => $stats['allowed_mime_types']
+                    ],
+                    'upload_instructions' => [
+                        'field_name' => 'abstract_file',
+                        'method' => 'POST',
+                        'content_type' => 'multipart/form-data',
+                        'additional_fields' => [
+                            'registration_id' => 'required',
+                            'title' => 'required',
+                            'abstract_text' => 'required',
+                            'keywords' => 'optional',
+                            'category_id' => 'optional (default: 1)'
+                        ]
+                    ]
+                ]
+            ]);
+            
+        } catch (\Exception $e) {
+            return $this->response->setStatusCode(500)->setJSON([
+                'status' => 'error',
+                'message' => 'Failed to get upload info'
             ]);
         }
     }

@@ -10,21 +10,17 @@ use CodeIgniter\Router\RouteCollection;
 $routes->get('/', 'Home::index');
 
 // ==========================================
-// API ROUTES - Clean Version
+// LOAD DEVELOPMENT ROUTES (only in development)
+// ==========================================
+if (ENVIRONMENT === 'development') {
+    require_once APPPATH . 'Config/Routes/Development.php';
+}
+
+// ==========================================
+// API ROUTES - Production Clean Version
 // ==========================================
 $routes->group('api/v1', ['namespace' => 'App\Controllers\API'], function($routes) {
     
-    // =================
-    // SIMPLE TEST ENDPOINTS (no auth required)
-    // =================
-    $routes->get('test/db', 'SimpleDebugController::testDb');                    
-    $routes->get('test/users', 'SimpleDebugController::testUsers');              
-    $routes->get('test/events', 'SimpleDebugController::testEvents');            
-    $routes->post('test/insert', 'SimpleDebugController::testInsert');           
-    $routes->post('test/model-insert', 'SimpleDebugController::testModelInsert');
-    $routes->post('test/json', 'SimpleDebugController::testJson');               
-    $routes->post('test/simple-register', 'SimpleDebugController::simpleRegister');
-
     // =================
     // HEALTH ENDPOINTS (no auth required)
     // =================
@@ -34,20 +30,6 @@ $routes->group('api/v1', ['namespace' => 'App\Controllers\API'], function($route
     $routes->get('version', 'HealthApiController::version');                
     $routes->get('docs', 'HealthApiController::documentation');    
     
-    // =================
-    // DEBUG ROUTES
-    // =================
-    $routes->get('debug/profile', 'DebugController::profile');
-    $routes->get('debug/jwt', 'DebugController::jwt');
-    $routes->get('debug/jwt-keys', 'DebugController::jwtKeys');
-    $routes->get('debug/jwt-test-keys', 'DebugController::jwtTestKeys');
-    $routes->get('debug/profile-jwt', 'DebugController::profileJwt');
-
-    // =================
-    // SIMPLE PROFILE (NEW)
-    // =================
-    $routes->get('simple/profile', 'SimpleProfileController::profile');
-
     // =================
     // ADMIN ROUTES (no auth for now)
     // =================
@@ -63,10 +45,10 @@ $routes->group('api/v1', ['namespace' => 'App\Controllers\API'], function($route
         $routes->post('login', 'AuthApiController::login');
         $routes->post('register', 'AuthApiController::register');
         $routes->post('verify', 'AuthApiController::verify');
-        $routes->post('verify-user', 'AuthApiController::verifyUser');  // Add manual verification
+        $routes->post('verify-user', 'AuthApiController::verifyUser');
         $routes->post('refresh', 'AuthApiController::refresh');
         $routes->post('logout', 'AuthApiController::logout');
-        $routes->get('profile', 'AuthApiController::profile'); // NO FILTER
+        $routes->get('profile', 'AuthApiController::profile');
     });
 
     // =================
@@ -84,16 +66,6 @@ $routes->group('api/v1', ['namespace' => 'App\Controllers\API'], function($route
     // =================
     // PROTECTED ROUTES (require JWT)
     // =================
-    $routes->group('registrations', ['filter' => 'apiauth'], function($routes) {
-        $routes->get('/', 'RegistrationApiController::index');           
-        $routes->post('/', 'RegistrationApiController::create');         
-        $routes->get('(:num)', 'RegistrationApiController::show/$1');    
-        $routes->put('(:num)', 'RegistrationApiController::update/$1');  
-        $routes->delete('(:num)', 'RegistrationApiController::cancel/$1'); 
-        $routes->get('(:num)/certificate', 'RegistrationApiController::certificate/$1'); 
-        $routes->get('stats', 'RegistrationApiController::stats');       
-    });
-
     $routes->group('payments', ['filter' => 'apiauth'], function($routes) {
         $routes->get('/', 'PaymentApiController::index');                
         $routes->post('/', 'PaymentApiController::create');              
@@ -107,66 +79,99 @@ $routes->group('api/v1', ['namespace' => 'App\Controllers\API'], function($route
     // ABSTRACT MANAGEMENT (require JWT)
     // =================
     $routes->group('abstracts', ['filter' => 'apiauth'], function($routes) {
-        $routes->get('/', 'AbstractApiController::index');              // List my abstracts
-        $routes->post('/', 'AbstractApiController::create');            // Submit abstract
-        $routes->get('categories', 'AbstractApiController::categories'); // Get categories (before (:num))
-        $routes->get('stats', 'AbstractApiController::stats');          // Get statistics (before (:num))
-        $routes->get('(:num)', 'AbstractApiController::show/$1');       // Get abstract details
-        $routes->put('(:num)', 'AbstractApiController::update/$1');     // Update abstract
+        $routes->get('/', 'AbstractApiController::index');
+        $routes->post('/', 'AbstractApiController::create');
+        $routes->get('upload-info', 'AbstractApiController::getUploadInfo');
+        $routes->get('categories', 'AbstractApiController::categories');
+        $routes->get('stats', 'AbstractApiController::stats');
+        $routes->get('(:num)', 'AbstractApiController::show/$1');
+        $routes->put('(:num)', 'AbstractApiController::update/$1');
+        $routes->get('(:num)/download', 'AbstractApiController::downloadFile/$1');
+        $routes->get('(:num)/reviews', 'AbstractApiController::getReviews/$1');
+        $routes->post('(:num)/revision', 'AbstractApiController::submitRevision/$1');
     });
 
-    // Add to existing API routes group - REVIEW SYSTEM
-$routes->group('abstracts', ['filter' => 'apiauth'], function($routes) {
-    $routes->get('/', 'AbstractApiController::index');                    // List my abstracts
-    $routes->post('/', 'AbstractApiController::create');                  // Submit abstract
-    $routes->get('categories', 'AbstractApiController::categories');       // Get categories (before (:num))
-    $routes->get('stats', 'AbstractApiController::stats');                // Get statistics (before (:num))
-    $routes->get('(:num)', 'AbstractApiController::show/$1');             // Get abstract details
-    $routes->put('(:num)', 'AbstractApiController::update/$1');           // Update abstract
-    $routes->get('(:num)/reviews', 'AbstractApiController::getReviews/$1'); // Get reviews for abstract
-    $routes->post('(:num)/revision', 'AbstractApiController::submitRevision/$1'); // Submit revision
-});
-
-// LOA TEST ROUTES (TAMBAH INI SEBELUM CLOSING BRACE)
     // =================
-    $routes->get('test-loa/generate/(:num)', 'LoaController::generateLoa/$1');
-    $routes->get('test-loa/download/(:num)', 'LoaController::downloadLoa/$1');
-    $routes->get('test-loa/my-loas', 'LoaController::getMyLoas');
-$routes->get('test-loa/admin/all', 'LoaController::getAllLoas');
+    // REVIEW SYSTEM (require JWT)
+    // =================
+    $routes->group('reviews', ['filter' => 'apiauth'], function($routes) {
+        $routes->get('assigned', 'ReviewApiController::getAssignedAbstracts');
+        $routes->post('/', 'ReviewApiController::submitReview');
+        $routes->get('(:num)', 'ReviewApiController::getReview/$1');
+        $routes->put('(:num)', 'ReviewApiController::updateReview/$1');
+        $routes->get('dashboard', 'ReviewApiController::reviewerDashboard');
+    });
 
-    // LOA routes with auth (nanti untuk production)
+    // =================
+    // LOA SYSTEM (require JWT)
+    // =================
     $routes->group('loa', ['filter' => 'apiauth'], function($routes) {
         $routes->get('generate/(:num)', 'LoaController::generateLoa/$1');
         $routes->get('download/(:num)', 'LoaController::downloadLoa/$1');
         $routes->get('my-loas', 'LoaController::getMyLoas');
-        $routes->get('test-loa/admin/all', 'LoaController::getAllLoas');
+        $routes->get('admin/all', 'LoaController::getAllLoas');
     });
 
-    
+    // =================
+    // DEVELOPMENT LOA ROUTES (only in development)
+    // =================
+    if (ENVIRONMENT === 'development') {
+        $routes->get('test-loa/generate/(:num)', 'LoaController::generateLoa/$1');
+        $routes->get('test-loa/download/(:num)', 'LoaController::downloadLoa/$1');
+        $routes->get('test-loa/my-loas', 'LoaController::getMyLoas');
+        $routes->get('test-loa/admin/all', 'LoaController::getAllLoas');
+    }
 
     // =================
     // WEBHOOKS (no auth)
     // =================
     $routes->post('webhooks/midtrans', 'PaymentApiController::midtransWebhook');
-
 });
 
 // ==========================================
-// WEB ROUTES (if needed)
+// WEB ROUTES - Production Clean Version
 // ==========================================
 $routes->group('', ['namespace' => 'App\Controllers'], function($routes) {
-    // Auth routes
+    
+    // =================
+    // AUTHENTICATION ROUTES
+    // =================
     $routes->get('login', 'Auth\AuthController::login');
     $routes->post('login', 'Auth\AuthController::attemptLogin');
     $routes->get('logout', 'Auth\AuthController::logout');
     
-    // Dashboard
+    // =================
+    // REGISTRATION ROUTES
+    // =================
+    $routes->get('register', 'Auth\RegisterController::index');
+    $routes->post('register', 'Auth\RegisterController::store');
+    $routes->get('auth/verify-email/(:any)', 'Auth\RegisterController::verifyEmail/$1');
+    $routes->post('auth/resend-verification', 'Auth\RegisterController::resendVerification');
+    $routes->get('auth/check-email', 'Auth\RegisterController::checkEmail');
+
+    // =================
+    // DASHBOARD ROUTES
+    // =================
     $routes->get('dashboard', 'DashboardController::index', ['filter' => 'auth']);
     
-    // Admin routes
+    // =================
+    // ADMIN ROUTES
+    // =================
     $routes->group('admin', ['filter' => 'auth'], function($routes) {
         $routes->get('/', 'Admin\DashboardController::index');
         $routes->get('users', 'Admin\UserController::index');
         // Add more admin routes as needed
     });
+
+    $routes->group('', ['namespace' => 'App\Controllers'], function($routes) {
+    // ... existing routes ...
+    
+    // QR Test Routes
+    $routes->get('test/qr-generate/(:num)', 'TestController::testQRGenerate/$1');
+    $routes->get('test/qr-generate', 'TestController::testQRGenerate');
+    $routes->get('test/qr-validate/(:any)', 'TestController::testQRValidate/$1');
+    $routes->get('test/qr-scan/(:any)', 'TestController::testQRScan/$1');
+    $routes->get('test/qr-data/(:num)', 'TestController::testQRData/$1');
+    $routes->get('test/qr-data', 'TestController::testQRData');
+});
 });

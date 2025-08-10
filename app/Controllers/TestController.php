@@ -15,6 +15,9 @@ use App\Models\ReviewModel;
 use App\Models\CertificateModel;
 use App\Models\NotificationModel;
 use CodeIgniter\HTTP\ResponseInterface;
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
+use Endroid\QrCode\Builder\Builder;
 
 class TestController extends BaseController
 {
@@ -403,4 +406,190 @@ class TestController extends BaseController
 
         return $this->response->setJSON($requirements);
     }
+
+    
+/**
+ * Test QR Code generation (WORKING for v6.x)
+ */
+public function qrBasic()
+{
+    try {
+        // Simple approach that should work
+        $qrCode = new \Endroid\QrCode\QrCode('Hello SNIA QR Code Test!');
+        $writer = new \Endroid\QrCode\Writer\PngWriter();
+        
+        $result = $writer->write($qrCode);
+        
+        $this->response->setHeader('Content-Type', $result->getMimeType());
+        return $this->response->setBody($result->getString());
+        
+    } catch (\Exception $e) {
+        return "❌ QR Generation Error: " . $e->getMessage();
+    }
+}
+
+/**
+ * Test QR Code with custom data (WORKING for v6.x)  
+ */
+public function qrCustom($data = null)
+{
+    try {
+        $qrData = $data ? urldecode($data) : 'Default SNIA QR Code';
+        
+        $qrCode = new \Endroid\QrCode\QrCode($qrData);
+        $writer = new \Endroid\QrCode\Writer\PngWriter();
+        
+        $result = $writer->write($qrCode);
+        
+        $this->response->setHeader('Content-Type', $result->getMimeType());
+        return $this->response->setBody($result->getString());
+        
+    } catch (\Exception $e) {
+        return "❌ QR Generation Error: " . $e->getMessage();
+    }
+}
+
+/**
+ * Test QR Code Service - Generate QR
+ */
+public function testQRGenerate($registrationId = null)
+{
+    try {
+        // Use registration ID from URL or default to 1
+        $regId = $registrationId ?? 1;
+        
+        $qrService = new \App\Services\QRCodeService();
+        $result = $qrService->generateRegistrationQR($regId);
+        
+        if ($result['success']) {
+            $response = [
+                'status' => 'success',
+                'registration_id' => $regId,
+                'qr_hash' => $result['qr_hash'],
+                'qr_data' => is_string($result['qr_data']) ? json_decode($result['qr_data'], true) : $result['qr_data'],
+                'expires_at' => $result['expires_at'] ?? 'Not provided',
+                'message' => $result['message'],
+                'qr_status' => $result['status']
+            ];
+            
+            // If includes image, show size info
+            if (isset($result['qr_image'])) {
+                $response['qr_image_size'] = strlen($result['qr_image']) . ' bytes (base64)';
+            }
+            
+            return $this->response->setJSON($response);
+        } else {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => $result['message']
+            ]);
+        }
+        
+    } catch (\Exception $e) {
+        return $this->response->setJSON([
+            'status' => 'error',
+            'message' => 'Test failed: ' . $e->getMessage()
+        ]);
+    }
+}
+
+/**
+ * Test QR Code Service - Validate QR
+ */
+public function testQRValidate($qrHash = null)
+{
+    try {
+        if (!$qrHash) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'QR hash is required',
+                'usage' => '/test/qr-validate/{qr_hash}'
+            ]);
+        }
+        
+        $qrService = new \App\Services\QRCodeService();
+        $result = $qrService->validateQR($qrHash);
+        
+        return $this->response->setJSON([
+            'status' => $result['valid'] ? 'success' : 'error',
+            'valid' => $result['valid'],
+            'message' => $result['message'],
+            'registration' => $result['registration'] ?? null
+        ]);
+        
+    } catch (\Exception $e) {
+        return $this->response->setJSON([
+            'status' => 'error',
+            'message' => 'Validation test failed: ' . $e->getMessage()
+        ]);
+    }
+}
+
+/**
+ * Test QR Code Service - Scan QR
+ */
+public function testQRScan($qrHash = null)
+{
+    try {
+        if (!$qrHash) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'QR hash is required',
+                'usage' => '/test/qr-scan/{qr_hash}'
+            ]);
+        }
+        
+        $qrService = new \App\Services\QRCodeService();
+        $result = $qrService->scanQR(
+            $qrHash, 
+            1, // scanned_by (admin user)
+            'test_entrance',
+            'Test Scanner'
+        );
+        
+        return $this->response->setJSON([
+            'status' => $result['success'] ? 'success' : 'error',
+            'scan_success' => $result['success'],
+            'scan_result' => $result['scan_result'],
+            'message' => $result['message'],
+            'participant' => $result['participant'] ?? null,
+            'attendance' => $result['attendance'] ?? null
+        ]);
+        
+    } catch (\Exception $e) {
+        return $this->response->setJSON([
+            'status' => 'error',
+            'message' => 'Scan test failed: ' . $e->getMessage()
+        ]);
+    }
+}
+
+/**
+ * Test QR Code Service - Get QR Data
+ */
+public function testQRData($registrationId = null)
+{
+    try {
+        $regId = $registrationId ?? 1;
+        
+        $qrService = new \App\Services\QRCodeService();
+        $qrData = $qrService->getQRData($regId);
+        $scanHistory = $qrService->getScanHistory($regId);
+        
+        return $this->response->setJSON([
+            'status' => 'success',
+            'registration_id' => $regId,
+            'qr_data' => $qrData,
+            'scan_history' => $scanHistory,
+            'scan_count' => count($scanHistory)
+        ]);
+        
+    } catch (\Exception $e) {
+        return $this->response->setJSON([
+            'status' => 'error',
+            'message' => 'Data retrieval test failed: ' . $e->getMessage()
+        ]);
+    }
+}
+
 }

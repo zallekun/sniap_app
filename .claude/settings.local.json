@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php spark migrate:version:*)",
+      "Bash(php spark db:query:*)",
+      "Bash(php:*)",
+      "Bash(rm:*)",
+      "Bash(composer validate:*)",
+      "Bash(composer:*)",
+      "Bash(mkdir:*)"
+    ],
+    "deny": []
+  }
+}

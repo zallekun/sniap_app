@@ -4,6 +4,7 @@ namespace App\Controllers\API;
 
 use App\Controllers\BaseController;
 use CodeIgniter\HTTP\ResponseInterface;
+use App\Services\EmailService;
 
 class PaymentApiController extends BaseController
 {
@@ -274,110 +275,182 @@ class PaymentApiController extends BaseController
      * POST /api/v1/payments/{id}/verify
      */
     public function verify($paymentId)
-    {
-        try {
-            // Get authenticated user
-            $request = service('request');
-            $user = $request->api_user ?? null;
-            
-            if (!$user) {
-                return $this->response->setJSON([
-                    'status' => 'error',
-                    'message' => 'User not authenticated'
-                ])->setStatusCode(ResponseInterface::HTTP_UNAUTHORIZED);
-            }
-
-            // Get payment details
-            $db = \Config\Database::connect();
-            $payment = $db->query('
-                SELECT p.*, r.user_id, r.id as registration_id
-                FROM payments p 
-                JOIN registrations r ON r.id = p.registration_id 
-                WHERE p.id = ? AND r.user_id = ?', 
-                [$paymentId, $user['id']]
-            )->getRowArray();
-
-            if (!$payment) {
-                return $this->response->setJSON([
-                    'status' => 'error',
-                    'message' => 'Payment not found'
-                ])->setStatusCode(ResponseInterface::HTTP_NOT_FOUND);
-            }
-
-            // For demo purposes, mark payment as successful
-            $updateSql = "UPDATE payments 
-                         SET payment_status = ?, paid_at = ?, transaction_id = ? 
-                         WHERE id = ?";
-            
-            $transactionId = 'DEMO-TXN-' . time();
-            $paidAt = date('Y-m-d H:i:s');
-            
-            $paymentUpdated = $db->query($updateSql, ['success', $paidAt, $transactionId, $paymentId]);
-
-            if ($paymentUpdated) {
-                // Try to update registration payment_status to success
-                $registrationUpdateResult = null;
-                try {
-                    $registrationUpdated = $db->query('
-                        UPDATE registrations 
-                        SET payment_status = ? 
-                        WHERE id = ?', 
-                        ['success', $payment['registration_id']]
-                    );
-                    $registrationUpdateResult = $registrationUpdated ? 'success' : 'failed';
-                } catch (\Exception $e) {
-                    // If 'success' doesn't work, try other values
-                    $possibleValues = ['paid', 'completed', 'confirmed'];
-                    foreach ($possibleValues as $value) {
-                        try {
-                            $registrationUpdated = $db->query('
-                                UPDATE registrations 
-                                SET payment_status = ? 
-                                WHERE id = ?', 
-                                [$value, $payment['registration_id']]
-                            );
-                            if ($registrationUpdated) {
-                                $registrationUpdateResult = "success_with_" . $value;
-                                break;
-                            }
-                        } catch (\Exception $innerE) {
-                            continue;
-                        }
-                    }
-                    
-                    if (!$registrationUpdateResult) {
-                        $registrationUpdateResult = 'enum_constraint_failed';
-                    }
-                }
-
-                return $this->response->setJSON([
-                    'status' => 'success',
-                    'message' => 'Payment verified successfully',
-                    'data' => [
-                        'payment_id' => $paymentId,
-                        'payment_status' => 'success',
-                        'verified_at' => $paidAt,
-                        'transaction_id' => $transactionId,
-                        'registration_update' => $registrationUpdateResult,
-                        'note' => $registrationUpdateResult === 'enum_constraint_failed' 
-                            ? 'Payment verified but registration status update failed due to enum constraints' 
-                            : 'Payment and registration status updated successfully'
-                    ]
-                ])->setStatusCode(ResponseInterface::HTTP_OK);
-            } else {
-                return $this->response->setJSON([
-                    'status' => 'error',
-                    'message' => 'Failed to verify payment'
-                ])->setStatusCode(ResponseInterface::HTTP_INTERNAL_SERVER_ERROR);
-            }
-
-        } catch (\Exception $e) {
+{
+    try {
+        // Get authenticated user
+        $request = service('request');
+        $user = $request->api_user ?? null;
+        
+        if (!$user) {
             return $this->response->setJSON([
                 'status' => 'error',
-                'message' => 'Payment verification failed: ' . $e->getMessage()
+                'message' => 'User not authenticated'
+            ])->setStatusCode(ResponseInterface::HTTP_UNAUTHORIZED);
+        }
+
+        // Get payment details
+        $db = \Config\Database::connect();
+        $payment = $db->query('
+            SELECT p.*, r.user_id, r.id as registration_id
+            FROM payments p 
+            JOIN registrations r ON r.id = p.registration_id 
+            WHERE p.id = ? AND r.user_id = ?', 
+            [$paymentId, $user['id']]
+        )->getRowArray();
+
+        if (!$payment) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Payment not found'
+            ])->setStatusCode(ResponseInterface::HTTP_NOT_FOUND);
+        }
+
+        // For demo purposes, mark payment as successful
+        $updateSql = "UPDATE payments 
+                     SET payment_status = ?, paid_at = ?, transaction_id = ? 
+                     WHERE id = ?";
+        
+        $transactionId = 'DEMO-TXN-' . time();
+        $paidAt = date('Y-m-d H:i:s');
+        
+        $paymentUpdated = $db->query($updateSql, ['success', $paidAt, $transactionId, $paymentId]);
+
+        if ($paymentUpdated) {
+            // Try to update registration payment_status to success
+            $registrationUpdateResult = null;
+            try {
+                $registrationUpdated = $db->query('
+                    UPDATE registrations 
+                    SET payment_status = ? 
+                    WHERE id = ?', 
+                    ['success', $payment['registration_id']]
+                );
+                $registrationUpdateResult = $registrationUpdated ? 'success' : 'failed';
+            } catch (\Exception $e) {
+                // If 'success' doesn't work, try other values
+                $possibleValues = ['paid', 'completed', 'confirmed'];
+                foreach ($possibleValues as $value) {
+                    try {
+                        $registrationUpdated = $db->query('
+                            UPDATE registrations 
+                            SET payment_status = ? 
+                            WHERE id = ?', 
+                            [$value, $payment['registration_id']]
+                        );
+                        if ($registrationUpdated) {
+                            $registrationUpdateResult = "success_with_" . $value;
+                            break;
+                        }
+                    } catch (\Exception $innerE) {
+                        continue;
+                    }
+                }
+                
+                if (!$registrationUpdateResult) {
+                    $registrationUpdateResult = 'enum_constraint_failed';
+                }
+            }
+
+            // 🚀 QR CODE GENERATION AFTER SUCCESSFUL PAYMENT:
+            $qrGenerationResult = null;
+            try {
+                $qrService = new \App\Services\QRCodeService();
+                $qrResult = $qrService->generateUserQRCode($payment['registration_id']);
+                
+                if ($qrResult['success']) {
+                    $qrGenerationResult = [
+                        'success' => true,
+                        'qr_hash' => $qrResult['qr_code']['qr_hash'],
+                        'message' => 'QR Code generated successfully'
+                    ];
+                    log_message('info', "QR Code generated for registration: " . $payment['registration_id']);
+                } else {
+                    $qrGenerationResult = [
+                        'success' => false,
+                        'message' => $qrResult['message']
+                    ];
+                    log_message('error', "Failed to generate QR Code: " . $qrResult['message']);
+                }
+            } catch (\Exception $qrException) {
+                $qrGenerationResult = [
+                    'success' => false,
+                    'message' => 'QR generation error: ' . $qrException->getMessage()
+                ];
+                log_message('error', 'QR Code generation error: ' . $qrException->getMessage());
+            }
+
+            // 🚀 EMAIL NOTIFICATION WITH QR CODE AFTER SUCCESSFUL PAYMENT:
+            $emailResult = null;
+            try {
+                // Get user dan payment details untuk email
+                $userPaymentQuery = $db->query("
+                    SELECT u.first_name, u.last_name, u.email, p.final_amount, p.transaction_id
+                    FROM users u
+                    JOIN registrations r ON u.id = r.user_id
+                    JOIN payments p ON r.id = p.registration_id
+                    WHERE p.id = ?
+                ", [$paymentId]);
+                
+                $userPayment = $userPaymentQuery->getRowArray();
+                
+                if ($userPayment) {
+                    $emailService = new EmailService();
+                    $fullName = $userPayment['first_name'] . ' ' . $userPayment['last_name'];
+                    
+                    $emailResult = $emailService->sendPaymentConfirmation(
+                        $userPayment['email'],
+                        $fullName,
+                        $userPayment['final_amount'],
+                        $userPayment['transaction_id']
+                    );
+                    
+                    if ($emailResult['success']) {
+                        log_message('info', "Payment confirmation email sent to: " . $userPayment['email']);
+                    } else {
+                        log_message('error', "Failed to send payment confirmation email: " . $emailResult['message']);
+                    }
+                }
+            } catch (\Exception $emailException) {
+                $emailResult = [
+                    'success' => false,
+                    'message' => $emailException->getMessage()
+                ];
+                log_message('error', 'Payment email notification error: ' . $emailException->getMessage());
+            }
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'Payment verified successfully',
+                'data' => [
+                    'payment_id' => $paymentId,
+                    'payment_status' => 'success',
+                    'verified_at' => $paidAt,
+                    'transaction_id' => $transactionId,
+                    'registration_update' => $registrationUpdateResult,
+                    'qr_code_generation' => $qrGenerationResult,
+                    'email_notification' => $emailResult,
+                    'note' => $registrationUpdateResult === 'enum_constraint_failed' 
+                        ? 'Payment verified but registration status update failed due to enum constraints' 
+                        : 'Payment and registration status updated successfully',
+                    'next_steps' => $qrGenerationResult && $qrGenerationResult['success'] 
+                        ? 'QR Code has been generated for your registration. Check your email for payment confirmation.'
+                        : 'Payment confirmed. QR Code generation may have failed - please contact support if needed.'
+                ]
+            ])->setStatusCode(ResponseInterface::HTTP_OK);
+        } else {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Failed to verify payment'
             ])->setStatusCode(ResponseInterface::HTTP_INTERNAL_SERVER_ERROR);
         }
+
+    } catch (\Exception $e) {
+        return $this->response->setJSON([
+            'status' => 'error',
+            'message' => 'Payment verification failed: ' . $e->getMessage()
+        ])->setStatusCode(ResponseInterface::HTTP_INTERNAL_SERVER_ERROR);
     }
+}
 
     /**
      * Get payment statistics for user - SIMPLIFIED

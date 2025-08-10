@@ -4,6 +4,7 @@ namespace App\Controllers\API;
 
 use App\Controllers\BaseController;
 use CodeIgniter\HTTP\ResponseInterface;
+use App\Services\EmailService;
 
 class ReviewApiController extends BaseController
 {
@@ -224,11 +225,51 @@ class ReviewApiController extends BaseController
             ", [$newReviewStatus, $newFinalStatus, $data['abstract_id']]);
             
             if (!$updateAbstractQuery) {
-                return $this->response->setStatusCode(500)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Review submitted but failed to update abstract status'
-                ]);
-            }
+    return $this->response->setStatusCode(500)->setJSON([
+        'status' => 'error',
+        'message' => 'Review submitted but failed to update abstract status'
+    ]);
+}
+// 🚀 ADD EMAIL NOTIFICATION HERE:
+try {
+    // Get presenter info untuk email
+    $presenterQuery = $db->query("
+        SELECT u.first_name, u.last_name, u.email, a.title 
+        FROM users u
+        JOIN registrations r ON u.id = r.user_id  
+        JOIN abstracts a ON r.id = a.registration_id
+        WHERE a.id = ?
+    ", [$data['abstract_id']]);
+    
+    $presenter = $presenterQuery->getRowArray();
+    
+    if ($presenter) {
+        $emailService = new EmailService();
+        $fullName = $presenter['first_name'] . ' ' . $presenter['last_name'];
+        $abstractTitle = $presenter['title'];
+        $status = strtoupper($data['decision']); // ACCEPTED, ACCEPTED_WITH_REVISION, REJECTED
+        $comments = $data['comments'] ?? '';
+        
+        $emailResult = $emailService->sendReviewStatusNotification(
+            $presenter['email'],
+            $fullName,
+            $abstractTitle,
+            $status,
+            $comments
+        );
+        
+        // Log email result tapi jangan fail request kalau email gagal
+        if ($emailResult['success']) {
+            log_message('info', "Review notification email sent to: " . $presenter['email']);
+        } else {
+            log_message('error', "Failed to send review notification email: " . $emailResult['message']);
+        }
+    }
+} catch (\Exception $emailException) {
+    // Log error tapi jangan fail request
+    log_message('error', 'Email notification error: ' . $emailException->getMessage());
+}
+
             
             // Determine next steps for presenter
             $nextSteps = '';
@@ -402,16 +443,51 @@ class ReviewApiController extends BaseController
             $updateValues = [];
             
             if (isset($data['decision'])) {
-                $validDecisions = ['accepted', 'accepted_with_revision', 'rejected'];
-                if (!in_array($data['decision'], $validDecisions)) {
-                    return $this->response->setStatusCode(400)->setJSON([
-                        'status' => 'error',
-                        'message' => 'Invalid decision. Allowed: ' . implode(', ', $validDecisions)
-                    ]);
-                }
-                $updateFields[] = 'review_status = ?'; // Use review_status instead of status
-                $updateValues[] = $data['decision'];
+    $newFinalStatus = ($data['decision'] === 'accepted') ? 'final_accepted' : 'pending';
+    $db->query("
+        UPDATE abstracts 
+        SET review_status = ?, final_status = ?, updated_at = NOW()
+        WHERE id = ?
+    ", [$data['decision'], $newFinalStatus, $review['abstract_id']]);
+    
+    // 🚀 ADD EMAIL NOTIFICATION FOR UPDATED REVIEW:
+    try {
+        // Get presenter info
+        $presenterQuery = $db->query("
+            SELECT u.first_name, u.last_name, u.email, a.title 
+            FROM users u
+            JOIN registrations r ON u.id = r.user_id  
+            JOIN abstracts a ON r.id = a.registration_id
+            WHERE a.id = ?
+        ", [$review['abstract_id']]);
+        
+        $presenter = $presenterQuery->getRowArray();
+        
+        if ($presenter) {
+            $emailService = new EmailService();
+            $fullName = $presenter['first_name'] . ' ' . $presenter['last_name'];
+            $abstractTitle = $presenter['title'];
+            $status = strtoupper($data['decision']);
+            $comments = $data['comments'] ?? '';
+            
+            $emailResult = $emailService->sendReviewStatusNotification(
+                $presenter['email'],
+                $fullName,
+                $abstractTitle,
+                $status,
+                $comments
+            );
+            
+            if ($emailResult['success']) {
+                log_message('info', "Updated review notification email sent to: " . $presenter['email']);
+            } else {
+                log_message('error', "Failed to send updated review notification email: " . $emailResult['message']);
             }
+        }
+    } catch (\Exception $emailException) {
+        log_message('error', 'Email notification error in update: ' . $emailException->getMessage());
+    }
+}
             
             if (isset($data['comments'])) {
                 $updateFields[] = 'comments = ?';

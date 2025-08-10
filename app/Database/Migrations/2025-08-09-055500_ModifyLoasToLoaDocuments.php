@@ -8,13 +8,16 @@ class ModifyLoasToLoaDocuments extends Migration
 {
     public function up()
     {
-        // First, backup existing data if any
-        $this->db->query("CREATE TABLE loas_backup AS SELECT * FROM loas");
-
-        // Drop the existing loas table
-        $this->forge->dropTable('loas');
+        // SAFE: Check if loas table exists before backing up
+        if ($this->db->tableExists('loas')) {
+            // First, backup existing data if any
+            $this->db->query("CREATE TABLE loas_backup AS SELECT * FROM loas");
+            
+            // Drop the existing loas table
+            $this->forge->dropTable('loas');
+        }
         
-        // Drop the old upload_type enum
+        // Drop the old upload_type enum if exists
         $this->db->query("DROP TYPE IF EXISTS upload_type CASCADE");
 
         // Create new ENUM type for status
@@ -100,11 +103,15 @@ class ModifyLoasToLoaDocuments extends Migration
         // Add primary key
         $this->forge->addPrimaryKey('id');
         
-        // Add foreign keys
-        $this->forge->addForeignKey('abstract_id', 'abstracts', 'id', 'CASCADE', 'CASCADE');
-        $this->forge->addForeignKey('generated_by', 'users', 'id', 'CASCADE', 'CASCADE');
-        $this->forge->addForeignKey('revoked_by', 'users', 'id', 'SET NULL', 'CASCADE');
-        $this->forge->addForeignKey('reactivated_by', 'users', 'id', 'SET NULL', 'CASCADE');
+        // Add foreign keys (with safe checks)
+        if ($this->db->tableExists('abstracts')) {
+            $this->forge->addForeignKey('abstract_id', 'abstracts', 'id', 'CASCADE', 'CASCADE');
+        }
+        if ($this->db->tableExists('users')) {
+            $this->forge->addForeignKey('generated_by', 'users', 'id', 'CASCADE', 'CASCADE');
+            $this->forge->addForeignKey('revoked_by', 'users', 'id', 'SET NULL', 'CASCADE');
+            $this->forge->addForeignKey('reactivated_by', 'users', 'id', 'SET NULL', 'CASCADE');
+        }
         
         // Create the table
         $this->forge->createTable('loa_documents');
@@ -142,21 +149,23 @@ class ModifyLoasToLoaDocuments extends Migration
             FOR EACH ROW EXECUTE FUNCTION update_loa_documents_updated_at();
         ");
 
-        // Add LOA tracking fields to abstracts table
-        $this->forge->addColumn('abstracts', [
-            'loa_generated' => [
-                'type' => 'BOOLEAN',
-                'default' => false
-            ],
-            'loa_number' => [
-                'type' => 'VARCHAR',
-                'constraint' => 50,
-                'null' => true
-            ]
-        ]);
+        // Add LOA tracking fields to abstracts table (if exists)
+        if ($this->db->tableExists('abstracts')) {
+            $this->forge->addColumn('abstracts', [
+                'loa_generated' => [
+                    'type' => 'BOOLEAN',
+                    'default' => false
+                ],
+                'loa_number' => [
+                    'type' => 'VARCHAR',
+                    'constraint' => 50,
+                    'null' => true
+                ]
+            ]);
+        }
 
         // Clean up backup table (optional - remove this line if you want to keep backup)
-        $this->db->query("DROP TABLE IF EXISTS loas_backup");
+        // $this->db->query("DROP TABLE IF EXISTS loas_backup");
     }
 
     public function down()
@@ -170,28 +179,39 @@ class ModifyLoasToLoaDocuments extends Migration
         // Drop functions
         $this->db->query("DROP FUNCTION IF EXISTS update_loa_documents_updated_at() CASCADE");
         
-        // Remove LOA columns from abstracts table
-        $this->forge->dropColumn('abstracts', ['loa_generated', 'loa_number']);
+        // Remove LOA columns from abstracts table (if exists)
+        if ($this->db->tableExists('abstracts')) {
+            $this->forge->dropColumn('abstracts', ['loa_generated', 'loa_number']);
+        }
         
-        // Recreate original loas table
-        $this->db->query("DO $$ BEGIN CREATE TYPE upload_type AS ENUM ('admin', 'reviewer'); EXCEPTION WHEN duplicate_object THEN null; END $$;");
-        
-        $this->forge->addField([
-            'id' => ['type' => 'SERIAL'],
-            'registration_id' => ['type' => 'INTEGER'],
-            'loa_number' => ['type' => 'VARCHAR', 'constraint' => 100, 'unique' => true],
-            'file_path' => ['type' => 'VARCHAR', 'constraint' => 255],
-            'upload_type' => ['type' => 'upload_type'],
-            'generated_by' => ['type' => 'INTEGER'],
-            'generated_at' => ['type' => 'TIMESTAMP', 'null' => true],
-        ]);
-        
-        $this->forge->addPrimaryKey('id');
-        $this->forge->addForeignKey('registration_id', 'registrations', 'id', 'CASCADE', 'CASCADE');
-        $this->forge->addForeignKey('generated_by', 'users', 'id');
-        $this->forge->createTable('loas');
-        
-        // Add trigger for original table
-        $this->db->query("CREATE TRIGGER update_loas_generated_at BEFORE INSERT ON loas FOR EACH ROW EXECUTE FUNCTION update_updated_at_column()");
+        // Recreate original loas table (if backup exists)
+        if ($this->db->tableExists('loas_backup')) {
+            $this->db->query("CREATE TABLE loas AS SELECT * FROM loas_backup");
+            $this->db->query("DROP TABLE loas_backup");
+        } else {
+            // Create empty original loas table
+            $this->db->query("DO $$ BEGIN CREATE TYPE upload_type AS ENUM ('admin', 'reviewer'); EXCEPTION WHEN duplicate_object THEN null; END $$;");
+            
+            $this->forge->addField([
+                'id' => ['type' => 'SERIAL'],
+                'registration_id' => ['type' => 'INTEGER'],
+                'loa_number' => ['type' => 'VARCHAR', 'constraint' => 100, 'unique' => true],
+                'file_path' => ['type' => 'VARCHAR', 'constraint' => 255],
+                'upload_type' => ['type' => 'upload_type'],
+                'generated_by' => ['type' => 'INTEGER'],
+                'generated_at' => ['type' => 'TIMESTAMP', 'null' => true],
+            ]);
+            
+            $this->forge->addPrimaryKey('id');
+            
+            if ($this->db->tableExists('registrations')) {
+                $this->forge->addForeignKey('registration_id', 'registrations', 'id', 'CASCADE', 'CASCADE');
+            }
+            if ($this->db->tableExists('users')) {
+                $this->forge->addForeignKey('generated_by', 'users', 'id');
+            }
+            
+            $this->forge->createTable('loas');
+        }
     }
 }

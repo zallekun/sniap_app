@@ -1,0 +1,11 @@
+# Prevent direct access to uploaded files
+<Files *>
+    Order Deny,Allow
+    Deny from all
+</Files>
+
+# Allow access only to specific file types
+<FilesMatch "\.(pdf|doc|docx)$">
+    Order Allow,Deny
+    Allow from all
+</FilesMatch>
