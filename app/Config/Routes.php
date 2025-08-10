@@ -139,6 +139,11 @@ $routes->group('api/v1', ['namespace' => 'App\Controllers\API'], function($route
     });
 
     // =================
+    // CERTIFICATE VERIFICATION (no auth required) - MUST BE FIRST
+    // =================
+    $routes->get('certificates/verify/(:any)', 'CertificateApiController::verify/$1');
+
+    // =================
     // CERTIFICATE SYSTEM (require JWT)
     // =================
     $routes->group('certificates', ['filter' => 'apiauth'], function($routes) {
@@ -148,11 +153,6 @@ $routes->group('api/v1', ['namespace' => 'App\Controllers\API'], function($route
         $routes->post('request', 'CertificateApiController::request');
         $routes->put('(:num)/issue', 'CertificateApiController::issue/$1');
     });
-
-    // =================
-    // CERTIFICATE VERIFICATION (no auth required)
-    // =================
-    $routes->get('certificates/verify/(:any)', 'CertificateApiController::verify/$1');
 
     // =================
     // VOUCHER SYSTEM (require JWT)

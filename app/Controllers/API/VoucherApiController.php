@@ -207,9 +207,9 @@ class VoucherApiController extends BaseController
             }
 
             // Check validity conditions
-            $now = date('Y-m-d');
+            $now = date('Y-m-d H:i:s');
             $isActive = $voucher['is_active'];
-            $isWithinDateRange = ($voucher['start_date'] <= $now && $voucher['end_date'] >= $now);
+            $isWithinDateRange = ($voucher['valid_from'] <= $now && $voucher['valid_until'] >= $now);
             
             // Check usage limit
             $usageCount = $db->table('voucher_usage')
@@ -235,8 +235,8 @@ class VoucherApiController extends BaseController
                     'description' => $voucher['description'],
                     'discount_type' => $voucher['discount_type'],
                     'discount_value' => $voucher['discount_value'],
-                    'start_date' => $voucher['start_date'],
-                    'end_date' => $voucher['end_date'],
+                    'valid_from' => $voucher['valid_from'],
+                    'valid_until' => $voucher['valid_until'],
                     'max_uses' => $voucher['max_uses'],
                     'usage_count' => $usageCount,
                     'remaining_usage' => ($voucher['max_uses'] > 0) ? max(0, $voucher['max_uses'] - $usageCount) : 'unlimited'
