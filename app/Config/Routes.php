@@ -176,6 +176,7 @@ $routes->group('api/v1', ['namespace' => 'App\Controllers\API'], function($route
         $routes->get('export/(:segment)', 'AdminApiController::export/$1');
         $routes->get('settings', 'AdminApiController::getSettings');
         $routes->put('settings', 'AdminApiController::updateSettings');
+        $routes->get('presenter-progress', 'AdminApiController::presenterProgress');
     });
 
     // =================

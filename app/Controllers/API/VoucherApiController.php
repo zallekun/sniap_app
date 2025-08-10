@@ -104,13 +104,8 @@ class VoucherApiController extends BaseController
                 ])->setStatusCode(ResponseInterface::HTTP_NOT_FOUND);
             }
 
-            // Check if voucher applies to this event
-            if ($voucher['event_id'] && $voucher['event_id'] != $registration['event_id']) {
-                return $this->response->setJSON([
-                    'status' => 'error',
-                    'message' => 'Voucher is not valid for this event'
-                ])->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST);
-            }
+            // Note: Vouchers are currently global (not event-specific)
+            // Future enhancement: Add event_id column to vouchers table if needed
 
             // Calculate discount
             $originalAmount = $registration['registration_fee'];
@@ -220,7 +215,7 @@ class VoucherApiController extends BaseController
             $usageCount = $db->table('voucher_usage')
                 ->where('voucher_id', $voucher['id'])
                 ->countAllResults();
-            $hasUsageLeft = ($voucher['usage_limit'] == 0 || $usageCount < $voucher['usage_limit']);
+            $hasUsageLeft = ($voucher['max_uses'] == 0 || $usageCount < $voucher['max_uses']);
 
             // Check if user already used it
             $userUsage = $db->table('voucher_usage')
@@ -242,9 +237,9 @@ class VoucherApiController extends BaseController
                     'discount_value' => $voucher['discount_value'],
                     'start_date' => $voucher['start_date'],
                     'end_date' => $voucher['end_date'],
-                    'usage_limit' => $voucher['usage_limit'],
+                    'max_uses' => $voucher['max_uses'],
                     'usage_count' => $usageCount,
-                    'remaining_usage' => ($voucher['usage_limit'] > 0) ? max(0, $voucher['usage_limit'] - $usageCount) : 'unlimited'
+                    'remaining_usage' => ($voucher['max_uses'] > 0) ? max(0, $voucher['max_uses'] - $usageCount) : 'unlimited'
                 ],
                 'validation_details' => [
                     'is_active' => $isActive,
@@ -336,8 +331,7 @@ class VoucherApiController extends BaseController
             $db = \Config\Database::connect();
             
             $vouchers = $db->table('vouchers v')
-                ->select('v.*, e.title as event_title')
-                ->join('events e', 'e.id = v.event_id', 'LEFT')
+                ->select('v.*')
                 ->orderBy('v.created_at', 'DESC')
                 ->get()
                 ->getResultArray();
@@ -357,7 +351,7 @@ class VoucherApiController extends BaseController
 
                 $voucher['usage_count'] = $usageCount;
                 $voucher['total_savings'] = (float) $totalSavings;
-                $voucher['remaining_usage'] = ($voucher['usage_limit'] > 0) ? max(0, $voucher['usage_limit'] - $usageCount) : 'unlimited';
+                $voucher['remaining_usage'] = ($voucher['max_uses'] > 0) ? max(0, $voucher['max_uses'] - $usageCount) : 'unlimited';
             }
 
             return $this->response->setJSON([
@@ -390,22 +384,23 @@ class VoucherApiController extends BaseController
                 ])->setStatusCode(ResponseInterface::HTTP_FORBIDDEN);
             }
 
+            // Get data from both POST and JSON
+            $jsonData = $this->request->getJSON(true) ?? [];
+            
             $data = [
-                'code' => strtoupper($this->request->getPost('code')),
-                'description' => $this->request->getPost('description'),
-                'discount_type' => $this->request->getPost('discount_type'), // percentage, fixed, free
-                'discount_value' => $this->request->getPost('discount_value'),
-                'start_date' => $this->request->getPost('start_date'),
-                'end_date' => $this->request->getPost('end_date'),
-                'usage_limit' => $this->request->getPost('usage_limit') ?: 0, // 0 = unlimited
-                'event_id' => $this->request->getPost('event_id') ?: null, // null = applies to all events
+                'code' => strtoupper($this->request->getPost('code') ?? $jsonData['code'] ?? ''),
+                'description' => $this->request->getPost('description') ?? $jsonData['description'] ?? '',
+                'discount_type' => $this->request->getPost('discount_type') ?? $jsonData['discount_type'] ?? '',
+                'discount_value' => $this->request->getPost('discount_value') ?? $jsonData['discount_value'] ?? 0,
+                'valid_from' => $this->request->getPost('valid_from') ?? $jsonData['valid_from'] ?? '',
+                'valid_until' => $this->request->getPost('valid_until') ?? $jsonData['valid_until'] ?? '',
+                'max_uses' => $this->request->getPost('max_uses') ?? $jsonData['max_uses'] ?? 0,
                 'is_active' => true,
-                'created_by' => $user['id'],
-                'created_at' => date('Y-m-d H:i:s')
+                'created_by' => $user['id']
             ];
 
             // Validation
-            $requiredFields = ['code', 'description', 'discount_type', 'start_date', 'end_date'];
+            $requiredFields = ['code', 'description', 'discount_type', 'valid_from', 'valid_until'];
             foreach ($requiredFields as $field) {
                 if (empty($data[$field])) {
                     return $this->response->setJSON([
