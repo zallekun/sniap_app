@@ -88,15 +88,15 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1>🎓 SNIA Conference</h1>
-            <p>Welcome to Scientific Conference Excellence</p>
+            <h1>🎓 <?= esc($eventTitle) ?></h1>
+            <p><?= esc($eventDescription) ?></p>
         </div>
 
         <!-- Content -->
         <div class="content">
             <h2>Welcome, <?= esc($userName) ?>! 👋</h2>
             
-            <p>Thank you for registering for the SNIA Scientific Conference. We're excited to have you join our community of researchers and academics!</p>
+            <p>Thank you for registering for <?= esc($eventTitle) ?>. We're excited to have you join our community of researchers and academics!</p>
             
             <p>To complete your registration and activate your account, please verify your email address by clicking the button below:</p>
             
@@ -128,7 +128,7 @@
         <!-- Footer -->
         <div class="footer">
             <p>
-                <strong>SNIA Scientific Conference</strong><br>
+                <strong><?= esc($eventTitle) ?></strong><br>
                 Advancing Research, Inspiring Innovation
             </p>
             <p>

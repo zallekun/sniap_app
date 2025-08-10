@@ -99,6 +99,59 @@ class EventApiController extends BaseController
     }
 
     /**
+     * Get event schedule
+     * GET /api/v1/events/{id}/schedule
+     */
+    public function schedule($eventId)
+    {
+        try {
+            $db = \Config\Database::connect();
+            
+            // Get event details
+            $event = $db->table('events')
+                ->where('id', $eventId)
+                ->get()
+                ->getRowArray();
+
+            if (!$event) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Event not found'
+                ])->setStatusCode(ResponseInterface::HTTP_NOT_FOUND);
+            }
+
+            // Get event schedule
+            $schedule = $db->table('event_schedules')
+                ->where('event_id', $eventId)
+                ->orderBy('start_time')
+                ->get()
+                ->getResultArray();
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'data' => [
+                    'event' => [
+                        'id' => $event['id'],
+                        'title' => $event['title'],
+                        'event_date' => $event['event_date'],
+                        'event_time' => $event['event_time'],
+                        'location' => $event['location'],
+                        'format' => $event['format']
+                    ],
+                    'schedule' => $schedule,
+                    'schedule_count' => count($schedule)
+                ]
+            ])->setStatusCode(ResponseInterface::HTTP_OK);
+
+        } catch (\Exception $e) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Failed to get event schedule: ' . $e->getMessage()
+            ])->setStatusCode(ResponseInterface::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
      * Get specific event details
      * GET /api/v1/events/{id}
      */
@@ -245,26 +298,6 @@ class EventApiController extends BaseController
         }
     }
 
-    /**
-     * Get event schedule (placeholder)
-     * GET /api/v1/events/{id}/schedule
-     */
-    public function schedule($eventId)
-    {
-        try {
-            return $this->response->setJSON([
-                'status' => 'success',
-                'message' => 'Event schedule feature not implemented yet',
-                'data' => []
-            ])->setStatusCode(ResponseInterface::HTTP_OK);
-
-        } catch (\Exception $e) {
-            return $this->response->setJSON([
-                'status' => 'error',
-                'message' => 'Failed to fetch schedule: ' . $e->getMessage()
-            ])->setStatusCode(ResponseInterface::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
 
     /**
      * Helper: Get event statistics (simplified)

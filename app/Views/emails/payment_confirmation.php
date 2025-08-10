@@ -270,7 +270,7 @@
         <div class="content">
             <h2>Thank you, <?= esc($userName) ?>!</h2>
             
-            <p>We have successfully received your payment for the SNIA Scientific Conference. Your registration is now <strong>complete and confirmed</strong>!</p>
+            <p>We have successfully received your payment for <?= esc($eventTitle) ?>. Your registration is now <strong>complete and confirmed</strong>!</p>
 
             <!-- Payment Receipt -->
             <div class="receipt-container">
@@ -280,7 +280,7 @@
                 <div class="receipt-body">
                     <div class="receipt-row">
                         <span class="receipt-label">Conference Registration</span>
-                        <span class="receipt-value">SNIA Scientific Conference</span>
+                        <span class="receipt-value"><?= esc($eventTitle) ?></span>
                     </div>
                     <div class="receipt-row">
                         <span class="receipt-label">Participant Name</span>
@@ -369,7 +369,7 @@
                 <p>If you have any questions about your payment, registration, or the conference, our support team is here to help you 24/7.</p>
             </div>
 
-            <p>We're excited to have you join us at the SNIA Scientific Conference! This will be an excellent opportunity to learn, network, and contribute to the advancement of scientific research.</p>
+            <p>We're excited to have you join us at <?= esc($eventTitle) ?>! This will be an excellent opportunity to learn, network, and contribute to the advancement of scientific research.</p>
 
             <p><strong>Thank you for your participation and see you at the conference!</strong> 🎓</p>
         </div>
@@ -377,7 +377,7 @@
         <!-- Footer -->
         <div class="footer">
             <p>
-                <strong>💳 SNIA Scientific Conference</strong><br>
+                <strong>💳 <?= esc($eventTitle) ?></strong><br>
                 Payment Processing & Registration
             </p>
             <p>

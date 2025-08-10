@@ -466,4 +466,102 @@ class QRCodeService
             throw new \Exception('Failed to generate QR image: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Scan QR Code for attendance/check-in
+     *
+     * @param string $qrHash
+     * @param array $options
+     * @return array
+     */
+    public function scanQRCode(string $qrHash, array $options = []): array
+    {
+        try {
+            // Get QR code details
+            $qrCode = $this->db->table('qr_codes')
+                ->where('qr_hash', $qrHash)
+                ->where('status', 'active')
+                ->get()
+                ->getRowArray();
+
+            if (!$qrCode) {
+                return [
+                    'success' => false,
+                    'message' => 'QR code not found or inactive'
+                ];
+            }
+
+            // Check if QR code is expired
+            if ($qrCode['expires_at'] && strtotime($qrCode['expires_at']) < time()) {
+                return [
+                    'success' => false,
+                    'message' => 'QR code has expired'
+                ];
+            }
+
+            // Record the scan
+            $scanData = [
+                'qr_code_id' => $qrCode['id'],
+                'user_id' => $qrCode['user_id'], // QR code owner
+                'scanner_user_id' => $options['scanner_user_id'] ?? $qrCode['user_id'],
+                'scan_type' => $options['scan_type'] ?? 'attendance',
+                'location' => $options['location'] ?? 'Conference Hall',
+                'notes' => $options['notes'] ?? null,
+                'ip_address' => $options['ip_address'] ?? null,
+                'scan_result' => 'success',
+                'scanned_at' => date('Y-m-d H:i:s'),
+                'created_at' => date('Y-m-d H:i:s')
+            ];
+
+            $scanId = $this->db->table('qr_scans')->insert($scanData);
+
+            if (!$scanId) {
+                return [
+                    'success' => false,
+                    'message' => 'Failed to record scan'
+                ];
+            }
+
+            // Update QR code scan count and last scanned time
+            $this->db->table('qr_codes')
+                ->where('id', $qrCode['id'])
+                ->update([
+                    'scan_count' => $qrCode['scan_count'] + 1,
+                    'last_scanned_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s')
+                ]);
+
+            // If this is attendance scan, update registration attendance status
+            if ($options['scan_type'] === 'attendance' || $options['scan_type'] === 'check_in') {
+                $qrData = json_decode($qrCode['qr_data'], true);
+                if (isset($qrData['registration_id'])) {
+                    $this->db->table('registrations')
+                        ->where('id', $qrData['registration_id'])
+                        ->update([
+                            'attended' => true,
+                            'attendance_time' => date('Y-m-d H:i:s')
+                        ]);
+                }
+            }
+
+            return [
+                'success' => true,
+                'message' => 'QR code scanned successfully',
+                'scan_data' => [
+                    'scan_id' => $this->db->insertID(),
+                    'scan_type' => $scanData['scan_type'],
+                    'location' => $scanData['location'],
+                    'scanned_at' => $scanData['scanned_at'],
+                    'qr_owner' => $qrCode['user_id']
+                ]
+            ];
+
+        } catch (\Exception $e) {
+            log_message('error', 'QR Code scan failed: ' . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'QR Code scan failed: ' . $e->getMessage()
+            ];
+        }
+    }
 }

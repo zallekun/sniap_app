@@ -255,7 +255,8 @@ try {
             $fullName,
             $abstractTitle,
             $status,
-            $comments
+            $comments,
+            1
         );
         
         // Log email result tapi jangan fail request kalau email gagal
@@ -475,7 +476,8 @@ try {
                 $fullName,
                 $abstractTitle,
                 $status,
-                $comments
+                $comments,
+                1
             );
             
             if ($emailResult['success']) {

@@ -241,7 +241,7 @@
         <div class="content">
             <h2>Dear <?= esc($userName) ?>,</h2>
             
-            <p>We are <strong>delighted</strong> to confirm that your abstract has been accepted for presentation at the SNIA Scientific Conference. This email contains your official <strong>Letter of Acceptance (LOA)</strong>.</p>
+            <p>We are <strong>delighted</strong> to confirm that your abstract has been accepted for presentation at <?= esc($eventTitle) ?>. This email contains your official <strong>Letter of Acceptance (LOA)</strong>.</p>
 
             <!-- Abstract Highlight -->
             <div class="abstract-highlight">
@@ -264,12 +264,12 @@
                     <div class="detail-item">
                         <div class="icon">🗓️</div>
                         <div class="label">Event Date</div>
-                        <div class="value">Coming Soon</div>
+                        <div class="value"><?= esc($eventDateFormatted) ?></div>
                     </div>
                     <div class="detail-item">
                         <div class="icon">📍</div>
                         <div class="label">Location</div>
-                        <div class="value">TBA</div>
+                        <div class="value"><?= esc($eventLocation) ?></div>
                     </div>
                     <div class="detail-item">
                         <div class="icon">🎤</div>
@@ -308,17 +308,17 @@
                 <p><strong>Registration Deadline:</strong> Please complete your payment within 14 days to confirm your participation. Failure to register may result in removal from the program.</p>
             </div>
 
-            <p>We're excited to have you as part of our conference and look forward to your valuable contribution to the scientific community. Your research will help advance knowledge and inspire fellow researchers.</p>
+            <p>We're excited to have you as part of <?= esc($eventTitle) ?> and look forward to your valuable contribution to the scientific community. Your research will help advance knowledge and inspire fellow researchers.</p>
 
             <p>Should you have any questions about your presentation, conference logistics, or need additional documentation, please don't hesitate to reach out to our organizing committee.</p>
 
-            <p><strong>Congratulations once again, and welcome to SNIA Scientific Conference!</strong> 🎓</p>
+            <p><strong>Congratulations once again, and welcome to <?= esc($eventTitle) ?>!</strong> 🎓</p>
         </div>
 
         <!-- Footer -->
         <div class="footer">
             <p>
-                <strong>🎓 SNIA Scientific Conference</strong><br>
+                <strong>🎓 <?= esc($eventTitle) ?></strong><br>
                 Organizing Committee
             </p>
             <p>

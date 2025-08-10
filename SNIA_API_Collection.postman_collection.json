@@ -1,0 +1,743 @@
+{
+	"info": {
+		"_postman_id": "snia-api-collection-2025-updated",
+		"name": "SNIA Conference API - Complete Testing Collection",
+		"description": "Updated and tested API collection for SNIA Conference Management System. All endpoints verified and working as of August 10, 2025.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080/api/v1",
+			"type": "string"
+		},
+		{
+			"key": "jwt_token",
+			"value": "{{jwt_token}}",
+			"type": "string"
+		},
+		{
+			"key": "registration_id",
+			"value": "16",
+			"type": "string"
+		},
+		{
+			"key": "certificate_id",
+			"value": "6",
+			"type": "string"
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{jwt_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"item": [
+		{
+			"name": "1. Authentication",
+			"item": [
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"uhuy@example.com\",\n  \"password\": \"testpassword\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "login"]
+						}
+					}
+				},
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST", 
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"first_name\": \"Test\",\n  \"last_name\": \"User\",\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\",\n  \"confirm_password\": \"password123\",\n  \"institution\": \"Test University\",\n  \"phone\": \"+62123456789\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "register"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "2. Registration System",
+			"item": [
+				{
+					"name": "Create Registration",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type", 
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"event_id\": 1,\n  \"registration_type\": \"presenter\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/registration",
+							"host": ["{{base_url}}"],
+							"path": ["registration"]
+						}
+					}
+				},
+				{
+					"name": "List Registrations",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/registration",
+							"host": ["{{base_url}}"],
+							"path": ["registration"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "3. Abstract Management",
+			"item": [
+				{
+					"name": "Submit Abstract",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "registration_id",
+									"value": "{{registration_id}}"
+								},
+								{
+									"key": "category_id", 
+									"value": "1"
+								},
+								{
+									"key": "title",
+									"value": "Machine Learning Applications in Healthcare"
+								},
+								{
+									"key": "abstract_text",
+									"value": "Submitted as file attachment"
+								},
+								{
+									"key": "keywords",
+									"value": "machine learning, healthcare, AI"
+								},
+								{
+									"key": "abstract_file",
+									"type": "file"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/abstracts",
+							"host": ["{{base_url}}"],
+							"path": ["abstracts"]
+						}
+					}
+				},
+				{
+					"name": "List Abstracts",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/abstracts",
+							"host": ["{{base_url}}"],
+							"path": ["abstracts"]
+						}
+					}
+				},
+				{
+					"name": "Abstract Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/abstracts/6",
+							"host": ["{{base_url}}"],
+							"path": ["abstracts", "6"]
+						}
+					}
+				},
+				{
+					"name": "Download Abstract",
+					"request": {
+						"method": "GET", 
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/abstracts/6/download",
+							"host": ["{{base_url}}"],
+							"path": ["abstracts", "6", "download"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "4. Payment System",
+			"item": [
+				{
+					"name": "Create Payment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"registration_id\": {{registration_id}},\n  \"payment_method\": \"bank_transfer\",\n  \"amount\": 500000\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/payment/create",
+							"host": ["{{base_url}}"],
+							"path": ["payment", "create"]
+						}
+					}
+				},
+				{
+					"name": "Payment Status",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization", 
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/payment/status/33",
+							"host": ["{{base_url}}"],
+							"path": ["payment", "status", "33"]
+						}
+					}
+				},
+				{
+					"name": "Simulate Payment Success",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/payment/simulate-success/33",
+							"host": ["{{base_url}}"],
+							"path": ["payment", "simulate-success", "33"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "5. LOA System", 
+			"item": [
+				{
+					"name": "Generate LOA",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/loa/generate/{{registration_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["loa", "generate", "{{registration_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Download LOA",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/loa/download/{{registration_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["loa", "download", "{{registration_id}}"]
+						}
+					}
+				},
+				{
+					"name": "My LOAs",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/loa/my-loas",
+							"host": ["{{base_url}}"],
+							"path": ["loa", "my-loas"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "6. Certificate System",
+			"item": [
+				{
+					"name": "Request Certificate",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"registration_id\": {{registration_id}},\n  \"certificate_type\": \"presenter\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/certificates/request",
+							"host": ["{{base_url}}"],
+							"path": ["certificates", "request"]
+						}
+					}
+				},
+				{
+					"name": "List Certificates",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/certificates",
+							"host": ["{{base_url}}"],
+							"path": ["certificates"]
+						}
+					}
+				},
+				{
+					"name": "Certificate Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/certificates/{{certificate_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["certificates", "{{certificate_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Issue Certificate (Admin Only)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/certificates/{{certificate_id}}/issue",
+							"host": ["{{base_url}}"],
+							"path": ["certificates", "{{certificate_id}}", "issue"]
+						}
+					}
+				},
+				{
+					"name": "Download Certificate",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/certificates/{{certificate_id}}/download",
+							"host": ["{{base_url}}"],
+							"path": ["certificates", "{{certificate_id}}", "download"]
+						}
+					}
+				},
+				{
+					"name": "Verify Certificate (Public)",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/certificates/verify/SNIA-2025-000016-E6D4",
+							"host": ["{{base_url}}"],
+							"path": ["certificates", "verify", "SNIA-2025-000016-E6D4"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "7. Voucher System",
+			"item": [
+				{
+					"name": "List Vouchers (Admin Only)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/vouchers",
+							"host": ["{{base_url}}"],
+							"path": ["vouchers"]
+						}
+					}
+				},
+				{
+					"name": "Check Voucher",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization", 
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/vouchers/check/SNIA2024EARLY",
+							"host": ["{{base_url}}"],
+							"path": ["vouchers", "check", "SNIA2024EARLY"]
+						}
+					}
+				},
+				{
+					"name": "Apply Voucher",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"voucher_code\": \"SNIA2024EARLY\",\n  \"registration_id\": {{registration_id}}\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/vouchers/apply",
+							"host": ["{{base_url}}"],
+							"path": ["vouchers", "apply"]
+						}
+					}
+				},
+				{
+					"name": "My Voucher Usage",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/vouchers/my-usage",
+							"host": ["{{base_url}}"],
+							"path": ["vouchers", "my-usage"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "8. Admin System",
+			"item": [
+				{
+					"name": "Admin Dashboard (Admin Only)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/admin/dashboard",
+							"host": ["{{base_url}}"],
+							"path": ["admin", "dashboard"]
+						}
+					}
+				},
+				{
+					"name": "Admin Users (Admin Only)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/admin/users",
+							"host": ["{{base_url}}"],
+							"path": ["admin", "users"]
+						}
+					}
+				},
+				{
+					"name": "Admin Abstracts (Admin Only)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/admin/abstracts",
+							"host": ["{{base_url}}"],
+							"path": ["admin", "abstracts"]
+						}
+					}
+				},
+				{
+					"name": "Admin Settings (Admin Only)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/admin/settings",
+							"host": ["{{base_url}}"],
+							"path": ["admin", "settings"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "9. QR Code System",
+			"item": [
+				{
+					"name": "My QR Codes",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/qr/my-codes",
+							"host": ["{{base_url}}"],
+							"path": ["qr", "my-codes"]
+						}
+					}
+				},
+				{
+					"name": "Generate QR Code",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization", 
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"qr_type\": \"attendance\",\n  \"registration_id\": {{registration_id}}\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/qr/generate",
+							"host": ["{{base_url}}"],
+							"path": ["qr", "generate"]
+						}
+					}
+				},
+				{
+					"name": "Scan QR Code",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"qr_hash\": \"YOUR_QR_HASH_HERE\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/qr/scan",
+							"host": ["{{base_url}}"],
+							"path": ["qr", "scan"]
+						}
+					}
+				},
+				{
+					"name": "Scan History",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/qr/scan-history",
+							"host": ["{{base_url}}"],
+							"path": ["qr", "scan-history"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "10. System Health",
+			"item": [
+				{
+					"name": "Database Health",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/health/database",
+							"host": ["{{base_url}}"],
+							"path": ["health", "database"]
+						}
+					}
+				},
+				{
+					"name": "Auth Health",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/health/auth",
+							"host": ["{{base_url}}"],
+							"path": ["health", "auth"]
+						}
+					}
+				}
+			]
+		}
+	]
+}

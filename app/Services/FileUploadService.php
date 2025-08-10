@@ -26,7 +26,58 @@ class FileUploadService
     public function uploadAbstractFile($file, int $userId, int $registrationId, string $type = 'abstract'): array
     {
         try {
-            // Basic validation
+            // Handle CodeIgniter 4 UploadedFile object
+            if ($file instanceof \CodeIgniter\HTTP\Files\UploadedFile) {
+                // Basic validation
+                if (!$file->isValid()) {
+                    return [
+                        'success' => false,
+                        'message' => 'No file uploaded or invalid file: ' . $file->getErrorString()
+                    ];
+                }
+
+                // Check file size
+                if ($file->getSize() > $this->maxFileSize) {
+                    return [
+                        'success' => false,
+                        'message' => 'File size exceeds maximum allowed size of ' . ($this->maxFileSize / 1024 / 1024) . 'MB'
+                    ];
+                }
+
+                // Check file type
+                $fileType = $file->getClientMimeType();
+                if (!in_array($fileType, $this->allowedMimeTypes)) {
+                    return [
+                        'success' => false,
+                        'message' => 'Invalid file type. Only PDF, DOC, and DOCX files are allowed'
+                    ];
+                }
+
+                // Generate unique filename
+                $extension = $file->getClientExtension();
+                $fileName = $type . '_' . $userId . '_' . $registrationId . '_' . time() . '.' . $extension;
+                $filePath = $this->uploadPath . $fileName;
+
+                // Move uploaded file
+                if ($file->move($this->uploadPath, $fileName)) {
+                    return [
+                        'success' => true,
+                        'message' => 'File uploaded successfully',
+                        'file_path' => $filePath,
+                        'file_name' => $fileName,
+                        'original_name' => $file->getClientName(),
+                        'file_size' => $file->getSize(),
+                        'file_type' => $fileType
+                    ];
+                } else {
+                    return [
+                        'success' => false,
+                        'message' => 'Failed to move uploaded file'
+                    ];
+                }
+            }
+            
+            // Legacy array format handling
             if (!isset($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) {
                 return [
                     'success' => false,

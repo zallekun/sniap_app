@@ -241,6 +241,10 @@ class PaymentApiController extends BaseController
 
             // Get payment with details using direct SQL
             $db = \Config\Database::connect();
+            
+            // Debug: check what we're looking for
+            log_message('debug', "Looking for payment_id: {$paymentId}, user_id: {$user['id']}");
+            
             $payment = $db->query('
                 SELECT p.*, r.user_id, r.event_id, e.title as event_title
                 FROM payments p
@@ -249,8 +253,17 @@ class PaymentApiController extends BaseController
                 WHERE p.id = ? AND r.user_id = ?', 
                 [$paymentId, $user['id']]
             )->getRowArray();
-
+            
+            // Debug: if not found, check what payments exist for this user
             if (!$payment) {
+                $userPayments = $db->query('
+                    SELECT p.id, p.payment_status, r.user_id 
+                    FROM payments p 
+                    JOIN registrations r ON r.id = p.registration_id 
+                    WHERE r.user_id = ?', [$user['id']])->getResultArray();
+                    
+                log_message('debug', 'User payments: ' . json_encode($userPayments));
+                
                 return $this->response->setJSON([
                     'status' => 'error',
                     'message' => 'Payment not found'
@@ -401,7 +414,8 @@ class PaymentApiController extends BaseController
                         $userPayment['email'],
                         $fullName,
                         $userPayment['final_amount'],
-                        $userPayment['transaction_id']
+                        $userPayment['transaction_id'],
+                        1
                     );
                     
                     if ($emailResult['success']) {
@@ -451,6 +465,57 @@ class PaymentApiController extends BaseController
         ])->setStatusCode(ResponseInterface::HTTP_INTERNAL_SERVER_ERROR);
     }
 }
+    
+    /**
+     * Simulate payment success for testing
+     * POST /api/v1/payments/{id}/simulate-success
+     */
+    public function simulateSuccess($paymentId)
+    {
+        try {
+            $db = \Config\Database::connect();
+            
+            // Update payment status
+            $updated = $db->table('payments')
+                ->where('id', $paymentId)
+                ->update([
+                    'payment_status' => 'success',
+                    'transaction_id' => 'DEMO-TXN-' . time(),
+                    'paid_at' => date('Y-m-d H:i:s')
+                ]);
+                
+            if ($updated) {
+                // Get payment details to update registration
+                $payment = $db->table('payments')
+                    ->where('id', $paymentId)
+                    ->get()
+                    ->getRowArray();
+                    
+                if ($payment) {
+                    // Update registration payment status
+                    $db->table('registrations')
+                        ->where('id', $payment['registration_id'])
+                        ->update(['payment_status' => 'paid']);
+                }
+                
+                return $this->response->setJSON([
+                    'status' => 'success',
+                    'message' => 'Payment simulated as successful'
+                ])->setStatusCode(ResponseInterface::HTTP_OK);
+            } else {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Payment not found or already processed'
+                ])->setStatusCode(ResponseInterface::HTTP_NOT_FOUND);
+            }
+            
+        } catch (\Exception $e) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Failed to simulate payment: ' . $e->getMessage()
+            ])->setStatusCode(ResponseInterface::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 
     /**
      * Get payment statistics for user - SIMPLIFIED
@@ -472,6 +537,9 @@ class PaymentApiController extends BaseController
 
             // Get payment stats using direct SQL
             $db = \Config\Database::connect();
+            
+            // Debug: log user info
+            log_message('debug', 'Payment stats for user: ' . json_encode($user));
             
             $totalPayments = $db->query('
                 SELECT COUNT(*) as count 

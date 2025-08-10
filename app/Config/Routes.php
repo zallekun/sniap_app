@@ -69,10 +69,11 @@ $routes->group('api/v1', ['namespace' => 'App\Controllers\API'], function($route
     $routes->group('payments', ['filter' => 'apiauth'], function($routes) {
         $routes->get('/', 'PaymentApiController::index');                
         $routes->post('/', 'PaymentApiController::create');              
+        $routes->get('stats', 'PaymentApiController::stats');            
         $routes->get('(:num)', 'PaymentApiController::show/$1');         
         $routes->post('(:num)/verify', 'PaymentApiController::verify/$1'); 
-        $routes->get('(:num)/invoice', 'PaymentApiController::invoice/$1'); 
-        $routes->get('stats', 'PaymentApiController::stats');            
+        $routes->post('(:num)/simulate-success', 'PaymentApiController::simulateSuccess/$1'); 
+        $routes->get('(:num)/invoice', 'PaymentApiController::invoice/$1');            
     });
 
     // =================
@@ -120,7 +121,94 @@ $routes->group('api/v1', ['namespace' => 'App\Controllers\API'], function($route
         $routes->get('test-loa/download/(:num)', 'LoaController::downloadLoa/$1');
         $routes->get('test-loa/my-loas', 'LoaController::getMyLoas');
         $routes->get('test-loa/admin/all', 'LoaController::getAllLoas');
+        
+        // Certificate testing endpoints (development only)
+        $routes->get('test-certificates/(:num)', 'CertificateApiController::show/$1');
+        $routes->get('test-certificates/(:num)/download', 'CertificateApiController::download/$1');
     }
+
+    // =================
+    // QR CODE SYSTEM (require JWT)
+    // =================
+    $routes->group('qr', ['filter' => 'apiauth'], function($routes) {
+        $routes->post('generate', 'QrCodeApiController::generate');
+        $routes->get('my-codes', 'QrCodeApiController::myCodes');
+        $routes->get('(:num)', 'QrCodeApiController::show/$1');
+        $routes->post('scan', 'QrCodeApiController::scan');
+        $routes->get('scan-history', 'QrCodeApiController::scanHistory');
+    });
+
+    // =================
+    // CERTIFICATE SYSTEM (require JWT)
+    // =================
+    $routes->group('certificates', ['filter' => 'apiauth'], function($routes) {
+        $routes->get('/', 'CertificateApiController::index');
+        $routes->get('(:num)', 'CertificateApiController::show/$1');
+        $routes->get('(:num)/download', 'CertificateApiController::download/$1');
+        $routes->post('request', 'CertificateApiController::request');
+        $routes->put('(:num)/issue', 'CertificateApiController::issue/$1');
+    });
+
+    // =================
+    // CERTIFICATE VERIFICATION (no auth required)
+    // =================
+    $routes->get('certificates/verify/(:any)', 'CertificateApiController::verify/$1');
+
+    // =================
+    // VOUCHER SYSTEM (require JWT)
+    // =================
+    $routes->group('vouchers', ['filter' => 'apiauth'], function($routes) {
+        $routes->get('/', 'VoucherApiController::index'); // Admin only
+        $routes->post('/', 'VoucherApiController::create'); // Admin only
+        $routes->post('apply', 'VoucherApiController::apply');
+        $routes->get('check/(:any)', 'VoucherApiController::check/$1');
+        $routes->get('my-usage', 'VoucherApiController::myUsage');
+    });
+
+    // =================
+    // ADMIN MANAGEMENT (require JWT + admin role)
+    // =================
+    $routes->group('admin', ['filter' => 'apiauth'], function($routes) {
+        $routes->get('dashboard', 'AdminApiController::dashboard');
+        $routes->get('users', 'AdminApiController::users');
+        $routes->get('abstracts', 'AdminApiController::abstracts');
+        $routes->put('abstracts/(:num)/assign', 'AdminApiController::assignReviewer/$1');
+        $routes->get('export/(:segment)', 'AdminApiController::export/$1');
+        $routes->get('settings', 'AdminApiController::getSettings');
+        $routes->put('settings', 'AdminApiController::updateSettings');
+    });
+
+    // =================
+    // SYSTEM CONFIGURATION (require JWT + admin role)
+    // =================
+    $routes->group('system', ['filter' => 'apiauth'], function($routes) {
+        $routes->get('config', 'SystemApiController::getConfig');
+        $routes->put('config', 'SystemApiController::updateConfig');
+        $routes->put('registration/(:segment)', 'SystemApiController::toggleRegistration/$1');
+        $routes->put('abstract/(:segment)', 'SystemApiController::toggleAbstract/$1');
+        $routes->put('event-mode/(:segment)', 'SystemApiController::setEventMode/$1');
+        $routes->put('deadlines', 'SystemApiController::setDeadlines');
+        $routes->put('email-config', 'SystemApiController::configureEmail');
+        $routes->get('status', 'SystemApiController::status');
+    });
+
+    // =================
+    // ENHANCED REGISTRATION ENDPOINTS (require JWT)
+    // =================
+    $routes->group('registrations', ['filter' => 'apiauth'], function($routes) {
+        $routes->get('/', 'RegistrationApiController::index'); // Get user registrations
+        $routes->get('(:num)', 'RegistrationApiController::show/$1'); // Get specific registration
+        $routes->post('register', 'RegistrationApiController::register'); // New presenter registration
+        $routes->get('stats', 'RegistrationApiController::stats');
+        $routes->get('(:num)/certificate', 'RegistrationApiController::certificate/$1');
+        $routes->put('(:num)', 'RegistrationApiController::update/$1');
+        $routes->delete('(:num)', 'RegistrationApiController::cancel/$1');
+    });
+
+    // =================
+    // ENHANCED EVENT ENDPOINTS (no auth required for schedule)
+    // =================
+    $routes->get('events/(:num)/schedule', 'EventApiController::schedule/$1');
 
     // =================
     // WEBHOOKS (no auth)

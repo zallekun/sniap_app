@@ -45,8 +45,11 @@ class AuthApiController extends BaseController
         if (empty($jsonInput['confirm_password']) || $jsonInput['password'] !== $jsonInput['confirm_password']) {
             $errors['confirm_password'] = 'Password confirmation does not match';
         }
-        if (empty($jsonInput['full_name'])) {
-            $errors['full_name'] = 'Full name is required';
+        if (empty($jsonInput['first_name'])) {
+            $errors['first_name'] = 'First name is required';
+        }
+        if (empty($jsonInput['last_name'])) {
+            $errors['last_name'] = 'Last name is required';
         }
         if (empty($jsonInput['role']) || !in_array($jsonInput['role'], ['presenter', 'audience', 'reviewer'])) {
             $errors['role'] = 'Invalid role';
@@ -71,11 +74,9 @@ class AuthApiController extends BaseController
             ])->setStatusCode(ResponseInterface::HTTP_CONFLICT);
         }
 
-        // Split full_name
-        $fullName = trim($jsonInput['full_name']);
-        $nameParts = explode(' ', $fullName, 2);
-        $firstName = $nameParts[0];
-        $lastName = isset($nameParts[1]) ? $nameParts[1] : '';
+        // Use direct first_name and last_name
+        $firstName = trim($jsonInput['first_name']);
+        $lastName = trim($jsonInput['last_name']);
 
         try {
             // Direct SQL insert

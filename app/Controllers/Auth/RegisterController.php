@@ -43,7 +43,8 @@ class RegisterController extends BaseController
     public function store()
     {
         $rules = [
-            'full_name' => 'required|min_length[3]|max_length[100]',
+            'first_name' => 'required|min_length[2]|max_length[100]',
+            'last_name' => 'required|min_length[2]|max_length[100]',
             'email' => 'required|valid_email|is_unique[users.email]',
             'password' => 'required|min_length[6]',
             'confirm_password' => 'required|matches[password]',
@@ -54,10 +55,15 @@ class RegisterController extends BaseController
         ];
 
         $messages = [
-            'full_name' => [
-                'required' => 'Full name is required',
-                'min_length' => 'Full name must be at least 3 characters',
-                'max_length' => 'Full name cannot exceed 100 characters'
+            'first_name' => [
+                'required' => 'First name is required',
+                'min_length' => 'First name must be at least 2 characters',
+                'max_length' => 'First name cannot exceed 100 characters'
+            ],
+            'last_name' => [
+                'required' => 'Last name is required',
+                'min_length' => 'Last name must be at least 2 characters',
+                'max_length' => 'Last name cannot exceed 100 characters'
             ],
             'email' => [
                 'required' => 'Email is required',
@@ -94,7 +100,8 @@ class RegisterController extends BaseController
 
         // Prepare user data
         $userData = [
-            'full_name' => $this->request->getPost('full_name'),
+            'first_name' => trim($this->request->getPost('first_name')),
+            'last_name' => trim($this->request->getPost('last_name')),
             'email' => strtolower(trim($this->request->getPost('email'))),
             'password' => password_hash($this->request->getPost('password'), PASSWORD_DEFAULT),
             'phone' => $this->request->getPost('phone'),
@@ -114,7 +121,8 @@ class RegisterController extends BaseController
             }
 
             // Send verification email
-            $this->sendVerificationEmail($userData['email'], $userData['full_name'], $userId);
+            $fullName = $userData['first_name'] . ' ' . $userData['last_name'];
+            $this->sendVerificationEmail($userData['email'], $fullName, $userId);
 
             // Auto login after registration (optional)
             $autoLogin = true; // You can make this configurable
@@ -123,7 +131,7 @@ class RegisterController extends BaseController
                 $sessionData = [
                     'user_id' => $userId,
                     'user_email' => $userData['email'],
-                    'user_name' => $userData['full_name'],
+                    'user_name' => $fullName,
                     'user_role' => $userData['role'],
                     'is_logged_in' => true
                 ];
@@ -203,7 +211,8 @@ class RegisterController extends BaseController
         }
 
         // Send verification email again
-        $this->sendVerificationEmail($user['email'], $user['full_name'], $user['id']);
+        $fullName = trim($user['first_name'] . ' ' . $user['last_name']);
+        $this->sendVerificationEmail($user['email'], $fullName, $user['id']);
 
         return redirect()->back()->with('success', 'Verification email has been resent.');
     }
@@ -268,7 +277,7 @@ class RegisterController extends BaseController
         // Use professional EmailService instead of basic email
         $emailService = new EmailService();
         
-        $result = $emailService->sendVerificationEmail($email, $name, $token);
+        $result = $emailService->sendVerificationEmail($email, $name, $token, 1);
         
         if ($result['success']) {
             log_message('info', "Verification email sent successfully to: {$email}");

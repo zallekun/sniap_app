@@ -15,14 +15,25 @@ class LoaController extends BaseController
     public function generateLoa($abstractId)
     {
         try {
-            // Get authenticated user (for testing, we'll create a dummy user)
+            // Get authenticated user
             $request = service('request');
-            $user = $request->api_user ?? [
-                'id' => 1,
-                'role' => 'presenter',
-                'first_name' => 'Test',
-                'last_name' => 'User'
-            ];
+            $user = $request->api_user ?? null;
+            
+            if (!$user) {
+                return $this->response->setStatusCode(401)->setJSON([
+                    'status' => 'error',
+                    'message' => 'User not authenticated'
+                ]);
+            }
+            
+            // Only admin and reviewer can generate LOA
+            if (!in_array($user['role'], ['admin', 'reviewer'])) {
+                return $this->response->setStatusCode(403)->setJSON([
+                    'status' => 'error',
+                    'message' => 'Only admin and reviewers can generate LOA',
+                    'user_role' => $user['role']
+                ]);
+            }
             
             $db = \Config\Database::connect();
             
@@ -144,7 +155,8 @@ class LoaController extends BaseController
                         $abstract['email'],
                         $presenterName,
                         $abstract['title'],
-                        $pdfPath // LOA file path
+                        $pdfPath, // LOA file path
+                        1 // eventId
                     );
                     
                     if ($emailResult['success']) {
@@ -200,6 +212,8 @@ class LoaController extends BaseController
             $db = \Config\Database::connect();
             
             // Get LOA details
+            log_message('debug', 'Looking for LOA ID: ' . $loaId);
+            
             $loaQuery = $db->query("
                 SELECT * FROM loa_documents WHERE id = ?
             ", [$loaId]);
@@ -207,9 +221,16 @@ class LoaController extends BaseController
             $loa = $loaQuery->getRowArray();
             
             if (!$loa) {
+                // Debug: show available LOAs
+                $availableLoas = $db->query('SELECT id, abstract_id, loa_number FROM loa_documents')->getResultArray();
+                
                 return $this->response->setStatusCode(404)->setJSON([
                     'status' => 'error',
-                    'message' => 'LOA not found'
+                    'message' => 'LOA not found',
+                    'debug' => [
+                        'requested_loa_id' => $loaId,
+                        'available_loas' => $availableLoas
+                    ]
                 ]);
             }
             

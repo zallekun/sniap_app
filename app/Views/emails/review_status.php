@@ -184,7 +184,7 @@
             <!-- Dynamic content based on review status -->
             <?php if ($status === 'ACCEPTED'): ?>
                 <!-- ACCEPTED Content -->
-                <p>🎉 <strong>Congratulations!</strong> We are pleased to inform you that your abstract has been <strong>accepted</strong> for presentation at the SNIA Scientific Conference.</p>
+                <p>🎉 <strong>Congratulations!</strong> We are pleased to inform you that your abstract has been <strong>accepted</strong> for presentation at <?= esc($eventTitle) ?>.</p>
                 
                 <p>Your research demonstrates excellent quality and aligns perfectly with our conference objectives. We look forward to your presentation!</p>
                 
@@ -214,7 +214,7 @@
 
             <?php elseif ($status === 'REVISION'): ?>
                 <!-- REVISION Content -->
-                <p>📝 Thank you for submitting your abstract. After careful review, we would like to request some <strong>revisions</strong> before final acceptance.</p>
+                <p>📝 Thank you for submitting your abstract to <?= esc($eventTitle) ?>. After careful review, we would like to request some <strong>revisions</strong> before final acceptance.</p>
                 
                 <p>The reviewers have provided specific feedback to help improve your submission. Please address the comments below and resubmit your revised abstract.</p>
                 
@@ -242,7 +242,7 @@
 
             <?php else: ?>
                 <!-- REJECTED Content -->
-                <p>Thank you for your interest in the SNIA Scientific Conference and for submitting your abstract for review.</p>
+                <p>Thank you for your interest in <?= esc($eventTitle) ?> and for submitting your abstract for review.</p>
                 
                 <p>After careful consideration, we regret to inform you that your abstract has <strong>not been selected</strong> for presentation at this conference.</p>
                 
@@ -273,7 +273,7 @@
         <!-- Footer -->
         <div class="footer">
             <p>
-                <strong>SNIA Scientific Conference</strong><br>
+                <strong><?= esc($eventTitle) ?></strong><br>
                 Organizing Committee
             </p>
             <p>

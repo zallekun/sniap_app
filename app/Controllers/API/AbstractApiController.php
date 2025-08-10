@@ -121,6 +121,10 @@ class AbstractApiController extends BaseController
             $data = $this->request->getPost() ?? $this->request->getJSON(true) ?? [];
             $files = $this->request->getFiles() ?? [];
             
+            // Debug: log received data
+            log_message('debug', 'Abstract submission data: ' . json_encode($data));
+            log_message('debug', 'Abstract submission files: ' . json_encode(array_keys($files)));
+            
             // Basic validation
             if (empty($data['registration_id'])) {
                 return $this->response->setStatusCode(400)->setJSON([
@@ -136,10 +140,13 @@ class AbstractApiController extends BaseController
                 ]);
             }
             
-            if (empty($data['abstract_text'])) {
+            // Check for abstract_text - it might be optional if uploading file
+            if (empty($data['abstract_text']) && empty($files['abstract_file'])) {
                 return $this->response->setStatusCode(400)->setJSON([
                     'status' => 'error',
-                    'message' => 'Abstract text is required'
+                    'message' => 'Either abstract text or abstract file is required',
+                    'received_data' => array_keys($data),
+                    'received_files' => array_keys($files)
                 ]);
             }
             
@@ -218,8 +225,13 @@ class AbstractApiController extends BaseController
                     ]);
                 }
                 
-                $filePath = $fileResult['file_info']['file_path'];
-                $fileInfo = $fileResult['file_info'];
+                $filePath = $fileResult['file_path'];
+                $fileInfo = [
+                    'file_name' => $fileResult['file_name'],
+                    'original_name' => $fileResult['original_name'],
+                    'file_size' => $fileResult['file_size'],
+                    'file_type' => $fileResult['file_type']
+                ];
             }
             
             // Use default category_id = 1 (assume it exists)
@@ -242,7 +254,7 @@ class AbstractApiController extends BaseController
                 $userInfo['institution'] ?? '', // affiliation
                 $categoryId, // valid category_id
                 $data['title'],
-                $data['abstract_text'],
+                $data['abstract_text'] ?? 'Submitted as file attachment',
                 $data['keywords'] ?? '',
                 $filePath ?? ('abstracts/placeholder_' . time() . '.txt'), // real file path or placeholder
                 1, // submission_version
@@ -270,7 +282,7 @@ class AbstractApiController extends BaseController
                     $responseData['file_info'] = [
                         'original_name' => $fileInfo['original_name'],
                         'file_size' => $fileInfo['file_size'],
-                        'file_type' => $fileInfo['extension'],
+                        'file_type' => $fileInfo['file_type'],
                         'uploaded_at' => $fileInfo['uploaded_at']
                     ];
                 }

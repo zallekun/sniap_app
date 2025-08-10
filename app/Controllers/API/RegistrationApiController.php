@@ -60,43 +60,53 @@ class RegistrationApiController extends BaseController
     }
 
     /**
-     * Register for an event - ULTRA CLEAN VERSION
+     * Register for event as presenter/attendee
      * POST /api/v1/registrations
      */
-    public function create()
+    public function register()
     {
         try {
             // Get authenticated user from service request
             $request = service('request');
-            $user = $request->api_user ?? null;
+            $userAuth = $request->api_user ?? null;
             
-            if (!$user) {
+            if (!$userAuth) {
                 return $this->response->setJSON([
                     'status' => 'error',
                     'message' => 'User not authenticated'
                 ])->setStatusCode(ResponseInterface::HTTP_UNAUTHORIZED);
             }
-
-            // Get JSON input
-            $jsonInput = $this->request->getJSON(true);
             
-            if (empty($jsonInput['event_id'])) {
+            // Get complete user data from database
+            $db = \Config\Database::connect();
+            $user = $db->table('users')->where('id', $userAuth['id'])->get()->getRowArray();
+            if (!$user) {
                 return $this->response->setJSON([
                     'status' => 'error',
-                    'message' => 'Event ID is required'
-                ])->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST);
+                    'message' => 'User not found'
+                ])->setStatusCode(ResponseInterface::HTTP_NOT_FOUND);
             }
 
-            $eventId = (int)$jsonInput['event_id'];
+            $eventId = $this->request->getPost('event_id') ?: 1; // Default event
+            $registrationType = $this->request->getPost('registration_type') ?: 'presenter'; // presenter, attendee
+            
+            // Check if already registered
+            $existingRegistration = $db->table('registrations')
+                ->where('user_id', $user['id'])
+                ->where('event_id', $eventId)
+                ->get()
+                ->getRowArray();
+                
+            if ($existingRegistration) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Already registered for this event',
+                    'data' => $existingRegistration
+                ])->setStatusCode(ResponseInterface::HTTP_CONFLICT);
+            }
 
-            // Check if event exists using direct query
-            $db = \Config\Database::connect();
-            $event = $db->query('
-                SELECT id, title, event_date, registration_fee, max_participants, registration_deadline 
-                FROM events 
-                WHERE id = ?', [$eventId]
-            )->getRowArray();
-
+            // Get event details
+            $event = $db->table('events')->where('id', $eventId)->get()->getRowArray();
             if (!$event) {
                 return $this->response->setJSON([
                     'status' => 'error',
@@ -104,60 +114,63 @@ class RegistrationApiController extends BaseController
                 ])->setStatusCode(ResponseInterface::HTTP_NOT_FOUND);
             }
 
-            // Check if registration deadline passed
-            $now = date('Y-m-d H:i:s');
-            if (!empty($event['registration_deadline']) && $event['registration_deadline'] < $now) {
+            // Check registration deadline
+            if ($event['registration_deadline'] && date('Y-m-d') > $event['registration_deadline']) {
                 return $this->response->setJSON([
                     'status' => 'error',
                     'message' => 'Registration deadline has passed'
                 ])->setStatusCode(ResponseInterface::HTTP_BAD_REQUEST);
             }
 
-            // Check if user already registered using model
-            if ($this->registrationModel->isUserRegistered($user['id'], $eventId)) {
-                return $this->response->setJSON([
-                    'status' => 'error',
-                    'message' => 'Already registered for this event'
-                ])->setStatusCode(ResponseInterface::HTTP_CONFLICT);
-            }
+            // Determine registration fee based on type and user role
+            $registrationFee = $this->calculateRegistrationFee($registrationType, $user['role'], $event);
 
-            // Create registration using model - CLEAN DATA
+            // Create registration
             $registrationData = [
-                'user_id' => (int)$user['id'],
+                'user_id' => $user['id'],
                 'event_id' => $eventId,
-                'registration_type' => ($user['role'] === 'presenter') ? 'presenter' : 'audience', // ← FIXED!
-                'registration_status' => 'pending', // Fixed enum value
-                'payment_status' => ($event['registration_fee'] > 0) ? 'pending' : 'free'
+                'registration_type' => $registrationType,
+                'registration_status' => 'pending',
+                'payment_status' => 'pending',
+                'created_at' => date('Y-m-d H:i:s')
             ];
 
-            $registrationId = $this->registrationModel->insert($registrationData);
-            
-            if (!$registrationId) {
+            $registrationId = $db->table('registrations')->insert($registrationData);
+
+            if ($registrationId) {
+                // Send confirmation email (skip for now to avoid email issues)
+                try {
+                    $emailService = new \App\Services\EmailService();
+                    $emailService->sendRegistrationConfirmation(
+                        $user['email'],
+                        $user['first_name'] . ' ' . $user['last_name'],
+                        $event['title'] ?? 'Conference Event',
+                        $registrationType,
+                        $registrationFee,
+                        1
+                    );
+                } catch (\Exception $e) {
+                    // Log email error but don't fail registration
+                    log_message('error', 'Registration email failed: ' . $e->getMessage());
+                }
+
+                return $this->response->setJSON([
+                    'status' => 'success',
+                    'message' => 'Registration successful',
+                    'data' => [
+                        'registration_id' => $registrationId,
+                        'event_title' => $event['title'],
+                        'registration_type' => $registrationType,
+                        'event_registration_fee' => $registrationFee,
+                        'payment_status' => 'pending'
+                    ]
+                ])->setStatusCode(ResponseInterface::HTTP_CREATED);
+            } else {
                 return $this->response->setJSON([
                     'status' => 'error',
                     'message' => 'Failed to create registration'
                 ])->setStatusCode(ResponseInterface::HTTP_INTERNAL_SERVER_ERROR);
             }
-
-            // Generate QR Code
-            $qrCode = $this->registrationModel->generateQRCode($registrationId);
-
-            return $this->response->setJSON([
-                'status' => 'success',
-                'message' => 'Registration successful',
-                'data' => [
-                    'registration_id' => $registrationId,
-                    'event_id' => $eventId,
-                    'event_title' => $event['title'],
-                    'user_id' => (int)$user['id'],
-                    'registration_status' => 'pending',
-                    'payment_status' => $registrationData['payment_status'],
-                    'qr_code' => $qrCode,
-                    'registration_fee' => (float)$event['registration_fee'],
-                    'requires_payment' => ($event['registration_fee'] > 0),
-                    'created_at' => date('Y-m-d H:i:s')
-                ]
-            ])->setStatusCode(ResponseInterface::HTTP_CREATED);
 
         } catch (\Exception $e) {
             return $this->response->setJSON([
@@ -165,6 +178,15 @@ class RegistrationApiController extends BaseController
                 'message' => 'Registration failed: ' . $e->getMessage()
             ])->setStatusCode(ResponseInterface::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    /**
+     * Register for an event - ULTRA CLEAN VERSION
+     * POST /api/v1/registrations (alias)
+     */
+    public function create()
+    {
+        return $this->register();
     }
 
     /**
@@ -351,24 +373,27 @@ class RegistrationApiController extends BaseController
             
             $pendingRegistrations = $db->query('SELECT COUNT(*) as count FROM registrations WHERE user_id = ? AND registration_status = ?', [$user['id'], 'pending'])->getRow()->count;
             
-            $cancelledRegistrations = $db->query('SELECT COUNT(*) as count FROM registrations WHERE user_id = ? AND registration_status = ?', [$user['id'], 'cancelled'])->getRow()->count;
+            $approvedRegistrations = $db->query('SELECT COUNT(*) as count FROM registrations WHERE user_id = ? AND registration_status = ?', [$user['id'], 'approved'])->getRow()->count;
+            $rejectedRegistrations = $db->query('SELECT COUNT(*) as count FROM registrations WHERE user_id = ? AND registration_status = ?', [$user['id'], 'rejected'])->getRow()->count;
             
             // Get payment-based "completed" registrations (paid registrations)
-            $paidRegistrations = $db->query('SELECT COUNT(*) as count FROM registrations WHERE user_id = ? AND payment_status = ?', [$user['id'], 'success'])->getRow()->count ?? 0;
+            $paidRegistrations = $db->query('SELECT COUNT(*) as count FROM registrations WHERE user_id = ? AND payment_status = ?', [$user['id'], 'paid'])->getRow()->count ?? 0;
             
-            // Alternative: count non-pending, non-cancelled as "active"
-            $activeRegistrations = $totalRegistrations - $pendingRegistrations - $cancelledRegistrations;
+            // Calculate active registrations (pending + approved)
+            $activeRegistrations = $pendingRegistrations + $approvedRegistrations;
 
             $stats = [
                 'total_registrations' => (int)$totalRegistrations,
                 'pending_registrations' => (int)$pendingRegistrations,
-                'cancelled_registrations' => (int)$cancelledRegistrations,
+                'approved_registrations' => (int)$approvedRegistrations,
+                'rejected_registrations' => (int)$rejectedRegistrations,
                 'active_registrations' => (int)$activeRegistrations,
                 'paid_registrations' => (int)$paidRegistrations,
                 'breakdown' => [
                     'pending_payment' => (int)$pendingRegistrations,
                     'payment_completed' => (int)$paidRegistrations,
-                    'cancelled' => (int)$cancelledRegistrations
+                    'approved' => (int)$approvedRegistrations,
+                    'rejected' => (int)$rejectedRegistrations
                 ]
             ];
 
@@ -416,5 +441,26 @@ class RegistrationApiController extends BaseController
                 'available_after' => 'Event completion and attendance confirmation'
             ]
         ])->setStatusCode(ResponseInterface::HTTP_OK);
+    }
+
+    /**
+     * Calculate registration fee based on type and user role
+     */
+    private function calculateRegistrationFee($registrationType, $userRole, $event)
+    {
+        // Base fees from event or defaults
+        $baseFees = [
+            'presenter' => $event['presenter_fee'] ?? 500000,
+            'attendee' => $event['attendee_fee'] ?? 100000,
+        ];
+
+        $fee = $baseFees[$registrationType] ?? $baseFees['attendee'];
+
+        // Apply discounts based on user role
+        if ($userRole === 'student') {
+            $fee *= 0.8; // 20% discount for students
+        }
+
+        return (int) $fee;
     }
 }
