@@ -13,11 +13,10 @@ class UserModel extends Model
     protected $useSoftDeletes = false;
     protected $protectFields = true;
     
-    // FIXED: Remove is_active and is_verified since columns don't exist
     protected $allowedFields = [
         'email', 'password', 'first_name', 'last_name', 'phone', 
-        'institution', 'role', 'profile_picture'
-        // Removed: 'is_verified', 'is_active', 'verification_token', 'reset_token', 'reset_expires_at', 'last_login_at'
+        'institution', 'role', 'profile_picture', 'is_verified',
+        'verification_code', 'verification_code_expires', 'created_at', 'updated_at'
     ];
 
     protected $useTimestamps = false;

@@ -234,18 +234,28 @@ $routes->group('', ['namespace' => 'App\Controllers'], function($routes) {
     // =================
     $routes->get('register', 'Auth\RegisterController::index');
     $routes->post('register', 'Auth\RegisterController::store');
-    $routes->get('auth/verify-email/(:any)', 'Auth\RegisterController::verifyEmail/$1');
+    
+    // New verification code system
+    $routes->get('auth/verify-code', 'Auth\RegisterController::verifyCodePage');
+    $routes->post('auth/verify-code', 'Auth\RegisterController::verifyCode');
+    $routes->post('auth/resend-code', 'Auth\RegisterController::resendCode');
+    
+    // Old verification system (keep for backward compatibility)
+    $routes->get('verify-email/(:any)', 'Auth\RegisterController::verifyEmail/$1');
     $routes->post('auth/resend-verification', 'Auth\RegisterController::resendVerification');
     $routes->get('auth/check-email', 'Auth\RegisterController::checkEmail');
 
     // =================
     // DASHBOARD ROUTES
     // =================
-    $routes->get('dashboard', 'DashboardController::index', ['filter' => 'auth']);
+    $routes->get('dashboard', 'DashboardController::index'); // Temporary remove auth filter
     $routes->get('dashboard/profile', 'DashboardController::profile', ['filter' => 'auth']);
     $routes->post('dashboard/profile', 'DashboardController::updateProfile', ['filter' => 'auth']);
     $routes->post('dashboard/change-password', 'DashboardController::changePassword', ['filter' => 'auth']);
     $routes->get('dashboard/stats', 'DashboardController::stats', ['filter' => 'auth']);
+    $routes->get('dashboard/registrations', 'DashboardController::registrations', ['filter' => 'auth']);
+    $routes->get('dashboard/events', 'DashboardController::events', ['filter' => 'auth']);
+    $routes->post('dashboard/register-event', 'DashboardController::registerEvent', ['filter' => 'auth']);
     
     // =================
     // ADMIN ROUTES

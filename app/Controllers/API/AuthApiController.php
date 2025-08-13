@@ -192,6 +192,8 @@ class AuthApiController extends BaseController
                     'user_id' => $user['id'],
                     'email' => $user['email'],
                     'role' => $user['role'],
+                    'first_name' => $user['first_name'],
+                    'last_name' => $user['last_name'],
                     'full_name' => trim($user['first_name'] . ' ' . $user['last_name']),
                     'token' => $token,
                     'token_type' => 'Bearer',

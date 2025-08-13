@@ -4,6 +4,7 @@ namespace App\Controllers\Auth;
 
 use App\Controllers\BaseController;
 use App\Models\UserModel;
+use App\Models\PendingRegistrationModel;
 use CodeIgniter\HTTP\ResponseInterface;
 use App\Services\EmailService;
 use App\Services\QRCodeService;
@@ -11,11 +12,13 @@ use App\Services\QRCodeService;
 class RegisterController extends BaseController
 {
     protected $userModel;
+    protected $pendingModel;
     protected $session;
 
     public function __construct()
     {
         $this->userModel = new UserModel();
+        $this->pendingModel = new PendingRegistrationModel();
         $this->session = \Config\Services::session();
     }
 
@@ -44,10 +47,13 @@ class RegisterController extends BaseController
      */
     public function store()
     {
+        log_message('info', 'Registration store method called');
+        log_message('info', 'POST data: ' . json_encode($this->request->getPost()));
+        
         $rules = [
             'first_name' => 'required|min_length[2]|max_length[100]',
             'last_name' => 'required|min_length[2]|max_length[100]',
-            'email' => 'required|valid_email|is_unique[users.email]',
+            'email' => 'required|valid_email',
             'password' => 'required|min_length[6]',
             'confirm_password' => 'required|matches[password]',
             'phone' => 'permit_empty|min_length[10]|max_length[15]',
@@ -97,54 +103,66 @@ class RegisterController extends BaseController
         ];
 
         if (!$this->validate($rules, $messages)) {
+            log_message('error', 'Validation failed: ' . json_encode($this->validator->getErrors()));
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
+        
+        // Check if email already exists in users or pending_registrations
+        $email = strtolower(trim($this->request->getPost('email')));
+        
+        $existingUser = $this->userModel->findByEmail($email);
+        $existingPending = $this->pendingModel->findByEmail($email);
+        
+        if ($existingUser) {
+            return redirect()->back()->withInput()->with('error', 'Email sudah terdaftar. Silakan gunakan email lain atau login.');
+        }
+        
+        if ($existingPending) {
+            // Delete old pending registration
+            $this->pendingModel->where('email', $email)->delete();
+            log_message('info', "Deleted old pending registration for: {$email}");
+        }
+        
+        log_message('info', 'Validation passed, proceeding with pending registration creation');
 
-        // Prepare user data
+        // Prepare pending registration data
+        $verificationCode = $this->generateVerificationCode();
         $userData = [
             'first_name' => trim($this->request->getPost('first_name')),
             'last_name' => trim($this->request->getPost('last_name')),
-            'email' => strtolower(trim($this->request->getPost('email'))),
+            'email' => $email,
             'password' => password_hash($this->request->getPost('password'), PASSWORD_DEFAULT),
             'phone' => $this->request->getPost('phone'),
             'institution' => $this->request->getPost('institution'),
             'role' => $this->request->getPost('role'),
-            'is_active' => true,
-            'email_verified' => false,
-            'created_at' => date('Y-m-d H:i:s')
+            'verification_code' => $verificationCode,
+            'verification_code_expires' => date('Y-m-d H:i:s', strtotime('+15 minutes'))
         ];
 
         try {
-            // Insert user
-            $userId = $this->userModel->insert($userData);
+            // Insert pending registration
+            $pendingId = $this->pendingModel->insert($userData);
 
-            if (!$userId) {
-                throw new \Exception('Failed to create user account');
+            if (!$pendingId) {
+                throw new \Exception('Failed to create pending registration');
             }
-
-            // Send verification email
-            $fullName = $userData['first_name'] . ' ' . $userData['last_name'];
-            $this->sendVerificationEmail($userData['email'], $fullName, $userId);
-
-            // Auto login after registration (optional)
-            $autoLogin = true; // You can make this configurable
             
-            if ($autoLogin) {
-                $sessionData = [
-                    'user_id' => $userId,
-                    'user_email' => $userData['email'],
-                    'user_name' => $fullName,
-                    'user_role' => $userData['role'],
-                    'is_logged_in' => true
-                ];
+            log_message('info', "Pending registration created with ID: {$pendingId}, email: {$email}");
 
-                $this->session->set($sessionData);
-
-                $redirectUrl = $this->getRedirectUrl($userData['role']);
-                return redirect()->to($redirectUrl)->with('success', 'Registration successful! Welcome to SNIA Conference.');
-            } else {
-                return redirect()->to('/login')->with('success', 'Registration successful! Please check your email for verification instructions.');
+            // Send verification code email
+            $fullName = trim($userData['first_name'] . ' ' . $userData['last_name']);
+            
+            log_message('info', "Generated verification code: {$verificationCode} for pending registration: {$email}");
+            
+            if (!$this->sendVerificationCode($email, $fullName, $verificationCode)) {
+                log_message('warning', 'Failed to send verification email, but pending registration was created');
             }
+
+            // Store email in session for verification page
+            $this->session->set('verification_email', $email);
+
+            // Redirect to verification code page
+            return redirect()->to('/auth/verify-code')->with('success', 'Registration successful! Please check your email for verification code.');
 
         } catch (\Exception $e) {
             log_message('error', 'Registration error: ' . $e->getMessage());
@@ -153,7 +171,159 @@ class RegisterController extends BaseController
     }
 
     /**
-     * Verify email address
+     * Show verification code page
+     */
+    public function verifyCodePage()
+    {
+        $email = $this->session->get('verification_email');
+        
+        if (!$email) {
+            return redirect()->to('/register')->with('error', 'Please register first.');
+        }
+
+        $data = [
+            'title' => 'Verify Email - SNIA Conference',
+            'email' => $email,
+            'hideNavbar' => true,
+            'hideFooter' => true
+        ];
+
+        return view('auth/verify-code', $data);
+    }
+
+    /**
+     * Process verification code
+     */
+    public function verifyCode()
+    {
+        log_message('info', 'VerifyCode method called');
+        log_message('info', 'POST data: ' . json_encode($this->request->getPost()));
+        log_message('info', 'Raw input: ' . $this->request->getBody());
+        
+        $code = $this->request->getPost('verification_code');
+        $email = $this->session->get('verification_email');
+
+        if (!$email) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Session expired. Please register again.'
+            ]);
+        }
+
+        if (!$code || strlen($code) !== 6) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Please enter a valid 6-digit code.'
+            ]);
+        }
+
+        // Find pending registration
+        $pending = $this->pendingModel->findByEmail($email);
+        
+        if (!$pending) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Pendaftaran tidak ditemukan atau sudah diverifikasi.'
+            ]);
+        }
+
+        // Check if code matches and is not expired
+        if ($pending['verification_code'] !== $code) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Kode verifikasi tidak valid.'
+            ]);
+        }
+
+        if (!$pending['verification_code_expires'] || strtotime($pending['verification_code_expires']) < time()) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Kode verifikasi telah kadaluarsa. Silakan minta kode baru.'
+            ]);
+        }
+
+        try {
+            // Create final user account
+            $userData = [
+                'first_name' => $pending['first_name'],
+                'last_name' => $pending['last_name'],
+                'email' => $pending['email'],
+                'password' => $pending['password'],
+                'phone' => $pending['phone'],
+                'institution' => $pending['institution'],
+                'role' => $pending['role'],
+                'is_verified' => true,
+                'created_at' => date('Y-m-d H:i:s')
+            ];
+
+            $userId = $this->userModel->insert($userData);
+
+            if (!$userId) {
+                throw new \Exception('Failed to create user account');
+            }
+
+            // Delete pending registration
+            $this->pendingModel->delete($pending['id']);
+            
+            log_message('info', "User account created successfully: {$email}, ID: {$userId}");
+        } catch (\Exception $e) {
+            log_message('error', 'Failed to create final user account: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat membuat akun. Silakan coba lagi.'
+            ]);
+        }
+
+        // Clear session
+        $this->session->remove('verification_email');
+
+        return $this->response->setJSON([
+            'success' => true,
+            'message' => 'Email verified successfully!'
+        ]);
+    }
+
+    /**
+     * Resend verification code
+     */
+    public function resendCode()
+    {
+        $email = $this->session->get('verification_email');
+        
+        if (!$email) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Session expired. Please register again.'
+            ]);
+        }
+
+        $pending = $this->pendingModel->findByEmail($email);
+        
+        if (!$pending) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Pendaftaran tidak ditemukan.'
+            ]);
+        }
+
+        // Generate new code and update expires time
+        $verificationCode = $this->generateVerificationCode();
+        $this->pendingModel->update($pending['id'], [
+            'verification_code' => $verificationCode,
+            'verification_code_expires' => date('Y-m-d H:i:s', strtotime('+15 minutes'))
+        ]);
+        
+        $fullName = trim($pending['first_name'] . ' ' . $pending['last_name']);
+        $this->sendVerificationCode($pending['email'], $fullName, $verificationCode);
+
+        return $this->response->setJSON([
+            'success' => true,
+            'message' => 'New verification code sent!'
+        ]);
+    }
+
+    /**
+     * Verify email address (old method - keep for backward compatibility)
      */
     public function verifyEmail($token = null)
     {
@@ -175,14 +345,14 @@ class RegisterController extends BaseController
             return redirect()->to('/login')->with('error', 'User not found.');
         }
 
-        if ($user['email_verified']) {
+        if ($user['is_verified']) {
             return redirect()->to('/login')->with('info', 'Email already verified. You can login now.');
         }
 
         // Update user as verified
         $this->userModel->update($userId, [
-            'email_verified' => true,
-            'email_verified_at' => date('Y-m-d H:i:s')
+            'is_verified' => true,
+            'updated_at' => date('Y-m-d H:i:s')
         ]);
 
         return redirect()->to('/login')->with('success', 'Email verified successfully! You can now login to your account.');
@@ -208,7 +378,7 @@ class RegisterController extends BaseController
             return redirect()->back()->with('error', 'Email not found.');
         }
 
-        if ($user['email_verified']) {
+        if ($user['is_verified']) {
             return redirect()->back()->with('info', 'Email is already verified.');
         }
 
@@ -233,11 +403,14 @@ class RegisterController extends BaseController
             ]);
         }
 
-        $exists = $this->userModel->where('email', $email)->first();
+        $existsInUsers = $this->userModel->where('email', $email)->first();
+        $existsInPending = $this->pendingModel->where('email', $email)->first();
 
+        $exists = $existsInUsers || $existsInPending;
+        
         return $this->response->setJSON([
             'available' => !$exists,
-            'message' => $exists ? 'Email is already registered' : 'Email is available'
+            'message' => $exists ? 'Email sudah terdaftar' : 'Email tersedia'
         ]);
     }
 
@@ -253,7 +426,7 @@ class RegisterController extends BaseController
 
         $stats = [
             'total_users' => $this->userModel->countAll(),
-            'verified_users' => $this->userModel->where('email_verified', true)->countAllResults(),
+            'verified_users' => $this->userModel->where('is_verified', true)->countAllResults(),
             'presenters' => $this->userModel->where('role', 'presenter')->countAllResults(),
             'audience' => $this->userModel->where('role', 'audience')->countAllResults(),
             'reviewers' => $this->userModel->where('role', 'reviewer')->countAllResults(),
@@ -296,12 +469,46 @@ class RegisterController extends BaseController
 }
 
     /**
-     * Generate verification token
+     * Generate 6-digit verification code
+     */
+    private function generateVerificationCode()
+    {
+        return str_pad(mt_rand(0, 999999), 6, '0', STR_PAD_LEFT);
+    }
+
+
+    /**
+     * Send verification code via email
+     */
+    private function sendVerificationCode($email, $name, $code)
+    {
+        try {
+            $emailService = new EmailService();
+            
+            $result = $emailService->sendVerificationCode($email, $name, $code, 1);
+            
+            if ($result['success']) {
+                log_message('info', "Verification code sent successfully to: {$email}");
+                return true;
+            } else {
+                log_message('error', "Failed to send verification code: " . $result['message']);
+                return false;
+            }
+            
+        } catch (\Exception $e) {
+            log_message('error', 'Verification code email error: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Generate verification token (old method - keep for backward compatibility)
      */
     private function generateVerificationToken($userId)
     {
-        // Simple token generation (you might want to use JWT or more secure method)
-        return base64_encode($userId . '|' . time() . '|' . bin2hex(random_bytes(16)));
+        // URL-safe token generation without = characters
+        $data = $userId . '|' . time() . '|' . bin2hex(random_bytes(16));
+        return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
     }
 
     /**
@@ -310,6 +517,8 @@ class RegisterController extends BaseController
     private function decodeVerificationToken($token)
     {
         try {
+            // Restore URL-safe base64
+            $token = str_pad(strtr($token, '-_', '+/'), strlen($token) % 4, '=', STR_PAD_RIGHT);
             $decoded = base64_decode($token);
             $parts = explode('|', $decoded);
             

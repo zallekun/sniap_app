@@ -17,6 +17,7 @@
 
                 <!-- Login Form -->
                 <form id="loginForm" method="POST">
+                    <?= csrf_field() ?>
                     <div class="mb-3">
                         <label for="email" class="form-label">Email</label>
                         <div class="input-group">
@@ -190,62 +191,69 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Login form submission
-    loginForm.addEventListener('submit', async function(e) {
+    // Login form submission - Use web route instead of API
+    loginForm.addEventListener('submit', function(e) {
         e.preventDefault();
         
         const submitBtn = loginForm.querySelector('button[type="submit"]');
         showLoading(submitBtn);
 
-        const formData = {
-            email: emailField.value,
-            password: passwordField.value
-        };
+        // Create form data for web submission
+        const formData = new FormData();
+        formData.append('email', emailField.value);
+        formData.append('password', passwordField.value);
+        
+        if (document.getElementById('remember').checked) {
+            formData.append('remember_me', '1');
+        }
 
-        try {
-            const { response, data } = await apiRequest('/api/v1/auth/login', {
-                method: 'POST',
-                body: JSON.stringify(formData)
-            });
+        // Add CSRF token
+        const csrfToken = document.querySelector('input[name="<?= csrf_token() ?>"]');
+        if (csrfToken) {
+            formData.append('<?= csrf_token() ?>', csrfToken.value);
+        }
 
-            if (data.status === 'success') {
-                // Store token and user info
-                localStorage.setItem('snia_token', data.data.token);
-                localStorage.setItem('snia_user', JSON.stringify(data.data.user));
-
-                showAlert('Login berhasil! Mengarahkan ke dashboard...', 'success');
-                
-                // Redirect based on role
-                setTimeout(() => {
-                    const userRole = data.data.user.role;
-                    if (userRole === 'admin') {
-                        window.location.href = '/admin/dashboard';
-                    } else {
-                        window.location.href = '/dashboard';
-                    }
-                }, 1500);
-            } else {
-                // Handle login errors
-                if (data.errors) {
-                    for (const [field, message] of Object.entries(data.errors)) {
-                        const fieldElement = document.getElementById(field);
-                        if (fieldElement) {
-                            fieldElement.classList.add('is-invalid');
-                            const feedback = fieldElement.parentNode.nextElementSibling;
-                            if (feedback && feedback.classList.contains('invalid-feedback')) {
-                                feedback.textContent = message;
-                            }
-                        }
-                    }
-                }
-                showAlert(data.message || 'Email atau password salah', 'danger');
+        // Submit to web login route
+        fetch('/login', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
             }
-        } catch (error) {
+        })
+        .then(response => {
+            if (response.redirected) {
+                // Login successful - redirect to dashboard
+                showAlert('Login berhasil! Mengarahkan ke dashboard...', 'success');
+                setTimeout(() => {
+                    window.location.href = response.url;
+                }, 1000);
+            } else {
+                return response.text();
+            }
+        })
+        .then(html => {
+            if (html) {
+                // Parse response for error messages
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const errorAlert = doc.querySelector('.alert-danger');
+                
+                if (errorAlert) {
+                    const errorMessage = errorAlert.textContent.trim();
+                    showAlert(errorMessage, 'danger');
+                } else {
+                    showAlert('Login gagal. Silakan periksa email dan password Anda.', 'danger');
+                }
+            }
+        })
+        .catch(error => {
             console.error('Login error:', error);
             showAlert('Terjadi kesalahan sistem. Silakan coba lagi.', 'danger');
-        } finally {
+        })
+        .finally(() => {
             hideLoading(submitBtn);
-        }
+        });
     });
 
     // Remove validation classes on input
@@ -255,28 +263,26 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Check if user is already logged in
+    // Disable auto-redirect temporarily to fix loop
+    console.log('Login page loaded, auto-redirect disabled');
+    
+    // Simple check if user is already logged in (but don't auto-redirect)
     const token = localStorage.getItem('snia_token');
-    if (token) {
-        // Verify token validity
-        apiRequest('/api/v1/auth/profile').then(({ data }) => {
-            if (data.status === 'success') {
-                const userRole = data.data.role;
-                if (userRole === 'admin') {
-                    window.location.href = '/admin/dashboard';
-                } else {
-                    window.location.href = '/dashboard';
-                }
-            } else {
-                // Token invalid, remove it
-                localStorage.removeItem('snia_token');
-                localStorage.removeItem('snia_user');
-            }
-        }).catch(() => {
-            // Token invalid, remove it
-            localStorage.removeItem('snia_token');
-            localStorage.removeItem('snia_user');
-        });
+    const storedUser = JSON.parse(localStorage.getItem('snia_user') || '{}');
+    
+    if (token && storedUser.email) {
+        console.log('User data found in localStorage:', storedUser);
+        // Show a link instead of auto-redirect to prevent loops
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-info mt-3';
+        alertDiv.innerHTML = `
+            <i class="fas fa-info-circle"></i>
+            Anda sudah login sebagai <strong>${storedUser.email}</strong>. 
+            <a href="/dashboard" class="btn btn-sm btn-primary ms-2">
+                <i class="fas fa-tachometer-alt"></i> Ke Dashboard
+            </a>
+        `;
+        document.querySelector('.card-body').prepend(alertDiv);
     }
 });
 </script>

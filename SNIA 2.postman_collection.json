@@ -1,67 +1,12 @@
 {
 	"info": {
-		"_postman_id": "snia-api-collection-2025",
-		"name": "SNIA Conference API Collection",
+		"_postman_id": "5ad76ca3-4556-4c8c-b0bd-7a77cd1db936",
+		"name": "SNIA 2",
 		"description": "Complete API collection for SNIA (Seminar Nasional Informatika) conference system with all endpoints for testing",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "47320286",
+		"_collection_link": "https://zallekun-9010215.postman.co/workspace/Rezal-Suryadi-Putra's-Workspace~efb0de42-226e-4450-8c7d-8ce6939f2aad/collection/47320286-5ad76ca3-4556-4c8c-b0bd-7a77cd1db936?action=share&source=collection_link&creator=47320286"
 	},
-	"variable": [
-		{
-			"key": "base_url",
-			"value": "http://localhost:8080/api/v1",
-			"type": "string"
-		},
-		{
-			"key": "jwt_token",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "user_id",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "registration_id",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "abstract_id",
-			"value": "",
-			"type": "string"
-		}
-	],
-	"auth": {
-		"type": "bearer",
-		"bearer": [
-			{
-				"key": "token",
-				"value": "{{jwt_token}}",
-				"type": "string"
-			}
-		]
-	},
-	"event": [
-		{
-			"listen": "prerequest",
-			"script": {
-				"type": "text/javascript",
-				"exec": [
-					""
-				]
-			}
-		},
-		{
-			"listen": "test",
-			"script": {
-				"type": "text/javascript",
-				"exec": [
-					""
-				]
-			}
-		}
-	],
 	"item": [
 		{
 			"name": "🔐 Authentication",
@@ -106,7 +51,8 @@
 								"register"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Login User",
@@ -149,7 +95,8 @@
 								"login"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Get User Profile",
@@ -171,7 +118,8 @@
 								"profile"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Verify Email",
@@ -197,7 +145,8 @@
 								"verify"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Refresh Token",
@@ -219,7 +168,8 @@
 								"refresh"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Logout",
@@ -241,7 +191,8 @@
 								"logout"
 							]
 						}
-					}
+					},
+					"response": []
 				}
 			]
 		},
@@ -272,7 +223,8 @@
 								}
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Get Event Details",
@@ -289,7 +241,8 @@
 								"1"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Get Event Schedule",
@@ -307,7 +260,8 @@
 								"schedule"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Get Upcoming Events",
@@ -324,7 +278,8 @@
 								"upcoming"
 							]
 						}
-					}
+					},
+					"response": []
 				}
 			]
 		},
@@ -375,7 +330,8 @@
 								"register"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Get My Registrations",
@@ -396,7 +352,8 @@
 								"registrations"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Get Registration Details",
@@ -418,7 +375,8 @@
 								"{{registration_id}}"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Get Registration Stats",
@@ -440,7 +398,8 @@
 								"stats"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Cancel Registration",
@@ -462,7 +421,8 @@
 								"{{registration_id}}"
 							]
 						}
-					}
+					},
+					"response": []
 				}
 			]
 		},
@@ -529,7 +489,8 @@
 								"abstracts"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Get My Abstracts",
@@ -550,7 +511,8 @@
 								"abstracts"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Get Abstract Details",
@@ -572,7 +534,8 @@
 								"{{abstract_id}}"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Submit Abstract Revision",
@@ -615,7 +578,8 @@
 								"revision"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Download Abstract File",
@@ -638,7 +602,8 @@
 								"download"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Get Abstract Categories",
@@ -660,7 +625,16 @@
 								"categories"
 							]
 						}
-					}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
 				}
 			]
 		},
@@ -687,7 +661,8 @@
 								"assigned"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Submit Review",
@@ -716,7 +691,8 @@
 								"reviews"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Get Review Details",
@@ -738,7 +714,8 @@
 								"1"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Get Reviewer Dashboard",
@@ -760,7 +737,8 @@
 								"dashboard"
 							]
 						}
-					}
+					},
+					"response": []
 				}
 			]
 		},
@@ -794,7 +772,8 @@
 								"payments"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Get Payment History",
@@ -815,7 +794,8 @@
 								"payments"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Get Payment Details",
@@ -837,7 +817,8 @@
 								"1"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Get Payment Stats",
@@ -859,7 +840,8 @@
 								"stats"
 							]
 						}
-					}
+					},
+					"response": []
 				}
 			]
 		},
@@ -887,7 +869,8 @@
 								"{{abstract_id}}"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Download LOA",
@@ -910,7 +893,8 @@
 								"{{abstract_id}}"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Get My LOAs",
@@ -932,7 +916,8 @@
 								"my-loas"
 							]
 						}
-					}
+					},
+					"response": []
 				}
 			]
 		},
@@ -967,7 +952,8 @@
 								"generate"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Get My QR Codes",
@@ -989,7 +975,8 @@
 								"my-codes"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Get QR Code Details",
@@ -1011,7 +998,8 @@
 								"1"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Scan QR Code (Admin/Staff)",
@@ -1041,7 +1029,8 @@
 								"scan"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Get Scan History",
@@ -1073,7 +1062,8 @@
 								}
 							]
 						}
-					}
+					},
+					"response": []
 				}
 			]
 		},
@@ -1099,7 +1089,8 @@
 								"certificates"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Request Certificate",
@@ -1129,7 +1120,8 @@
 								"request"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Download Certificate",
@@ -1152,7 +1144,8 @@
 								"download"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Verify Certificate (Public)",
@@ -1170,7 +1163,8 @@
 								"SNIA-2025-000001-ABCD"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Issue Certificate (Admin)",
@@ -1201,7 +1195,8 @@
 								"issue"
 							]
 						}
-					}
+					},
+					"response": []
 				}
 			]
 		},
@@ -1236,7 +1231,8 @@
 								"apply"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Check Voucher Validity",
@@ -1259,7 +1255,8 @@
 								"GRATIS100"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Get My Voucher Usage",
@@ -1281,7 +1278,8 @@
 								"my-usage"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Get All Vouchers (Admin)",
@@ -1302,7 +1300,8 @@
 								"vouchers"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Create Voucher (Admin)",
@@ -1331,7 +1330,8 @@
 								"vouchers"
 							]
 						}
-					}
+					},
+					"response": []
 				}
 			]
 		},
@@ -1358,7 +1358,8 @@
 								"dashboard"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Get All Users",
@@ -1394,7 +1395,8 @@
 								}
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Get All Abstracts",
@@ -1426,7 +1428,8 @@
 								}
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Assign Reviewer to Abstract",
@@ -1458,7 +1461,8 @@
 								"assign"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Export Users (CSV)",
@@ -1487,7 +1491,8 @@
 								}
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Export Registrations (JSON)",
@@ -1516,7 +1521,40 @@
 								}
 							]
 						}
-					}
+					},
+					"response": []
+				},
+				{
+					"name": "setting",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "detail progress",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "detail progress tracking",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "detail progress filter name",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
 				}
 			]
 		},
@@ -1543,7 +1581,8 @@
 								"config"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Update System Configuration",
@@ -1573,7 +1612,8 @@
 								"config"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Toggle Registration (Open)",
@@ -1596,7 +1636,8 @@
 								"open"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Toggle Registration (Close)",
@@ -1619,7 +1660,8 @@
 								"close"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Toggle Abstract Submission (Open)",
@@ -1642,7 +1684,8 @@
 								"open"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Set Event Mode (Offline)",
@@ -1673,7 +1716,8 @@
 								"offline"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Set Event Mode (Online)",
@@ -1704,7 +1748,8 @@
 								"online"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Set Deadlines",
@@ -1734,7 +1779,8 @@
 								"deadlines"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Configure Email Settings",
@@ -1764,7 +1810,8 @@
 								"email-config"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Get System Status",
@@ -1786,7 +1833,8 @@
 								"status"
 							]
 						}
-					}
+					},
+					"response": []
 				}
 			]
 		},
@@ -1807,7 +1855,8 @@
 								"health"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Database Health",
@@ -1824,7 +1873,8 @@
 								"database"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "JWT Health",
@@ -1841,7 +1891,8 @@
 								"jwt"
 							]
 						}
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "API Version",
@@ -1857,7 +1908,8 @@
 								"version"
 							]
 						}
-					}
+					},
+					"response": []
 				}
 			]
 		},
@@ -1888,10 +1940,67 @@
 								"midtrans"
 							]
 						}
-					}
+					},
+					"response": []
 				}
 			]
 		}
 	],
-	"protocolProfileBehavior": {}
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{jwt_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080/api/v1",
+			"type": "string"
+		},
+		{
+			"key": "jwt_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "user_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "registration_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "abstract_id",
+			"value": "",
+			"type": "string"
+		}
+	]
 }

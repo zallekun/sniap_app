@@ -108,15 +108,15 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <div class="d-grid">
-                                    <button class="btn btn-outline-primary" onclick="showRegistrationForm()">
+                                    <button class="btn btn-outline-primary" onclick="loadRegistrationForm()">
                                         <i class="fas fa-ticket-alt me-2"></i>
-                                        Daftar sebagai Peserta
+                                        Daftar Event
                                     </button>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="d-grid">
-                                    <button class="btn btn-outline-success" onclick="viewSchedule()">
+                                    <button class="btn btn-outline-success" onclick="loadEventSchedule()">
                                         <i class="fas fa-calendar me-2"></i>
                                         Jadwal Acara
                                     </button>
@@ -124,7 +124,7 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="d-grid">
-                                    <button class="btn btn-outline-info" onclick="viewMyQRCodes()">
+                                    <button class="btn btn-outline-info" onclick="loadMyQRCodes()">
                                         <i class="fas fa-qrcode me-2"></i>
                                         QR Code Saya
                                     </button>
@@ -132,11 +132,42 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="d-grid">
-                                    <button class="btn btn-outline-warning" onclick="viewCertificates()">
+                                    <button class="btn btn-outline-warning" onclick="loadMyCertificates()">
                                         <i class="fas fa-certificate me-2"></i>
                                         Sertifikat Saya
                                     </button>
                                 </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-grid">
+                                    <button class="btn btn-outline-secondary" onclick="loadPaymentHistory()">
+                                        <i class="fas fa-credit-card me-2"></i>
+                                        Riwayat Pembayaran
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-grid">
+                                    <button class="btn btn-outline-dark" onclick="loadVoucherSection()">
+                                        <i class="fas fa-ticket-alt me-2"></i>
+                                        Voucher Saya
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Event Registration Section -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="fas fa-calendar-check me-2"></i>Event Tersedia</h6>
+                    </div>
+                    <div class="card-body">
+                        <div id="availableEvents">
+                            <div class="text-center py-3">
+                                <div class="spinner-border text-primary" role="status"></div>
+                                <div class="mt-2">Memuat event...</div>
                             </div>
                         </div>
                     </div>
@@ -241,38 +272,43 @@
 <?= $this->section('scripts') ?>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Check authentication - try JWT first, then session
-    const token = localStorage.getItem('snia_token');
-    const storedUser = JSON.parse(localStorage.getItem('snia_user') || '{}');
-
-    if (token) {
-        // User has JWT token, verify it and load data
-        verifyTokenAndLoadData();
-    } else {
-        // Check if server-side session exists (from PHP)
-        const serverUser = <?= json_encode($user ?? null) ?>;
-        if (serverUser) {
-            // User logged in via server session, populate localStorage
-            const userData = {
-                id: serverUser.id,
-                email: serverUser.email,
-                first_name: serverUser.first_name,
-                last_name: serverUser.last_name,
-                role: serverUser.role,
-                institution: serverUser.institution,
-                phone: serverUser.phone
-            };
-            localStorage.setItem('snia_user', JSON.stringify(userData));
-            loadDashboardFromSession(userData);
-        } else {
-            // No authentication found
-            window.location.href = '/login';
-            return;
+    console.log('Dashboard loading...');
+    
+    // Use server-side session data (primary source)
+    const serverUser = <?= json_encode($user ?? null) ?>;
+    
+    if (serverUser) {
+        console.log('Using server session data:', serverUser);
+        
+        // Load dashboard with server session data
+        updateUserProfile(serverUser);
+        loadDashboardContent(serverUser);
+        
+        // Load additional data
+        loadRecentActivities();
+        loadNotifications();
+        
+        // Load registrations data
+        loadRegistrations();
+        
+        // For audience users, auto-load available events
+        if (serverUser.role === 'audience') {
+            loadRegistrationForm();
         }
+    } else {
+        // No session found, redirect to login
+        console.log('No session found, redirecting to login');
+        window.location.href = '/login';
     }
 });
 
 async function verifyTokenAndLoadData() {
+    // Prevent infinite loops by adding a flag
+    if (window.verificationInProgress) {
+        return;
+    }
+    window.verificationInProgress = true;
+    
     try {
         const { response, data } = await apiRequest('/api/v1/auth/profile');
         
@@ -281,6 +317,7 @@ async function verifyTokenAndLoadData() {
             localStorage.setItem('snia_user', JSON.stringify(data.data));
             loadDashboardFromAPI(data.data);
         } else {
+            console.error('Token invalid:', data);
             // Token invalid, clear and redirect
             localStorage.removeItem('snia_token');
             localStorage.removeItem('snia_user');
@@ -288,28 +325,66 @@ async function verifyTokenAndLoadData() {
         }
     } catch (error) {
         console.error('Token verification failed:', error);
-        localStorage.removeItem('snia_token');
-        localStorage.removeItem('snia_user');
-        window.location.href = '/login';
+        // If it's a fetch error, use stored user data as fallback
+        const storedUser = JSON.parse(localStorage.getItem('snia_user') || '{}');
+        if (storedUser.email) {
+            console.log('Using cached user data');
+            loadDashboardFromAPI(storedUser);
+        } else {
+            localStorage.removeItem('snia_token');
+            localStorage.removeItem('snia_user');
+            window.location.href = '/login';
+        }
+    } finally {
+        window.verificationInProgress = false;
+    }
+}
+
+function loadDashboardContent(user) {
+    // Load dashboard content without API calls that might cause loops
+    console.log('Loading dashboard content for:', user.email);
+    
+    // Load basic UI components without external API calls
+    loadBasicStats(user);
+    loadBasicNotifications();
+}
+
+function loadBasicStats(user) {
+    // Load basic stats without API calls
+    const statsContainer = document.getElementById('statisticsContainer');
+    if (statsContainer) {
+        statsContainer.innerHTML = `
+            <div class="text-center py-3">
+                <p class="mb-0">Welcome, ${user.first_name}!</p>
+                <p class="text-muted small">Dashboard loaded successfully</p>
+            </div>
+        `;
+    }
+}
+
+function loadBasicNotifications() {
+    // Load basic notifications without API calls
+    const notificationsContainer = document.getElementById('notificationsList');
+    if (notificationsContainer) {
+        notificationsContainer.innerHTML = `
+            <div class="text-center py-3">
+                <i class="fas fa-check-circle text-success fa-2x mb-2"></i>
+                <p class="mb-0">No new notifications</p>
+            </div>
+        `;
     }
 }
 
 function loadDashboardFromSession(user) {
     // Update UI with session data
     updateUserProfile(user);
-    loadDashboardStats();
-    loadRegistrations();
-    loadRecentActivities();
-    loadNotifications();
+    loadDashboardContent(user);
 }
 
 function loadDashboardFromAPI(user) {
     // Update UI with API data
     updateUserProfile(user);
-    loadDashboardStats();
-    loadRegistrations();
-    loadRecentActivities();
-    loadNotifications();
+    loadDashboardContent(user);
 }
 
 function updateUserProfile(user) {
@@ -436,10 +511,16 @@ async function loadDashboardStats() {
 
 async function loadRegistrations() {
     try {
-        const { response, data } = await apiRequest('/api/v1/registrations');
+        const response = await fetch('/dashboard/registrations', {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+        const data = await response.json();
         const container = document.getElementById('registrationsList');
         
-        if (data.status === 'success' && data.data.length > 0) {
+        if (data.status === 'success' && data.data && data.data.length > 0) {
             let html = '';
             data.data.forEach(registration => {
                 const statusBadge = getStatusBadge(registration.registration_status);
@@ -449,12 +530,23 @@ async function loadRegistrations() {
                     <div class="mb-3 p-3 border rounded">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
-                                <h6 class="mb-1">${registration.registration_type || 'Peserta'}</h6>
+                                <h6 class="mb-1">${registration.event_name || 'Event'}</h6>
+                                <p class="mb-1 small">${registration.registration_type || 'audience'}</p>
                                 <small class="text-muted">Terdaftar: ${formatDate(registration.created_at)}</small>
                             </div>
                             <div class="text-end">
                                 ${statusBadge}
                                 ${paymentBadge}
+                                <div class="mt-2">
+                                    <button class="btn btn-outline-primary btn-sm me-1" onclick="viewRegistration(${registration.id})">
+                                        <i class="fas fa-eye"></i> Detail
+                                    </button>
+                                    ${registration.payment_status === 'pending' ? 
+                                        `<button class="btn btn-outline-success btn-sm" onclick="payRegistration(${registration.id})">
+                                            <i class="fas fa-credit-card"></i> Bayar
+                                        </button>` : ''
+                                    }
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -466,7 +558,55 @@ async function loadRegistrations() {
         }
     } catch (error) {
         console.error('Error loading registrations:', error);
-        document.getElementById('registrationsList').innerHTML = '<p class="text-danger text-center">Gagal memuat data</p>';
+        if (container) {
+            container.innerHTML = '<p class="text-danger text-center">Gagal memuat data pendaftaran</p>';
+        }
+    }
+}
+
+// Alias for consistency
+async function loadMyRegistrations() {
+    return await loadRegistrations();
+}
+
+// View registration details
+async function viewRegistration(registrationId) {
+    try {
+        const { response, data } = await apiRequest(`/api/v1/registrations/${registrationId}`);
+        
+        if (data.status === 'success') {
+            showAlert('Detail pendaftaran berhasil dimuat', 'success');
+            console.log('Registration details:', data.data);
+        } else {
+            showAlert('Gagal memuat detail pendaftaran', 'danger');
+        }
+    } catch (error) {
+        console.error('Error loading registration details:', error);
+        showAlert('Terjadi kesalahan saat memuat detail', 'danger');
+    }
+}
+
+// Pay for registration
+async function payRegistration(registrationId) {
+    try {
+        const { response, data } = await apiRequest('/api/v1/payments', {
+            method: 'POST',
+            body: JSON.stringify({
+                registration_id: registrationId,
+                payment_method: 'midtrans',
+                amount: 500000 // This should come from registration data
+            })
+        });
+        
+        if (data.status === 'success') {
+            showAlert('Pembayaran berhasil dibuat', 'success');
+            loadRegistrations(); // Refresh the list
+        } else {
+            showAlert(data.message || 'Gagal membuat pembayaran', 'danger');
+        }
+    } catch (error) {
+        console.error('Payment error:', error);
+        showAlert('Terjadi kesalahan saat memproses pembayaran', 'danger');
     }
 }
 
@@ -640,29 +780,119 @@ function formatDate(dateString) {
     });
 }
 
-// Action functions
-function showRegistrationForm() {
-    showAlert('Fitur pendaftaran akan segera tersedia', 'info');
+// Action functions - Updated to use real API endpoints
+
+// Load available events for registration
+async function loadRegistrationForm() {
+    try {
+        const response = await fetch('/dashboard/events', {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+        const data = await response.json();
+        
+        if (data.status === 'success' && data.data) {
+            let html = '<div class="row">';
+            data.data.forEach(event => {
+                html += `
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h6 class="card-title">${event.title || 'Event'}</h6>
+                                <p class="card-text small">${event.description || 'Tidak ada deskripsi'}</p>
+                                <p class="small text-muted">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    ${formatDate(event.event_date)}
+                                </p>
+                                <button class="btn btn-primary btn-sm" onclick="registerForEvent(${event.id})">
+                                    <i class="fas fa-plus me-1"></i>Daftar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            
+            document.getElementById('availableEvents').innerHTML = html;
+            showAlert('Event tersedia dimuat berhasil', 'success');
+        } else {
+            document.getElementById('availableEvents').innerHTML = '<p class="text-muted text-center">Tidak ada event tersedia</p>';
+        }
+    } catch (error) {
+        console.error('Error loading events:', error);
+        document.getElementById('availableEvents').innerHTML = '<p class="text-danger text-center">Gagal memuat event</p>';
+        showAlert('Gagal memuat daftar event', 'danger');
+    }
 }
 
+// Register for specific event
+async function registerForEvent(eventId) {
+    try {
+        const formData = new FormData();
+        formData.append('event_id', eventId);
+        formData.append('registration_type', 'audience');
+        
+        const response = await fetch('/dashboard/register-event', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            showAlert('Pendaftaran berhasil!', 'success');
+            loadMyRegistrations(); // Refresh registrations list
+        } else {
+            showAlert(data.message || 'Pendaftaran gagal', 'danger');
+        }
+    } catch (error) {
+        console.error('Registration error:', error);
+        showAlert('Terjadi kesalahan saat mendaftar', 'danger');
+    }
+}
+
+// Load event schedule - Placeholder for now
+async function loadEventSchedule() {
+    showAlert('Fitur jadwal acara akan segera tersedia', 'info');
+}
+
+// Load my QR codes - Placeholder for now  
+async function loadMyQRCodes() {
+    showAlert('Fitur QR Code akan segera tersedia', 'info');
+}
+
+// Load my certificates - Placeholder for now
+async function loadMyCertificates() {
+    showAlert('Fitur sertifikat akan segera tersedia', 'info');
+}
+
+// Download certificate - Placeholder for now
+async function downloadCertificate(certId) {
+    showAlert('Fitur download sertifikat akan segera tersedia', 'info');
+}
+
+// Load payment history - Placeholder for now
+async function loadPaymentHistory() {
+    showAlert('Fitur riwayat pembayaran akan segera tersedia', 'info');
+}
+
+// Load voucher section - Placeholder for now
+async function loadVoucherSection() {
+    showAlert('Fitur voucher akan segera tersedia', 'info');
+}
+
+// Presenter functions (unchanged)
 function showAbstractForm() {
     showAlert('Fitur submit abstract akan segera tersedia', 'info');
 }
 
 function viewMyAbstracts() {
     showAlert('Fitur kelola abstract akan segera tersedia', 'info');
-}
-
-function viewCertificates() {
-    showAlert('Fitur sertifikat akan segera tersedia', 'info');
-}
-
-function viewSchedule() {
-    showAlert('Fitur jadwal acara akan segera tersedia', 'info');
-}
-
-function viewMyQRCodes() {
-    showAlert('Fitur QR Code akan segera tersedia', 'info');
 }
 
 function editProfile() {
@@ -678,9 +908,24 @@ function downloadAbstract(id) {
 }
 
 function confirmLogout() {
+    // Clear localStorage
     localStorage.removeItem('snia_token');
     localStorage.removeItem('snia_user');
-    window.location.href = '/login';
+    
+    // Call server logout to destroy session
+    fetch('/logout', {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    }).then(() => {
+        // Redirect to login page
+        window.location.href = '/login';
+    }).catch((error) => {
+        console.error('Logout error:', error);
+        // Still redirect even if logout fails
+        window.location.href = '/login';
+    });
 }
 
 // Add logout functionality to navbar

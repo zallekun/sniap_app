@@ -17,7 +17,50 @@ class EmailService
     }
 
     /**
-     * Send verification email to new user with dynamic event data
+     * Send verification code email
+     */
+    public function sendVerificationCode($email, $name, $code, $eventId = 1)
+    {
+        try {
+            // Get event data
+            $eventData = $this->getEventData($eventId);
+            
+            $subject = "Kode Verifikasi Email - {$eventData['title']}";
+            
+            $template = view('emails/verification_code', [
+                'name' => $name,
+                'code' => $code,
+                'eventData' => $eventData,
+                'expiresIn' => '15 menit'
+            ]);
+            
+            $this->email->setTo($email);
+            $this->email->setSubject($subject);
+            $this->email->setMessage($template);
+            
+            if ($this->email->send()) {
+                return [
+                    'success' => true,
+                    'message' => 'Verification code sent successfully'
+                ];
+            } else {
+                return [
+                    'success' => false,
+                    'message' => 'Failed to send verification code: ' . $this->email->printDebugger()
+                ];
+            }
+            
+        } catch (\Exception $e) {
+            log_message('error', 'Verification code email failed: ' . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'Email service error: ' . $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * Send verification email to new user with dynamic event data (old method)
      */
     public function sendVerificationEmail($userEmail, $userName, $verificationToken, $eventId = 1)
     {

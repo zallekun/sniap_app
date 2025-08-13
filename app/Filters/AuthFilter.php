@@ -97,11 +97,17 @@ class AuthFilter implements FilterInterface
         $userModel = new \App\Models\UserModel();
         $user = $userModel->where('remember_token', $token)->first();
 
-        if (!$user || !$user['is_active']) {
-            // Invalid token or inactive user, clear cookie
+        if (!$user) {
+            // Invalid token, clear cookie
             setcookie('remember_token', '', time() - 3600, '/');
             return false;
         }
+        
+        // Note: is_active column doesn't exist in current schema
+        // if (!$user['is_active']) {
+        //     setcookie('remember_token', '', time() - 3600, '/');
+        //     return false;
+        // }
 
         // Auto-login user
         $sessionData = [
@@ -138,6 +144,7 @@ class AuthFilter implements FilterInterface
         $userModel = new \App\Models\UserModel();
         $user = $userModel->find($userId);
 
-        return $user && $user['is_active'];
+        // Note: is_active column doesn't exist in current schema, so just check user exists
+        return $user ? true : false;
     }
 }

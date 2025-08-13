@@ -67,16 +67,21 @@ class AuthController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Invalid password.');
         }
 
-        // Check if user is active
-        if (!$user['is_active']) {
-            return redirect()->back()->withInput()->with('error', 'Account is inactive. Please contact administrator.');
+        // Note: is_active column doesn't exist in current schema, so skip this check
+        // if (!$user['is_active']) {
+        //     return redirect()->back()->withInput()->with('error', 'Account is inactive. Please contact administrator.');
+        // }
+
+        // Check if email is verified
+        if (!$user['is_verified']) {
+            return redirect()->back()->withInput()->with('error', 'Please verify your email address before logging in. Check your email for verification instructions.');
         }
 
         // Set session data
         $sessionData = [
             'user_id' => $user['id'],
             'user_email' => $user['email'],
-            'user_name' => $user['full_name'],
+            'user_name' => trim($user['first_name'] . ' ' . $user['last_name']),
             'user_role' => $user['role'],
             'is_logged_in' => true
         ];
@@ -88,10 +93,15 @@ class AuthController extends BaseController
             $this->setRememberMeCookie($user['id']);
         }
 
-        // Update last login
-        $this->userModel->update($user['id'], [
-            'last_login_at' => date('Y-m-d H:i:s')
-        ]);
+        // Update last login (only update if column exists)
+        try {
+            $this->userModel->update($user['id'], [
+                'updated_at' => date('Y-m-d H:i:s')
+            ]);
+        } catch (\Exception $e) {
+            // Column might not exist, ignore
+            log_message('warning', 'Could not update last login: ' . $e->getMessage());
+        }
 
         // Redirect based on role
         $redirectUrl = $this->getRedirectUrl($user['role']);

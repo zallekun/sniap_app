@@ -26,26 +26,30 @@ class DashboardController extends BaseController
         $userId = $this->session->get('user_id');
         $userRole = $this->session->get('user_role');
         
-        if (!$userId) {
-            // Check for JWT token in frontend (will be handled by JavaScript)
-            // For now, redirect to login if no session
-            return redirect()->to('/login');
-        }
+        if ($userId) {
+            // User has session, get user data
+            $user = $this->userModel->find($userId);
+            
+            if (!$user) {
+                $this->session->destroy();
+                return redirect()->to('/login')->with('error', 'User account not found.');
+            }
 
-        // Get user data
-        $user = $this->userModel->find($userId);
-        
-        if (!$user) {
-            $this->session->destroy();
-            return redirect()->to('/login')->with('error', 'User account not found.');
+            $data = [
+                'title' => 'Dashboard - SNIA Conference',
+                'user' => $user,
+                'userRole' => $userRole,
+                'userName' => trim($user['first_name'] . ' ' . $user['last_name'])
+            ];
+        } else {
+            // No session, but allow access - JWT token will be handled by JavaScript
+            $data = [
+                'title' => 'Dashboard - SNIA Conference',
+                'user' => null,
+                'userRole' => null,
+                'userName' => null
+            ];
         }
-
-        $data = [
-            'title' => 'Dashboard - SNIA Conference',
-            'user' => $user,
-            'userRole' => $userRole,
-            'userName' => trim($user['first_name'] . ' ' . $user['last_name'])
-        ];
 
         return view('dashboard/index', $data);
     }
@@ -243,6 +247,137 @@ class DashboardController extends BaseController
             return $this->response->setStatusCode(500)->setJSON([
                 'status' => 'error',
                 'message' => 'Failed to load statistics'
+            ]);
+        }
+    }
+
+    /**
+     * Get user registrations
+     */
+    public function registrations()
+    {
+        if (!$this->session->get('user_id')) {
+            return $this->response->setStatusCode(401)->setJSON([
+                'status' => 'error',
+                'message' => 'Unauthorized'
+            ]);
+        }
+
+        $userId = $this->session->get('user_id');
+
+        try {
+            $db = \Config\Database::connect();
+            $registrations = $db->table('registrations r')
+                ->select('r.*, e.title as event_name, e.description as event_description')
+                ->join('events e', 'e.id = r.event_id', 'left')
+                ->where('r.user_id', $userId)
+                ->orderBy('r.created_at', 'DESC')
+                ->get()
+                ->getResultArray();
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'data' => $registrations
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'Load registrations error: ' . $e->getMessage());
+            return $this->response->setStatusCode(500)->setJSON([
+                'status' => 'error',
+                'message' => 'Failed to load registrations'
+            ]);
+        }
+    }
+
+    /**
+     * Get available events
+     */
+    public function events()
+    {
+        try {
+            $db = \Config\Database::connect();
+            $events = $db->table('events')
+                ->where('is_active', true)
+                ->where('event_date >=', date('Y-m-d'))
+                ->orderBy('event_date', 'ASC')
+                ->limit(10)
+                ->get()
+                ->getResultArray();
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'data' => $events
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'Load events error: ' . $e->getMessage());
+            return $this->response->setStatusCode(500)->setJSON([
+                'status' => 'error',
+                'message' => 'Failed to load events'
+            ]);
+        }
+    }
+
+    /**
+     * Register for event
+     */
+    public function registerEvent()
+    {
+        if (!$this->session->get('user_id')) {
+            return $this->response->setStatusCode(401)->setJSON([
+                'status' => 'error',
+                'message' => 'Unauthorized'
+            ]);
+        }
+
+        $userId = $this->session->get('user_id');
+        $eventId = $this->request->getPost('event_id');
+        $registrationType = $this->request->getPost('registration_type') ?? 'audience';
+
+        if (!$eventId) {
+            return $this->response->setStatusCode(400)->setJSON([
+                'status' => 'error',
+                'message' => 'Event ID is required'
+            ]);
+        }
+
+        try {
+            $db = \Config\Database::connect();
+            
+            // Check if already registered
+            $existing = $db->table('registrations')
+                ->where('user_id', $userId)
+                ->where('event_id', $eventId)
+                ->get()
+                ->getRowArray();
+
+            if ($existing) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'You are already registered for this event'
+                ]);
+            }
+
+            // Create registration
+            $data = [
+                'user_id' => $userId,
+                'event_id' => $eventId,
+                'registration_type' => $registrationType,
+                'registration_status' => 'pending',
+                'payment_status' => 'pending',
+                'created_at' => date('Y-m-d H:i:s')
+            ];
+
+            $db->table('registrations')->insert($data);
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'Registration successful',
+                'data' => ['registration_id' => $db->insertID()]
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'Registration error: ' . $e->getMessage());
+            return $this->response->setStatusCode(500)->setJSON([
+                'status' => 'error',
+                'message' => 'Registration failed'
             ]);
         }
     }

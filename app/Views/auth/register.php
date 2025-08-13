@@ -14,9 +14,29 @@
 
                 <!-- Alert Container -->
                 <div class="alert-container"></div>
+                
+                <!-- Show validation errors -->
+                <?php if (session('errors')): ?>
+                    <div class="alert alert-danger">
+                        <ul class="mb-0">
+                            <?php foreach (session('errors') as $error): ?>
+                                <li><?= esc($error) ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+                <?php endif; ?>
+                
+                <!-- Show success/error messages -->
+                <?php if (session('success')): ?>
+                    <div class="alert alert-success"><?= esc(session('success')) ?></div>
+                <?php endif; ?>
+                <?php if (session('error')): ?>
+                    <div class="alert alert-danger"><?= esc(session('error')) ?></div>
+                <?php endif; ?>
 
                 <!-- Registration Form -->
                 <form id="registerForm" method="POST">
+                    <?= csrf_field() ?>
                     <!-- Role Selection -->
                     <div class="mb-4">
                         <label class="form-label fw-bold">Pilih Jenis Peserta</label>
@@ -190,6 +210,40 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const submitBtn = form.querySelector('button[type="submit"]');
         showLoading(submitBtn);
+        
+        // DEBUG: Simple form submission without complex JS
+        if (true) {
+            // Check if role is selected
+            const roleSelected = document.querySelector('.role-option.selected');
+            if (!roleSelected) {
+                showAlert('Pilih jenis peserta terlebih dahulu', 'warning');
+                hideLoading(submitBtn);
+                return;
+            }
+            
+            // Add required fields and submit directly
+            if (!document.querySelector('input[name="terms"]')) {
+                let termsInput = document.createElement('input');
+                termsInput.type = 'hidden';
+                termsInput.name = 'terms';
+                termsInput.value = 'accepted';
+                form.appendChild(termsInput);
+            }
+            
+            // Add role field
+            if (!document.querySelector('input[name="role"]')) {
+                let roleInput = document.createElement('input');
+                roleInput.type = 'hidden';
+                roleInput.name = 'role';
+                roleInput.value = roleSelected.dataset.role;
+                form.appendChild(roleInput);
+            }
+            
+            form.action = '/register';
+            form.method = 'POST';
+            form.submit();
+            return;
+        }
 
         // Validate role selection
         if (!roleInput.value) {
@@ -220,50 +274,36 @@ document.addEventListener('DOMContentLoaded', function() {
         };
 
         try {
-            const { response, data } = await apiRequest('/api/v1/auth/register', {
-                method: 'POST',
-                body: JSON.stringify(formData)
+            // Submit form normally to allow CodeIgniter to handle redirects
+            showLoading(submitBtn);
+            showAlert('Memproses pendaftaran...', 'info');
+            
+            // Create hidden inputs for form data
+            Object.entries(formData).forEach(([key, value]) => {
+                let input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = key;
+                input.value = value;
+                form.appendChild(input);
             });
-
-            if (data.status === 'success') {
-                showAlert('Pendaftaran berhasil! Mengarahkan ke dashboard...', 'success');
-                
-                // Store token if provided in response
-                if (data.data && data.data.token) {
-                    localStorage.setItem('snia_token', data.data.token);
-                    localStorage.setItem('snia_user', JSON.stringify(data.data.user));
-                }
-                
-                // Reset form
-                form.reset();
-                roleOptions.forEach(opt => opt.classList.remove('selected'));
-                roleInput.value = '';
-                
-                // Redirect to dashboard after successful registration
-                setTimeout(() => {
-                    window.location.href = '/dashboard';
-                }, 1500);
-            } else {
-                // Handle validation errors
-                if (data.errors) {
-                    for (const [field, message] of Object.entries(data.errors)) {
-                        const fieldElement = document.getElementById(field);
-                        if (fieldElement) {
-                            fieldElement.classList.add('is-invalid');
-                            const feedback = fieldElement.parentNode.querySelector('.invalid-feedback');
-                            if (feedback) {
-                                feedback.textContent = message;
-                            }
-                        }
-                    }
-                }
-                showAlert(data.message || 'Terjadi kesalahan saat mendaftar', 'danger');
-            }
+            
+            // Add terms acceptance
+            let termsInput = document.createElement('input');
+            termsInput.type = 'hidden';
+            termsInput.name = 'terms';
+            termsInput.value = 'accepted';
+            form.appendChild(termsInput);
+            
+            // Submit the form normally (this will trigger redirect)
+            form.action = '/register';
+            form.method = 'POST';
+            form.submit();
         } catch (error) {
             console.error('Registration error:', error);
             showAlert('Terjadi kesalahan sistem. Silakan coba lagi.', 'danger');
         } finally {
-            hideLoading(submitBtn);
+            // Don't hide loading since we're redirecting
+            // hideLoading(submitBtn);
         }
     });
 

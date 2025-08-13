@@ -35,12 +35,6 @@
             border: none;
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
         }
 
         .btn-primary {
@@ -49,12 +43,6 @@
             border-radius: 25px;
             padding: 12px 30px;
             font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
         }
 
         .btn-outline-primary {
@@ -63,19 +51,16 @@
             border-radius: 25px;
             padding: 12px 30px;
             font-weight: 600;
-            transition: all 0.3s ease;
         }
 
         .btn-outline-primary:hover {
             background: var(--primary-color);
-            transform: translateY(-2px);
         }
 
         .form-control {
             border-radius: 10px;
             border: 2px solid #e9ecef;
             padding: 12px 15px;
-            transition: all 0.3s ease;
         }
 
         .form-control:focus {
@@ -130,7 +115,6 @@
             padding: 20px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s ease;
             background: white;
         }
 
