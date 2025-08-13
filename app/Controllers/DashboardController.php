@@ -22,13 +22,15 @@ class DashboardController extends BaseController
      */
     public function index()
     {
-        // Check if user is logged in
-        if (!$this->session->get('user_id')) {
-            return redirect()->to('/login');
-        }
-
+        // Try to get user from session first
         $userId = $this->session->get('user_id');
         $userRole = $this->session->get('user_role');
+        
+        if (!$userId) {
+            // Check for JWT token in frontend (will be handled by JavaScript)
+            // For now, redirect to login if no session
+            return redirect()->to('/login');
+        }
 
         // Get user data
         $user = $this->userModel->find($userId);

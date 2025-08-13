@@ -241,65 +241,103 @@
 <?= $this->section('scripts') ?>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Check authentication
+    // Check authentication - try JWT first, then session
     const token = localStorage.getItem('snia_token');
-    const user = JSON.parse(localStorage.getItem('snia_user') || '{}');
+    const storedUser = JSON.parse(localStorage.getItem('snia_user') || '{}');
 
-    if (!token) {
-        window.location.href = '/login';
-        return;
+    if (token) {
+        // User has JWT token, verify it and load data
+        verifyTokenAndLoadData();
+    } else {
+        // Check if server-side session exists (from PHP)
+        const serverUser = <?= json_encode($user ?? null) ?>;
+        if (serverUser) {
+            // User logged in via server session, populate localStorage
+            const userData = {
+                id: serverUser.id,
+                email: serverUser.email,
+                first_name: serverUser.first_name,
+                last_name: serverUser.last_name,
+                role: serverUser.role,
+                institution: serverUser.institution,
+                phone: serverUser.phone
+            };
+            localStorage.setItem('snia_user', JSON.stringify(userData));
+            loadDashboardFromSession(userData);
+        } else {
+            // No authentication found
+            window.location.href = '/login';
+            return;
+        }
     }
-
-    // Load dashboard data
-    loadUserProfile();
-    loadDashboardStats();
-    loadRegistrations();
-    loadRecentActivities();
-    loadNotifications();
 });
 
-async function loadUserProfile() {
+async function verifyTokenAndLoadData() {
     try {
         const { response, data } = await apiRequest('/api/v1/auth/profile');
         
         if (data.status === 'success') {
-            const user = data.data;
-            
-            // Update profile info
-            document.getElementById('userName').textContent = user.first_name + ' ' + user.last_name;
-            document.getElementById('userRole').textContent = getRoleDisplayName(user.role);
-            document.getElementById('profileName').textContent = user.first_name + ' ' + user.last_name;
-            document.getElementById('profileEmail').textContent = user.email;
-            document.getElementById('profileInstitution').textContent = user.institution || 'Tidak ada data';
-            
-            // Update role icon
-            const roleIcon = document.getElementById('roleIcon');
-            const roleIcons = {
-                'presenter': 'fas fa-microphone',
-                'audience': 'fas fa-users',
-                'reviewer': 'fas fa-user-graduate',
-                'admin': 'fas fa-user-shield'
-            };
-            roleIcon.className = roleIcons[user.role] || 'fas fa-user';
-            
-            // Show role-specific content
-            showRoleContent(user.role);
-            
-            // Load role-specific data
-            if (user.role === 'presenter') {
-                loadMyAbstracts();
-            }
+            // Token is valid, update stored user data
+            localStorage.setItem('snia_user', JSON.stringify(data.data));
+            loadDashboardFromAPI(data.data);
         } else {
-            // Token invalid, redirect to login
+            // Token invalid, clear and redirect
             localStorage.removeItem('snia_token');
             localStorage.removeItem('snia_user');
             window.location.href = '/login';
         }
     } catch (error) {
-        console.error('Error loading profile:', error);
-        showAlert('Gagal memuat profil pengguna', 'danger');
+        console.error('Token verification failed:', error);
+        localStorage.removeItem('snia_token');
+        localStorage.removeItem('snia_user');
+        window.location.href = '/login';
     }
 }
+
+function loadDashboardFromSession(user) {
+    // Update UI with session data
+    updateUserProfile(user);
+    loadDashboardStats();
+    loadRegistrations();
+    loadRecentActivities();
+    loadNotifications();
+}
+
+function loadDashboardFromAPI(user) {
+    // Update UI with API data
+    updateUserProfile(user);
+    loadDashboardStats();
+    loadRegistrations();
+    loadRecentActivities();
+    loadNotifications();
+}
+
+function updateUserProfile(user) {
+    document.getElementById('userName').textContent = user.first_name + ' ' + user.last_name;
+    document.getElementById('userRole').textContent = getRoleDisplayName(user.role);
+    document.getElementById('profileName').textContent = user.first_name + ' ' + user.last_name;
+    document.getElementById('profileEmail').textContent = user.email;
+    document.getElementById('profileInstitution').textContent = user.institution || 'Tidak ada data';
+    
+    // Update role icon
+    const roleIcon = document.getElementById('roleIcon');
+    const roleIcons = {
+        'presenter': 'fas fa-microphone',
+        'audience': 'fas fa-users',
+        'reviewer': 'fas fa-user-graduate',
+        'admin': 'fas fa-user-shield'
+    };
+    roleIcon.className = roleIcons[user.role] || 'fas fa-user';
+    
+    // Show role-specific content
+    showRoleContent(user.role);
+    
+    // Load role-specific data
+    if (user.role === 'presenter') {
+        loadMyAbstracts();
+    }
+}
+
 
 async function loadDashboardStats() {
     try {

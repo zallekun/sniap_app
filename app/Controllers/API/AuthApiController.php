@@ -96,13 +96,46 @@ class AuthApiController extends BaseController
             $insertResult = $result->getRowArray();
             $userId = $insertResult['id'];
 
+            // Auto-login: Generate JWT token after successful registration
+            $payload = [
+                'user_id' => (int)$userId,
+                'email' => $jsonInput['email'],
+                'role' => $jsonInput['role'],
+                'iat' => time(),
+                'exp' => time() + $this->jwtExpire
+            ];
+
+            $jwt = \Firebase\JWT\JWT::encode($payload, $this->jwtSecret, 'HS256');
+
+            // Send verification email
+            try {
+                $emailService = new \App\Services\EmailService();
+                $token = base64_encode($userId . '|' . time() . '|' . bin2hex(random_bytes(16)));
+                $emailService->sendVerificationEmail($jsonInput['email'], $firstName . ' ' . $lastName, $token, 1);
+            } catch (\Exception $e) {
+                // Email failed but registration successful - log error
+                log_message('error', 'Verification email failed: ' . $e->getMessage());
+            }
+
             return $this->response->setJSON([
                 'status' => 'success',
-                'message' => 'Registration successful',
+                'message' => 'Registration successful! Welcome to SNIA Conference.',
                 'data' => [
                     'user_id' => (int)$userId,
                     'email' => $jsonInput['email'],
-                    'full_name' => $firstName . ' ' . $lastName
+                    'first_name' => $firstName,
+                    'last_name' => $lastName,
+                    'role' => $jsonInput['role'],
+                    'token' => $jwt,
+                    'user' => [
+                        'id' => (int)$userId,
+                        'email' => $jsonInput['email'],
+                        'first_name' => $firstName,
+                        'last_name' => $lastName,
+                        'role' => $jsonInput['role'],
+                        'institution' => $jsonInput['institution'] ?? null,
+                        'phone' => $jsonInput['phone_number'] ?? null
+                    ]
                 ]
             ])->setStatusCode(ResponseInterface::HTTP_CREATED);
 

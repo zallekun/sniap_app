@@ -213,7 +213,7 @@ document.addEventListener('DOMContentLoaded', function() {
             last_name: document.getElementById('last_name').value,
             email: document.getElementById('email').value,
             institution: document.getElementById('institution').value,
-            phone: document.getElementById('phone').value,
+            phone_number: document.getElementById('phone').value,
             password: passwordField.value,
             confirm_password: confirmPasswordField.value,
             role: roleInput.value
@@ -226,17 +226,23 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             if (data.status === 'success') {
-                showAlert('Pendaftaran berhasil! Silakan cek email untuk verifikasi akun.', 'success');
+                showAlert('Pendaftaran berhasil! Mengarahkan ke dashboard...', 'success');
+                
+                // Store token if provided in response
+                if (data.data && data.data.token) {
+                    localStorage.setItem('snia_token', data.data.token);
+                    localStorage.setItem('snia_user', JSON.stringify(data.data.user));
+                }
                 
                 // Reset form
                 form.reset();
                 roleOptions.forEach(opt => opt.classList.remove('selected'));
                 roleInput.value = '';
                 
-                // Redirect to login after 3 seconds
+                // Redirect to dashboard after successful registration
                 setTimeout(() => {
-                    window.location.href = '/login';
-                }, 3000);
+                    window.location.href = '/dashboard';
+                }, 1500);
             } else {
                 // Handle validation errors
                 if (data.errors) {
