@@ -29,15 +29,577 @@
 }
 
 .card-registration {
-    border: 2px solid #f1f5f9;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     transition: all 0.3s ease;
+    background: #ffffff;
+    margin-bottom: 1rem;
 }
 
 .card-registration:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    border-color: #3b82f6;
+}
+
+.registration-card-header {
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+
+.registration-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.registration-action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+    .registration-meta-grid {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .registration-action-buttons {
+        justify-content: stretch;
+        width: 100%;
+    }
+    
+    .registration-action-buttons .btn {
+        flex: 1;
+    }
+    
+    .card-registration .card-body {
+        padding: 1rem !important;
+    }
+}
+
+/* Modal styling improvements - darker blues for better visibility */
+.modal .text-primary {
+    color: #1e40af !important;
+}
+
+.modal .bg-primary {
+    background-color: #1e40af !important;
+}
+
+.modal .btn-primary {
+    background-color: #1e40af !important;
+    border-color: #1e40af !important;
+}
+
+.modal .btn-primary:hover {
+    background-color: #1d4ed8 !important;
+    border-color: #1d4ed8 !important;
+}
+
+.modal .text-info {
+    color: #0369a1 !important;
+}
+
+/* Card detail modal specific styling */
+.modal-content .card.border-0.bg-light {
+    background-color: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+.modal-content .text-dark {
+    color: #1f2937 !important;
+    font-weight: 600;
+}
+
+/* Payment modal improvements */
+.payment-summary-card {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%) !important;
+    border: 1px solid #cbd5e1 !important;
+}
+
+.payment-method-card {
+    border: 2px solid #e2e8f0 !important;
+    background: #ffffff !important;
+}
+
+.payment-method-card.selected {
+    border-color: #1e40af !important;
+    background: #eff6ff !important;
+}
+
+/* Icon colors for better contrast */
+.modal .fas.fa-info-circle {
+    color: #1e40af !important;
+}
+
+.modal .fas.fa-hashtag {
+    color: #0369a1 !important;
+}
+
+.modal .fas.fa-calendar {
+    color: #059669 !important;
+}
+
+.modal .fas.fa-user {
+    color: #1e40af !important;
+}
+
+.modal .fas.fa-clock {
+    color: #d97706 !important;
+}
+
+/* Badge improvements in modal */
+.modal .badge.bg-warning {
+    background-color: #f59e0b !important;
+    color: #1f2937 !important;
+}
+
+.modal .badge.bg-success {
+    background-color: #059669 !important;
+}
+
+.modal .badge.bg-info {
+    background-color: #0369a1 !important;
+}
+
+/* Avatar improvements in modal */
+.modal .avatar-sm.bg-primary {
+    background-color: #1e40af !important;
+}
+
+.modal .avatar-sm.bg-warning {
+    background-color: #f59e0b !important;
+}
+
+/* Code styling for registration ID */
+.modal code {
+    background-color: #f1f5f9 !important;
+    color: #1e40af !important;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+    font-weight: 700;
+}
+
+/* Payment method card styling */
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.payment-method-card {
+    transition: all 0.3s ease;
+    border: 2px solid #e2e8f0;
+    background: #ffffff;
+}
+
+.payment-method-card:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     transform: translateY(-1px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-    border-color: #e2e8f0;
+}
+
+.payment-method-card.selected {
+    border-color: #1e40af;
+    background: #eff6ff;
+    box-shadow: 0 4px 16px rgba(30,64,175,0.2);
+}
+
+.payment-check {
+    font-size: 1.2rem;
+}
+
+/* ========== UNIFIED THEME COLORS ========== */
+/* Based on the gradient theme from 'Daftar Event' buttons */
+
+:root {
+    --theme-primary: #2c3e50;
+    --theme-secondary: #3498db;
+    --theme-gradient: linear-gradient(45deg, #2c3e50, #3498db);
+    --theme-gradient-hover: linear-gradient(45deg, #1e2a38, #2980b9);
+    --theme-success: #27ae60;
+    --theme-warning: #f39c12;
+    --theme-danger: #e74c3c;
+    --theme-info: #3498db;
+    --theme-light: #ecf0f1;
+    --theme-dark: #2c3e50;
+    --theme-muted: #7f8c8d;
+}
+
+/* Welcome Banner */
+.card.bg-primary {
+    background: var(--theme-gradient) !important;
+    border: none;
+    box-shadow: 0 8px 25px rgba(44, 62, 80, 0.3);
+}
+
+/* Stats Cards */
+.card.bg-primary.text-white {
+    background: var(--theme-gradient) !important;
+}
+
+/* Profile Avatar */
+.bg-primary.text-white.rounded-circle {
+    background: var(--theme-gradient) !important;
+}
+
+/* Action Buttons - Primary */
+.btn-primary, .btn.btn-primary {
+    background: var(--theme-gradient) !important;
+    border: none !important;
+    border-radius: 25px;
+    padding: 10px 25px;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(44, 62, 80, 0.3);
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover, .btn.btn-primary:hover {
+    background: var(--theme-gradient-hover) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(44, 62, 80, 0.4);
+}
+
+/* Outline Buttons */
+.btn-outline-primary {
+    border: 2px solid var(--theme-primary) !important;
+    color: var(--theme-primary) !important;
+    border-radius: 25px;
+    padding: 10px 25px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+    background: var(--theme-gradient) !important;
+    border-color: transparent !important;
+    color: white !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(44, 62, 80, 0.3);
+}
+
+/* Success Buttons (for free events) */
+.btn-success {
+    background: linear-gradient(45deg, #27ae60, #2ecc71) !important;
+    border: none !important;
+    border-radius: 25px;
+    padding: 10px 25px;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+}
+
+.btn-success:hover {
+    background: linear-gradient(45deg, #229954, #28b463) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+}
+
+/* Card Hover Effects */
+.card-hover:hover {
+    border-color: var(--theme-secondary) !important;
+}
+
+.card-event:hover {
+    border-color: var(--theme-secondary) !important;
+}
+
+/* Icons - Theme Colors */
+.text-primary {
+    color: var(--theme-primary) !important;
+}
+
+.text-secondary {
+    color: var(--theme-secondary) !important;
+}
+
+.text-info {
+    color: var(--theme-info) !important;
+}
+
+/* Badges */
+.badge.bg-primary {
+    background: var(--theme-gradient) !important;
+}
+
+.badge.bg-info {
+    background: linear-gradient(45deg, #3498db, #5dade2) !important;
+}
+
+/* Avatar Colors in Cards */
+.avatar-sm.bg-primary {
+    background: var(--theme-gradient) !important;
+}
+
+.avatar-sm.bg-success {
+    background: linear-gradient(45deg, #27ae60, #2ecc71) !important;
+}
+
+.avatar-sm.bg-warning {
+    background: linear-gradient(45deg, #f39c12, #f4d03f) !important;
+}
+
+.avatar-sm.bg-secondary {
+    background: linear-gradient(45deg, #7f8c8d, #95a5a6) !important;
+}
+
+/* Border Colors */
+.border-success {
+    border-color: var(--theme-success) !important;
+}
+
+.border-primary {
+    border-color: var(--theme-primary) !important;
+}
+
+.border-warning {
+    border-color: var(--theme-warning) !important;
+}
+
+/* Panel Headers */
+.card-header.bg-info {
+    background: var(--theme-gradient) !important;
+}
+
+.card-header.bg-success {
+    background: linear-gradient(45deg, #27ae60, #2ecc71) !important;
+}
+
+/* Spinners */
+.spinner-border.text-primary {
+    color: var(--theme-primary) !important;
+}
+
+/* Links */
+a.text-primary {
+    color: var(--theme-primary) !important;
+}
+
+a.text-primary:hover {
+    color: var(--theme-secondary) !important;
+}
+
+/* Payment Modal Overrides */
+.modal .btn-primary {
+    background: var(--theme-gradient) !important;
+    border: none !important;
+}
+
+.modal .btn-primary:hover {
+    background: var(--theme-gradient-hover) !important;
+}
+
+/* Small Button Variants */
+.btn-sm.btn-primary {
+    background: var(--theme-gradient) !important;
+    border: none !important;
+    border-radius: 20px;
+    padding: 8px 20px;
+}
+
+.btn-sm.btn-success {
+    background: linear-gradient(45deg, #27ae60, #2ecc71) !important;
+    border: none !important;
+    border-radius: 20px;
+    padding: 8px 20px;
+}
+
+.btn-sm.btn-outline-primary {
+    border: 2px solid var(--theme-primary) !important;
+    color: var(--theme-primary) !important;
+    border-radius: 20px;
+    padding: 8px 20px;
+}
+
+.btn-sm.btn-outline-primary:hover {
+    background: var(--theme-gradient) !important;
+    border-color: transparent !important;
+    color: white !important;
+}
+
+/* Form Controls */
+.form-control:focus {
+    border-color: var(--theme-secondary) !important;
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25) !important;
+}
+
+/* Event Card Free Badge */
+.badge.bg-success {
+    background: linear-gradient(45deg, #27ae60, #2ecc71) !important;
+}
+
+/* Navigation overrides for dashboard only */
+.dashboard-page .navbar-brand {
+    background: var(--theme-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: bold;
+}
+
+/* ========== PANEL SPECIFIC STYLING ========== */
+/* Unified color palette for all panels */
+
+/* Panel Peserta (Audience Panel) */
+.card-header.bg-info.text-white {
+    background: var(--theme-gradient) !important;
+    border: none;
+    box-shadow: 0 2px 8px rgba(44, 62, 80, 0.2);
+}
+
+/* Alternative gradient for Panel Peserta - more vibrant */
+#audienceContent .card-header.bg-info {
+    background: linear-gradient(135deg, #3498db, #2980b9) !important;
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+}
+
+/* Pendaftaran Saya Panel */
+.card-header {
+    background: linear-gradient(135deg, #ecf0f1, #d5dbdb) !important;
+    border: none;
+    border-bottom: 3px solid var(--theme-secondary) !important;
+    color: var(--theme-dark) !important;
+    font-weight: 600;
+}
+
+/* Special styling for My Registrations header */
+.card .card-header h6 {
+    color: var(--theme-dark) !important;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.card .card-header i {
+    color: var(--theme-secondary) !important;
+}
+
+/* Alternative styling for section headers */
+.section-header-primary {
+    background: var(--theme-gradient) !important;
+    color: white !important;
+    border-radius: 10px 10px 0 0;
+    padding: 1rem 1.5rem;
+    border: none;
+    box-shadow: 0 4px 15px rgba(44, 62, 80, 0.2);
+}
+
+.section-header-secondary {
+    background: linear-gradient(135deg, #3498db, #5dade2) !important;
+    color: white !important;
+    border-radius: 10px 10px 0 0;
+    padding: 1rem 1.5rem;
+    border: none;
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+}
+
+.section-header-light {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef) !important;
+    color: var(--theme-dark) !important;
+    border-radius: 10px 10px 0 0;
+    padding: 1rem 1.5rem;
+    border: none;
+    border-bottom: 3px solid var(--theme-secondary) !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+/* Panel action buttons color coordination */
+.panel-btn-primary {
+    background: var(--theme-gradient) !important;
+    border: none !important;
+    color: white !important;
+    border-radius: 25px;
+    padding: 12px 25px;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(44, 62, 80, 0.3);
+    transition: all 0.3s ease;
+}
+
+.panel-btn-primary:hover {
+    background: var(--theme-gradient-hover) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(44, 62, 80, 0.4);
+    color: white !important;
+}
+
+.panel-btn-secondary {
+    background: linear-gradient(45deg, #3498db, #5dade2) !important;
+    border: none !important;
+    color: white !important;
+    border-radius: 25px;
+    padding: 12px 25px;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+    transition: all 0.3s ease;
+}
+
+.panel-btn-secondary:hover {
+    background: linear-gradient(45deg, #2980b9, #3498db) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+    color: white !important;
+}
+
+.panel-btn-success {
+    background: linear-gradient(45deg, #27ae60, #2ecc71) !important;
+    border: none !important;
+    color: white !important;
+    border-radius: 25px;
+    padding: 12px 25px;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+    transition: all 0.3s ease;
+}
+
+.panel-btn-success:hover {
+    background: linear-gradient(45deg, #229954, #28b463) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+    color: white !important;
+}
+
+.panel-btn-warning {
+    background: linear-gradient(45deg, #f39c12, #f4d03f) !important;
+    border: none !important;
+    color: white !important;
+    border-radius: 25px;
+    padding: 12px 25px;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3);
+    transition: all 0.3s ease;
+}
+
+.panel-btn-warning:hover {
+    background: linear-gradient(45deg, #d68910, #f39c12) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(243, 156, 18, 0.4);
+    color: white !important;
+}
+
+/* Panel card improvements */
+.panel-card {
+    border: none !important;
+    border-radius: 15px !important;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08) !important;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.panel-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.12) !important;
+}
+
+/* Event Tersedia section header */
+#audienceContent .card:nth-child(2) .card-header h6 {
+    background: linear-gradient(45deg, var(--theme-secondary), #5dade2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
 }
 
 .card-event {
@@ -107,7 +669,7 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
-<div class="container-fluid py-4">
+<div class="container-fluid py-4 dashboard-page">
     <!-- Welcome Section -->
     <div class="row mb-4">
         <div class="col-12">
@@ -206,15 +768,15 @@
 
             <!-- Audience-specific content -->
             <div id="audienceContent" class="d-none">
-                <div class="card mb-4">
-                    <div class="card-header bg-info text-white">
+                <div class="card mb-4 panel-card">
+                    <div class="card-header section-header-secondary">
                         <h5 class="mb-0"><i class="fas fa-users me-2"></i>Panel Peserta</h5>
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <div class="d-grid">
-                                    <button class="btn btn-outline-primary" onclick="showEventRegistrationModal()">
+                                    <button class="btn panel-btn-primary" onclick="showEventRegistrationModal()">
                                         <i class="fas fa-ticket-alt me-2"></i>
                                         Daftar Event
                                     </button>
@@ -222,7 +784,7 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="d-grid">
-                                    <button class="btn btn-outline-success" onclick="loadEventSchedule()">
+                                    <button class="btn panel-btn-success" onclick="loadEventSchedule()">
                                         <i class="fas fa-calendar me-2"></i>
                                         Jadwal Acara
                                     </button>
@@ -230,7 +792,7 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="d-grid">
-                                    <button class="btn btn-outline-info" onclick="loadMyQRCodes()">
+                                    <button class="btn panel-btn-secondary" onclick="loadMyQRCodes()">
                                         <i class="fas fa-qrcode me-2"></i>
                                         QR Code Saya
                                     </button>
@@ -238,7 +800,7 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="d-grid">
-                                    <button class="btn btn-outline-warning" onclick="loadMyCertificates()">
+                                    <button class="btn panel-btn-warning" onclick="loadMyCertificates()">
                                         <i class="fas fa-certificate me-2"></i>
                                         Sertifikat Saya
                                     </button>
@@ -246,7 +808,7 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="d-grid">
-                                    <button class="btn btn-outline-secondary" onclick="loadPaymentHistory()">
+                                    <button class="btn panel-btn-primary" onclick="loadPaymentHistory()">
                                         <i class="fas fa-credit-card me-2"></i>
                                         Riwayat Pembayaran
                                     </button>
@@ -254,7 +816,7 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="d-grid">
-                                    <button class="btn btn-outline-dark" onclick="loadVoucherSection()">
+                                    <button class="btn panel-btn-secondary" onclick="loadVoucherSection()">
                                         <i class="fas fa-ticket-alt me-2"></i>
                                         Voucher Saya
                                     </button>
@@ -265,8 +827,8 @@
                 </div>
 
                 <!-- Event Registration Section -->
-                <div class="card mb-4">
-                    <div class="card-header">
+                <div class="card mb-4 panel-card">
+                    <div class="card-header section-header-light">
                         <h6 class="mb-0"><i class="fas fa-calendar-check me-2"></i>Event Tersedia</h6>
                     </div>
                     <div class="card-body">
@@ -321,8 +883,8 @@
             </div>
 
             <!-- My Registrations -->
-            <div class="card mb-4">
-                <div class="card-header">
+            <div class="card mb-4 panel-card">
+                <div class="card-header section-header-light">
                     <h6 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>Pendaftaran Saya</h6>
                 </div>
                 <div class="card-body">
@@ -726,76 +1288,63 @@ async function loadRegistrations() {
                 const eventDate = registration.created_at ? formatDate(registration.created_at) : 'Tidak diketahui';
                 
                 html += `
-                    <div class="col-12 mb-4">
+                    <div class="col-12 mb-3">
                         <div class="card card-registration border-start border-4 ${registration.payment_status === 'success' ? 'border-success' : registration.payment_status === 'pending' ? 'border-warning' : 'border-secondary'}">
                             <div class="card-body p-4">
                                 <!-- Header Section -->
-                                <div class="row align-items-start mb-3">
-                                    <div class="col-md-8">
-                                        <div class="d-flex align-items-start">
-                                            <div class="flex-shrink-0 me-3">
-                                                <div class="avatar-sm ${registration.payment_status === 'success' ? 'bg-success' : registration.payment_status === 'pending' ? 'bg-warning' : 'bg-secondary'} rounded-circle d-flex align-items-center justify-content-center">
-                                                    <i class="fas fa-calendar-check text-white"></i>
-                                                </div>
-                                            </div>
-                                            <div class="flex-grow-1">
-                                                <h6 class="mb-2 text-dark fw-bold">${registration.event_name || 'Event'}</h6>
-                                                <p class="text-muted mb-0 small lh-sm">${(registration.event_description || 'Tidak ada deskripsi').substring(0, 120)}${(registration.event_description || '').length > 120 ? '...' : ''}</p>
+                                <div class="registration-card-header">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0 me-3">
+                                            <div class="avatar-sm ${registration.payment_status === 'success' ? 'bg-success' : registration.payment_status === 'pending' ? 'bg-warning' : 'bg-secondary'} rounded-circle d-flex align-items-center justify-content-center">
+                                                <i class="fas fa-calendar-check text-white"></i>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                                        <div class="mb-2">
-                                            ${statusBadge}
-                                            ${paymentBadge}
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <div>
+                                                    <h6 class="mb-1 text-dark fw-bold">${registration.event_name || 'Event'}</h6>
+                                                    <p class="text-muted mb-0 small lh-sm">${(registration.event_description || 'Tidak ada deskripsi').substring(0, 100)}${(registration.event_description || '').length > 100 ? '...' : ''}</p>
+                                                </div>
+                                                <div class="d-flex gap-2 align-items-start flex-shrink-0">
+                                                    ${statusBadge}
+                                                    ${paymentBadge}
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Divider -->
-                                <div class="info-divider"></div>
-
-                                <!-- Info Section -->
-                                <div class="row align-items-center">
-                                    <div class="col-md-8">
-                                        <div class="metadata-section">
-                                            <div class="row g-2">
-                                                <div class="col-md-6">
-                                                    <small class="text-muted d-flex align-items-center">
-                                                        <i class="fas fa-user me-2 text-primary"></i>
-                                                        <span>${registration.registration_type || 'audience'}</span>
-                                                    </small>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <small class="text-muted d-flex align-items-center">
-                                                        <i class="fas fa-hashtag me-2 text-info"></i>
-                                                        <span>ID: ${registration.id}</span>
-                                                    </small>
-                                                </div>
-                                                <div class="col-12">
-                                                    <small class="text-muted d-flex align-items-center">
-                                                        <i class="fas fa-calendar me-2 text-success"></i>
-                                                        <span>Terdaftar: ${eventDate}</span>
-                                                    </small>
-                                                </div>
-                                            </div>
-                                        </div>
+                                <!-- Metadata & Actions Section -->
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="registration-meta-grid flex-grow-1 me-3">
+                                        <small class="text-muted d-flex align-items-center">
+                                            <i class="fas fa-hashtag me-2 text-info"></i>
+                                            <span>ID: ${registration.id}</span>
+                                        </small>
+                                        <small class="text-muted d-flex align-items-center">
+                                            <i class="fas fa-user me-2 text-primary"></i>
+                                            <span class="text-capitalize">${registration.registration_type || 'audience'}</span>
+                                        </small>
+                                        <small class="text-muted d-flex align-items-center">
+                                            <i class="fas fa-calendar me-2 text-success"></i>
+                                            <span>${eventDate}</span>
+                                        </small>
                                     </div>
-                                    <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                                        <div class="d-grid gap-2 d-md-block">
-                                            <button class="btn btn-outline-primary btn-sm" onclick="viewRegistration(${registration.id})" title="Lihat Detail">
-                                                <i class="fas fa-eye me-1"></i>Detail
-                                            </button>
-                                            ${registration.payment_status === 'pending' ? 
-                                                `<button class="btn btn-success btn-sm ms-md-2" onclick="payRegistration(${registration.id})" title="Bayar Sekarang">
-                                                    <i class="fas fa-credit-card me-1"></i>Bayar
-                                                </button>` : 
-                                                registration.payment_status === 'success' ?
-                                                `<button class="btn btn-outline-info btn-sm ms-md-2" onclick="downloadTicket(${registration.id})" title="Download Tiket" disabled>
-                                                    <i class="fas fa-download me-1"></i>Tiket
-                                                </button>` : ''
-                                            }
-                                        </div>
+                                    
+                                    <!-- Action Buttons -->
+                                    <div class="registration-action-buttons">
+                                        <button class="btn btn-outline-primary btn-sm" onclick="viewRegistration(${registration.id})" title="Lihat Detail">
+                                            <i class="fas fa-eye me-1"></i>Detail
+                                        </button>
+                                        ${registration.payment_status === 'pending' ? 
+                                            `<button class="btn btn-success btn-sm" onclick="payRegistration(${registration.id})" title="Bayar Sekarang">
+                                                <i class="fas fa-credit-card me-1"></i>Bayar
+                                            </button>` : 
+                                            registration.payment_status === 'success' ?
+                                            `<button class="btn btn-outline-info btn-sm" onclick="downloadTicket(${registration.id})" title="Download Tiket" disabled>
+                                                <i class="fas fa-download me-1"></i>Tiket
+                                            </button>` : ''
+                                        }
                                     </div>
                                 </div>
                             </div>
@@ -1091,47 +1640,50 @@ async function displayPaymentModal(registration) {
                         <h6 class="mb-3 fw-bold text-dark">
                             <i class="fas fa-credit-card me-2 text-warning"></i>Pilih Metode Pembayaran
                         </h6>
-                        <div class="row g-2">
+                        <div class="row g-3">
                             <div class="col-12">
-                                <div class="form-check p-3 border rounded">
-                                    <input class="form-check-input" type="radio" name="paymentMethod" id="bank_transfer" value="bank_transfer" checked>
-                                    <label class="form-check-label w-100" for="bank_transfer">
+                                <div class="payment-method-card p-3 rounded cursor-pointer" data-method="bank_transfer" onclick="selectPaymentMethod('bank_transfer', this)">
+                                    <input type="radio" name="paymentMethod" value="bank_transfer" style="display: none;" checked>
+                                    <div class="d-flex align-items-center justify-content-between">
                                         <div class="d-flex align-items-center">
-                                            <i class="fas fa-university me-3 text-primary"></i>
+                                            <i class="fas fa-university me-3 text-primary fs-4"></i>
                                             <div>
-                                                <strong>Transfer Bank</strong>
+                                                <strong class="text-dark">Transfer Bank</strong>
                                                 <small class="text-muted d-block">Transfer ke rekening bank</small>
                                             </div>
                                         </div>
-                                    </label>
+                                        <i class="fas fa-check-circle text-primary payment-check d-none"></i>
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-12">
-                                <div class="form-check p-3 border rounded">
-                                    <input class="form-check-input" type="radio" name="paymentMethod" id="ewallet" value="ewallet">
-                                    <label class="form-check-label w-100" for="ewallet">
+                                <div class="payment-method-card p-3 rounded cursor-pointer" data-method="ewallet" onclick="selectPaymentMethod('ewallet', this)">
+                                    <input type="radio" name="paymentMethod" value="ewallet" style="display: none;">
+                                    <div class="d-flex align-items-center justify-content-between">
                                         <div class="d-flex align-items-center">
-                                            <i class="fas fa-mobile-alt me-3 text-success"></i>
+                                            <i class="fas fa-mobile-alt me-3 text-success fs-4"></i>
                                             <div>
-                                                <strong>E-Wallet</strong>
+                                                <strong class="text-dark">E-Wallet</strong>
                                                 <small class="text-muted d-block">OVO, GoPay, DANA, ShopeePay</small>
                                             </div>
                                         </div>
-                                    </label>
+                                        <i class="fas fa-check-circle text-success payment-check d-none"></i>
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-12">
-                                <div class="form-check p-3 border rounded">
-                                    <input class="form-check-input" type="radio" name="paymentMethod" id="credit_card" value="credit_card">
-                                    <label class="form-check-label w-100" for="credit_card">
+                                <div class="payment-method-card p-3 rounded cursor-pointer" data-method="credit_card" onclick="selectPaymentMethod('credit_card', this)">
+                                    <input type="radio" name="paymentMethod" value="credit_card" style="display: none;">
+                                    <div class="d-flex align-items-center justify-content-between">
                                         <div class="d-flex align-items-center">
-                                            <i class="fas fa-credit-card me-3 text-info"></i>
+                                            <i class="fas fa-credit-card me-3 text-info fs-4"></i>
                                             <div>
-                                                <strong>Kartu Kredit/Debit</strong>
+                                                <strong class="text-dark">Kartu Kredit/Debit</strong>
                                                 <small class="text-muted d-block">Visa, MasterCard, JCB</small>
                                             </div>
                                         </div>
-                                    </label>
+                                        <i class="fas fa-check-circle text-info payment-check d-none"></i>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1201,6 +1753,36 @@ async function displayPaymentModal(registration) {
     }
     
     modal.show();
+    
+    // Initialize payment methods after modal is shown
+    setTimeout(() => {
+        initializePaymentMethods();
+    }, 100);
+}
+
+// Select payment method function
+function selectPaymentMethod(method, element) {
+    // Remove selected class from all payment cards
+    document.querySelectorAll('.payment-method-card').forEach(card => {
+        card.classList.remove('selected');
+        card.querySelector('.payment-check').classList.add('d-none');
+        card.querySelector('input[type="radio"]').checked = false;
+    });
+    
+    // Add selected class to clicked card
+    element.classList.add('selected');
+    element.querySelector('.payment-check').classList.remove('d-none');
+    element.querySelector('input[type="radio"]').checked = true;
+    
+    console.log('Payment method selected:', method);
+}
+
+// Initialize first payment method as selected
+function initializePaymentMethods() {
+    const firstCard = document.querySelector('.payment-method-card[data-method="bank_transfer"]');
+    if (firstCard) {
+        selectPaymentMethod('bank_transfer', firstCard);
+    }
 }
 
 // Process payment
