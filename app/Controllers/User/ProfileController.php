@@ -67,9 +67,9 @@ class ProfileController extends BaseController
     }
 
     /**
-     * Update user profile
+     * Display edit profile page
      */
-    public function update()
+    public function edit()
     {
         $userId = $this->session->get('user_id');
         $user = $this->userModel->find($userId);
@@ -78,81 +78,270 @@ class ProfileController extends BaseController
             return redirect()->to('/login')->with('error', 'User not found');
         }
 
+        // Get user statistics for sidebar
+        $stats = [
+            'total_registrations' => $this->getUserRegistrationCount($userId),
+            'upcoming_events' => $this->getUserUpcomingEventsCount($userId)
+        ];
+
+        $data = [
+            'title' => 'Edit Profile - SNIA Conference',
+            'user' => $user,
+            'stats' => $stats,
+            'validation' => \Config\Services::validation()
+        ];
+
+        return view('user/edit_profile', $data);
+    }
+
+    /**
+     * Update user profile - Dashboard AJAX version
+     */
+    public function update()
+    {
+        // Check if this is an AJAX request from dashboard
+        if ($this->request->getHeaderLine('X-Requested-With') === 'XMLHttpRequest') {
+            return $this->updateProfileAjax();
+        }
+
+        // Regular form submission from dedicated edit profile page
+        $userId = $this->session->get('user_id');
+        $user = $this->userModel->find($userId);
+
+        if (!$user) {
+            return redirect()->to('/login')->with('error', 'User not found');
+        }
+
         $rules = [
-            'full_name' => 'required|min_length[3]|max_length[100]',
-            'email' => "required|valid_email|is_unique[users.email,id,{$userId}]",
-            'phone' => 'permit_empty|min_length[10]|max_length[15]',
-            'institution' => 'permit_empty|max_length[200]',
-            'bio' => 'permit_empty|max_length[1000]',
-            'profile_picture' => 'permit_empty|uploaded[profile_picture]|is_image[profile_picture]|max_size[profile_picture,2048]'
+            'first_name' => 'required|min_length[2]|max_length[100]',
+            'last_name' => 'required|min_length[2]|max_length[100]',
+            'phone' => 'permit_empty|min_length[10]|max_length[20]',
+            'institution' => 'permit_empty|max_length[255]'
         ];
 
-        $messages = [
-            'full_name' => [
-                'required' => 'Full name is required',
-                'min_length' => 'Full name must be at least 3 characters'
-            ],
-            'email' => [
-                'required' => 'Email is required',
-                'valid_email' => 'Please enter a valid email address',
-                'is_unique' => 'This email is already taken'
-            ],
-            'phone' => [
-                'min_length' => 'Phone number must be at least 10 digits',
-                'max_length' => 'Phone number cannot exceed 15 digits'
-            ],
-            'profile_picture' => [
-                'uploaded' => 'Please select a valid image file',
-                'is_image' => 'Profile picture must be an image',
-                'max_size' => 'Profile picture must be less than 2MB'
-            ]
-        ];
+        // Add password validation rules if password change is requested
+        $currentPassword = $this->request->getPost('current_password');
+        $newPassword = $this->request->getPost('new_password');
+        
+        if (!empty($currentPassword) || !empty($newPassword)) {
+            $rules['current_password'] = 'required';
+            $rules['new_password'] = 'required|min_length[6]';
+            $rules['confirm_password'] = 'required|matches[new_password]';
+        }
 
-        if (!$this->validate($rules, $messages)) {
+        if (!$this->validate($rules)) {
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
-        // Handle profile picture upload
-        $profilePicture = $this->handleProfilePictureUpload($userId);
+        // Verify current password if password change is requested
+        if (!empty($currentPassword)) {
+            if (!password_verify($currentPassword, $user['password'])) {
+                return redirect()->back()->withInput()->with('error', 'Current password is incorrect.');
+            }
+        }
 
         $updateData = [
-            'full_name' => $this->request->getPost('full_name'),
-            'email' => strtolower(trim($this->request->getPost('email'))),
+            'first_name' => trim($this->request->getPost('first_name')),
+            'last_name' => trim($this->request->getPost('last_name')),
             'phone' => $this->request->getPost('phone'),
             'institution' => $this->request->getPost('institution'),
-            'bio' => $this->request->getPost('bio'),
             'updated_at' => date('Y-m-d H:i:s')
         ];
 
-        // Only update profile picture if new one is uploaded
-        if ($profilePicture) {
-            // Delete old profile picture
-            if ($user['profile_picture']) {
-                $oldPicturePath = WRITEPATH . 'uploads/' . $user['profile_picture'];
-                if (file_exists($oldPicturePath)) {
-                    unlink($oldPicturePath);
+        // Add password to update data if changing password
+        if (!empty($newPassword)) {
+            $updateData['password'] = password_hash($newPassword, PASSWORD_DEFAULT);
+        }
+
+        // Handle profile photo upload
+        $profilePhotoFile = $this->request->getFile('profilePhotoInput');
+        $photoChanged = $this->request->getPost('photo_changed');
+        
+        if ($profilePhotoFile && $profilePhotoFile->isValid() && !$profilePhotoFile->hasMoved() && $photoChanged == '1') {
+            $profilePhotoUrl = $this->handleProfilePhotoUploadNew($userId, $profilePhotoFile);
+            if ($profilePhotoUrl) {
+                // Delete old profile photo if exists
+                if (!empty($user['profile_photo'])) {
+                    $oldPhotoPath = FCPATH . 'uploads/' . $user['profile_photo'];
+                    if (file_exists($oldPhotoPath)) {
+                        unlink($oldPhotoPath);
+                        log_message('info', 'Deleted old profile photo: ' . $user['profile_photo']);
+                    }
                 }
+                $updateData['profile_photo'] = $profilePhotoUrl;
+                log_message('info', 'Profile photo will be updated to: ' . $profilePhotoUrl);
+            } else {
+                log_message('error', 'Profile photo upload failed for user: ' . $userId);
+                return redirect()->back()->withInput()->with('error', 'Failed to upload profile photo. Please try again.');
             }
-            $updateData['profile_picture'] = $profilePicture;
+        } elseif ($photoChanged == '1' && (!$profilePhotoFile || !$profilePhotoFile->isValid())) {
+            log_message('error', 'Profile photo upload requested but file is invalid for user: ' . $userId);
+            return redirect()->back()->withInput()->with('error', 'Invalid photo file. Please select a valid image.');
         }
 
         try {
             $this->userModel->update($userId, $updateData);
 
-            // Update session data if name or email changed
-            if ($updateData['full_name'] !== $user['full_name']) {
-                $this->session->set('user_name', $updateData['full_name']);
-            }
-            if ($updateData['email'] !== $user['email']) {
-                $this->session->set('user_email', $updateData['email']);
-            }
+            // Update session data
+            $fullName = trim($updateData['first_name'] . ' ' . $updateData['last_name']);
+            $this->session->set('user_name', $fullName);
 
-            return redirect()->back()->with('success', 'Profile updated successfully!');
+            $successMessage = 'Profile updated successfully!';
+            if (isset($updateData['profile_photo'])) {
+                $successMessage = 'Profile updated successfully! Photo uploaded and saved.';
+            }
+            return redirect()->back()->with('success', $successMessage);
 
         } catch (\Exception $e) {
             log_message('error', 'Profile update error: ' . $e->getMessage());
             return redirect()->back()->withInput()->with('error', 'Failed to update profile. Please try again.');
         }
+    }
+
+    /**
+     * Update profile via AJAX from dashboard
+     */
+    private function updateProfileAjax()
+    {
+        $userId = $this->session->get('user_id');
+        if (!$userId) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'User not authenticated'
+            ]);
+        }
+
+        $user = $this->userModel->find($userId);
+        if (!$user) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'User not found'
+            ]);
+        }
+
+        try {
+            // Validate input
+            $firstName = trim($this->request->getPost('first_name'));
+            $lastName = trim($this->request->getPost('last_name'));
+            $institution = trim($this->request->getPost('institution'));
+            $phone = trim($this->request->getPost('phone'));
+            $currentPassword = $this->request->getPost('current_password');
+            $newPassword = $this->request->getPost('new_password');
+
+            if (empty($firstName) || empty($lastName)) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'First name and last name are required'
+                ]);
+            }
+
+            // Prepare update data
+            $updateData = [
+                'first_name' => $firstName,
+                'last_name' => $lastName,
+                'institution' => $institution,
+                'phone' => $phone,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            // Handle password change if provided
+            if (!empty($currentPassword) && !empty($newPassword)) {
+                // Verify current password
+                if (!password_verify($currentPassword, $user['password'])) {
+                    return $this->response->setJSON([
+                        'status' => 'error',
+                        'message' => 'Current password is incorrect'
+                    ]);
+                }
+
+                // Validate new password
+                if (strlen($newPassword) < 6) {
+                    return $this->response->setJSON([
+                        'status' => 'error',
+                        'message' => 'New password must be at least 6 characters'
+                    ]);
+                }
+
+                $updateData['password'] = password_hash($newPassword, PASSWORD_DEFAULT);
+            }
+
+            // Handle profile photo upload
+            $profilePhotoUrl = null;
+            if ($this->request->getFile('profile_photo') && $this->request->getFile('profile_photo')->isValid()) {
+                $profilePhotoUrl = $this->handleProfilePhotoUpload($userId);
+                if ($profilePhotoUrl) {
+                    $updateData['profile_photo'] = $profilePhotoUrl;
+                }
+            }
+
+            // Update user
+            $this->userModel->update($userId, $updateData);
+
+            // Update session data
+            $this->session->set([
+                'first_name' => $firstName,
+                'user_name' => trim($firstName . ' ' . $lastName)
+            ]);
+
+            // Return success response with updated user data
+            $updatedUser = $this->userModel->find($userId);
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'Profile updated successfully',
+                'user' => [
+                    'first_name' => $updatedUser['first_name'],
+                    'last_name' => $updatedUser['last_name'],
+                    'email' => $updatedUser['email'],
+                    'institution' => $updatedUser['institution'],
+                    'phone' => $updatedUser['phone'],
+                    'profile_photo_url' => $profilePhotoUrl ? base_url('uploads/' . $profilePhotoUrl) : null
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            log_message('error', 'Profile update error: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Failed to update profile. Please try again.'
+            ]);
+        }
+    }
+
+    /**
+     * Handle profile photo upload for dashboard
+     */
+    private function handleProfilePhotoUpload($userId)
+    {
+        $file = $this->request->getFile('profile_photo');
+
+        if (!$file || !$file->isValid()) {
+            return null;
+        }
+
+        // Validate file
+        if ($file->getSize() > 2 * 1024 * 1024) { // 2MB limit
+            return null;
+        }
+
+        if (!in_array($file->getMimeType(), ['image/jpeg', 'image/png', 'image/gif'])) {
+            return null;
+        }
+
+        // Create upload directory if it doesn't exist
+        $uploadPath = WRITEPATH . 'uploads/profiles/';
+        if (!is_dir($uploadPath)) {
+            mkdir($uploadPath, 0755, true);
+        }
+
+        // Generate unique filename
+        $fileName = 'profile_' . $userId . '_' . time() . '.' . $file->getExtension();
+
+        // Move file
+        if ($file->move($uploadPath, $fileName)) {
+            return 'profiles/' . $fileName;
+        }
+
+        return null;
     }
 
     /**
@@ -548,6 +737,46 @@ class ProfileController extends BaseController
     }
 
     /**
+     * Handle profile photo upload for dedicated edit profile page
+     */
+    private function handleProfilePhotoUploadNew($userId, $file)
+    {
+        // Validate file
+        if ($file->getSize() > 2 * 1024 * 1024) { // 2MB limit
+            log_message('error', 'Profile photo upload failed: File size too large (' . $file->getSize() . ' bytes)');
+            return null;
+        }
+
+        if (!in_array($file->getMimeType(), ['image/jpeg', 'image/png', 'image/gif', 'image/webp'])) {
+            log_message('error', 'Profile photo upload failed: Invalid mime type (' . $file->getMimeType() . ')');
+            return null;
+        }
+
+        // Create upload directory if it doesn't exist
+        $uploadPath = FCPATH . 'uploads/';
+        if (!is_dir($uploadPath)) {
+            mkdir($uploadPath, 0755, true);
+        }
+
+        // Generate unique filename
+        $fileName = 'profile_' . $userId . '_' . time() . '.' . $file->getExtension();
+
+        // Move file
+        try {
+            if ($file->move($uploadPath, $fileName)) {
+                log_message('info', 'Profile photo uploaded successfully: ' . $fileName);
+                return $fileName;
+            } else {
+                log_message('error', 'Profile photo upload failed: Could not move file');
+                return null;
+            }
+        } catch (\Exception $e) {
+            log_message('error', 'Profile photo upload error: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
      * Send password change notification
      */
     private function sendPasswordChangeNotification($email, $name)
@@ -604,5 +833,29 @@ class ProfileController extends BaseController
             log_message('error', 'Failed to send deactivation email: ' . $e->getMessage());
             return false;
         }
+    }
+
+    /**
+     * Get user registration count
+     */
+    private function getUserRegistrationCount($userId)
+    {
+        $db = \Config\Database::connect();
+        return $db->table('registrations')
+                  ->where('user_id', $userId)
+                  ->countAllResults();
+    }
+
+    /**
+     * Get upcoming events count for user
+     */
+    private function getUserUpcomingEventsCount($userId)
+    {
+        $db = \Config\Database::connect();
+        return $db->table('registrations r')
+                  ->join('events e', 'e.id = r.event_id')
+                  ->where('r.user_id', $userId)
+                  ->where('e.event_date >=', date('Y-m-d'))
+                  ->countAllResults();
     }
 }

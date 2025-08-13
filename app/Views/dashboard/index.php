@@ -5,667 +5,7 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('styles') ?>
-<style>
-.avatar-sm {
-    width: 2.5rem;
-    height: 2.5rem;
-    font-size: 1rem;
-}
-
-.card-hover {
-    transition: all 0.3s ease;
-    border: 1px solid #e0e6ed !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
-}
-
-.card-hover:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.15) !important;
-    border-color: #3b82f6 !important;
-}
-
-.border-4 {
-    border-width: 4px !important;
-}
-
-.card-registration {
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-    transition: all 0.3s ease;
-    background: #ffffff;
-    margin-bottom: 1rem;
-}
-
-.card-registration:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-    border-color: #3b82f6;
-}
-
-.registration-card-header {
-    border-bottom: 1px solid #f1f5f9;
-    padding-bottom: 1rem;
-    margin-bottom: 1rem;
-}
-
-.registration-meta-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 0.75rem;
-    align-items: center;
-}
-
-.registration-action-buttons {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    flex-shrink: 0;
-}
-
-@media (max-width: 768px) {
-    .registration-meta-grid {
-        grid-template-columns: 1fr;
-        gap: 0.5rem;
-        margin-bottom: 1rem;
-    }
-    
-    .registration-action-buttons {
-        justify-content: stretch;
-        width: 100%;
-    }
-    
-    .registration-action-buttons .btn {
-        flex: 1;
-    }
-    
-    .card-registration .card-body {
-        padding: 1rem !important;
-    }
-}
-
-/* Modal styling improvements - darker blues for better visibility */
-.modal .text-primary {
-    color: #1e40af !important;
-}
-
-.modal .bg-primary {
-    background-color: #1e40af !important;
-}
-
-.modal .btn-primary {
-    background-color: #1e40af !important;
-    border-color: #1e40af !important;
-}
-
-.modal .btn-primary:hover {
-    background-color: #1d4ed8 !important;
-    border-color: #1d4ed8 !important;
-}
-
-.modal .text-info {
-    color: #0369a1 !important;
-}
-
-/* Card detail modal specific styling */
-.modal-content .card.border-0.bg-light {
-    background-color: #f8fafc !important;
-    border: 1px solid #e2e8f0 !important;
-}
-
-.modal-content .text-dark {
-    color: #1f2937 !important;
-    font-weight: 600;
-}
-
-/* Payment modal improvements */
-.payment-summary-card {
-    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%) !important;
-    border: 1px solid #cbd5e1 !important;
-}
-
-.payment-method-card {
-    border: 2px solid #e2e8f0 !important;
-    background: #ffffff !important;
-}
-
-.payment-method-card.selected {
-    border-color: #1e40af !important;
-    background: #eff6ff !important;
-}
-
-/* Icon colors for better contrast */
-.modal .fas.fa-info-circle {
-    color: #1e40af !important;
-}
-
-.modal .fas.fa-hashtag {
-    color: #0369a1 !important;
-}
-
-.modal .fas.fa-calendar {
-    color: #059669 !important;
-}
-
-.modal .fas.fa-user {
-    color: #1e40af !important;
-}
-
-.modal .fas.fa-clock {
-    color: #d97706 !important;
-}
-
-/* Badge improvements in modal */
-.modal .badge.bg-warning {
-    background-color: #f59e0b !important;
-    color: #1f2937 !important;
-}
-
-.modal .badge.bg-success {
-    background-color: #059669 !important;
-}
-
-.modal .badge.bg-info {
-    background-color: #0369a1 !important;
-}
-
-/* Avatar improvements in modal */
-.modal .avatar-sm.bg-primary {
-    background-color: #1e40af !important;
-}
-
-.modal .avatar-sm.bg-warning {
-    background-color: #f59e0b !important;
-}
-
-/* Code styling for registration ID */
-.modal code {
-    background-color: #f1f5f9 !important;
-    color: #1e40af !important;
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.375rem;
-    font-weight: 700;
-}
-
-/* Payment method card styling */
-.cursor-pointer {
-    cursor: pointer;
-}
-
-.payment-method-card {
-    transition: all 0.3s ease;
-    border: 2px solid #e2e8f0;
-    background: #ffffff;
-}
-
-.payment-method-card:hover {
-    border-color: #cbd5e1;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    transform: translateY(-1px);
-}
-
-.payment-method-card.selected {
-    border-color: #1e40af;
-    background: #eff6ff;
-    box-shadow: 0 4px 16px rgba(30,64,175,0.2);
-}
-
-.payment-check {
-    font-size: 1.2rem;
-}
-
-/* ========== UNIFIED THEME COLORS ========== */
-/* Based on the gradient theme from 'Daftar Event' buttons */
-
-:root {
-    --theme-primary: #2c3e50;
-    --theme-secondary: #3498db;
-    --theme-gradient: linear-gradient(45deg, #2c3e50, #3498db);
-    --theme-gradient-hover: linear-gradient(45deg, #1e2a38, #2980b9);
-    --theme-success: #27ae60;
-    --theme-warning: #f39c12;
-    --theme-danger: #e74c3c;
-    --theme-info: #3498db;
-    --theme-light: #ecf0f1;
-    --theme-dark: #2c3e50;
-    --theme-muted: #7f8c8d;
-}
-
-/* Welcome Banner */
-.card.bg-primary {
-    background: var(--theme-gradient) !important;
-    border: none;
-    box-shadow: 0 8px 25px rgba(44, 62, 80, 0.3);
-}
-
-/* Stats Cards */
-.card.bg-primary.text-white {
-    background: var(--theme-gradient) !important;
-}
-
-/* Profile Avatar */
-.bg-primary.text-white.rounded-circle {
-    background: var(--theme-gradient) !important;
-}
-
-/* Action Buttons - Primary */
-.btn-primary, .btn.btn-primary {
-    background: var(--theme-gradient) !important;
-    border: none !important;
-    border-radius: 25px;
-    padding: 10px 25px;
-    font-weight: 600;
-    box-shadow: 0 4px 15px rgba(44, 62, 80, 0.3);
-    transition: all 0.3s ease;
-}
-
-.btn-primary:hover, .btn.btn-primary:hover {
-    background: var(--theme-gradient-hover) !important;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(44, 62, 80, 0.4);
-}
-
-/* Outline Buttons */
-.btn-outline-primary {
-    border: 2px solid var(--theme-primary) !important;
-    color: var(--theme-primary) !important;
-    border-radius: 25px;
-    padding: 10px 25px;
-    font-weight: 600;
-    transition: all 0.3s ease;
-}
-
-.btn-outline-primary:hover {
-    background: var(--theme-gradient) !important;
-    border-color: transparent !important;
-    color: white !important;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(44, 62, 80, 0.3);
-}
-
-/* Success Buttons (for free events) */
-.btn-success {
-    background: linear-gradient(45deg, #27ae60, #2ecc71) !important;
-    border: none !important;
-    border-radius: 25px;
-    padding: 10px 25px;
-    font-weight: 600;
-    box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
-}
-
-.btn-success:hover {
-    background: linear-gradient(45deg, #229954, #28b463) !important;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
-}
-
-/* Card Hover Effects */
-.card-hover:hover {
-    border-color: var(--theme-secondary) !important;
-}
-
-.card-event:hover {
-    border-color: var(--theme-secondary) !important;
-}
-
-/* Icons - Theme Colors */
-.text-primary {
-    color: var(--theme-primary) !important;
-}
-
-.text-secondary {
-    color: var(--theme-secondary) !important;
-}
-
-.text-info {
-    color: var(--theme-info) !important;
-}
-
-/* Badges */
-.badge.bg-primary {
-    background: var(--theme-gradient) !important;
-}
-
-.badge.bg-info {
-    background: linear-gradient(45deg, #3498db, #5dade2) !important;
-}
-
-/* Avatar Colors in Cards */
-.avatar-sm.bg-primary {
-    background: var(--theme-gradient) !important;
-}
-
-.avatar-sm.bg-success {
-    background: linear-gradient(45deg, #27ae60, #2ecc71) !important;
-}
-
-.avatar-sm.bg-warning {
-    background: linear-gradient(45deg, #f39c12, #f4d03f) !important;
-}
-
-.avatar-sm.bg-secondary {
-    background: linear-gradient(45deg, #7f8c8d, #95a5a6) !important;
-}
-
-/* Border Colors */
-.border-success {
-    border-color: var(--theme-success) !important;
-}
-
-.border-primary {
-    border-color: var(--theme-primary) !important;
-}
-
-.border-warning {
-    border-color: var(--theme-warning) !important;
-}
-
-/* Panel Headers */
-.card-header.bg-info {
-    background: var(--theme-gradient) !important;
-}
-
-.card-header.bg-success {
-    background: linear-gradient(45deg, #27ae60, #2ecc71) !important;
-}
-
-/* Spinners */
-.spinner-border.text-primary {
-    color: var(--theme-primary) !important;
-}
-
-/* Links */
-a.text-primary {
-    color: var(--theme-primary) !important;
-}
-
-a.text-primary:hover {
-    color: var(--theme-secondary) !important;
-}
-
-/* Payment Modal Overrides */
-.modal .btn-primary {
-    background: var(--theme-gradient) !important;
-    border: none !important;
-}
-
-.modal .btn-primary:hover {
-    background: var(--theme-gradient-hover) !important;
-}
-
-/* Small Button Variants */
-.btn-sm.btn-primary {
-    background: var(--theme-gradient) !important;
-    border: none !important;
-    border-radius: 20px;
-    padding: 8px 20px;
-}
-
-.btn-sm.btn-success {
-    background: linear-gradient(45deg, #27ae60, #2ecc71) !important;
-    border: none !important;
-    border-radius: 20px;
-    padding: 8px 20px;
-}
-
-.btn-sm.btn-outline-primary {
-    border: 2px solid var(--theme-primary) !important;
-    color: var(--theme-primary) !important;
-    border-radius: 20px;
-    padding: 8px 20px;
-}
-
-.btn-sm.btn-outline-primary:hover {
-    background: var(--theme-gradient) !important;
-    border-color: transparent !important;
-    color: white !important;
-}
-
-/* Form Controls */
-.form-control:focus {
-    border-color: var(--theme-secondary) !important;
-    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25) !important;
-}
-
-/* Event Card Free Badge */
-.badge.bg-success {
-    background: linear-gradient(45deg, #27ae60, #2ecc71) !important;
-}
-
-/* Navigation overrides for dashboard only */
-.dashboard-page .navbar-brand {
-    background: var(--theme-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    font-weight: bold;
-}
-
-/* ========== PANEL SPECIFIC STYLING ========== */
-/* Unified color palette for all panels */
-
-/* Panel Peserta (Audience Panel) */
-.card-header.bg-info.text-white {
-    background: var(--theme-gradient) !important;
-    border: none;
-    box-shadow: 0 2px 8px rgba(44, 62, 80, 0.2);
-}
-
-/* Alternative gradient for Panel Peserta - more vibrant */
-#audienceContent .card-header.bg-info {
-    background: linear-gradient(135deg, #3498db, #2980b9) !important;
-    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
-}
-
-/* Pendaftaran Saya Panel */
-.card-header {
-    background: linear-gradient(135deg, #ecf0f1, #d5dbdb) !important;
-    border: none;
-    border-bottom: 3px solid var(--theme-secondary) !important;
-    color: var(--theme-dark) !important;
-    font-weight: 600;
-}
-
-/* Special styling for My Registrations header */
-.card .card-header h6 {
-    color: var(--theme-dark) !important;
-    font-weight: 700;
-    font-size: 1rem;
-}
-
-.card .card-header i {
-    color: var(--theme-secondary) !important;
-}
-
-/* Alternative styling for section headers */
-.section-header-primary {
-    background: var(--theme-gradient) !important;
-    color: white !important;
-    border-radius: 10px 10px 0 0;
-    padding: 1rem 1.5rem;
-    border: none;
-    box-shadow: 0 4px 15px rgba(44, 62, 80, 0.2);
-}
-
-.section-header-secondary {
-    background: linear-gradient(135deg, #3498db, #5dade2) !important;
-    color: white !important;
-    border-radius: 10px 10px 0 0;
-    padding: 1rem 1.5rem;
-    border: none;
-    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
-}
-
-.section-header-light {
-    background: linear-gradient(135deg, #f8f9fa, #e9ecef) !important;
-    color: var(--theme-dark) !important;
-    border-radius: 10px 10px 0 0;
-    padding: 1rem 1.5rem;
-    border: none;
-    border-bottom: 3px solid var(--theme-secondary) !important;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-}
-
-/* Panel action buttons color coordination */
-.panel-btn-primary {
-    background: var(--theme-gradient) !important;
-    border: none !important;
-    color: white !important;
-    border-radius: 25px;
-    padding: 12px 25px;
-    font-weight: 600;
-    box-shadow: 0 4px 15px rgba(44, 62, 80, 0.3);
-    transition: all 0.3s ease;
-}
-
-.panel-btn-primary:hover {
-    background: var(--theme-gradient-hover) !important;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(44, 62, 80, 0.4);
-    color: white !important;
-}
-
-.panel-btn-secondary {
-    background: linear-gradient(45deg, #3498db, #5dade2) !important;
-    border: none !important;
-    color: white !important;
-    border-radius: 25px;
-    padding: 12px 25px;
-    font-weight: 600;
-    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
-    transition: all 0.3s ease;
-}
-
-.panel-btn-secondary:hover {
-    background: linear-gradient(45deg, #2980b9, #3498db) !important;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
-    color: white !important;
-}
-
-.panel-btn-success {
-    background: linear-gradient(45deg, #27ae60, #2ecc71) !important;
-    border: none !important;
-    color: white !important;
-    border-radius: 25px;
-    padding: 12px 25px;
-    font-weight: 600;
-    box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
-    transition: all 0.3s ease;
-}
-
-.panel-btn-success:hover {
-    background: linear-gradient(45deg, #229954, #28b463) !important;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
-    color: white !important;
-}
-
-.panel-btn-warning {
-    background: linear-gradient(45deg, #f39c12, #f4d03f) !important;
-    border: none !important;
-    color: white !important;
-    border-radius: 25px;
-    padding: 12px 25px;
-    font-weight: 600;
-    box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3);
-    transition: all 0.3s ease;
-}
-
-.panel-btn-warning:hover {
-    background: linear-gradient(45deg, #d68910, #f39c12) !important;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(243, 156, 18, 0.4);
-    color: white !important;
-}
-
-/* Panel card improvements */
-.panel-card {
-    border: none !important;
-    border-radius: 15px !important;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.08) !important;
-    overflow: hidden;
-    transition: all 0.3s ease;
-}
-
-.panel-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.12) !important;
-}
-
-/* Event Tersedia section header */
-#audienceContent .card:nth-child(2) .card-header h6 {
-    background: linear-gradient(45deg, var(--theme-secondary), #5dade2);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    font-weight: 700;
-}
-
-.card-event {
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-    transition: all 0.3s ease;
-}
-
-.card-event:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-    border-color: #3b82f6;
-}
-
-.btn-group .btn {
-    border-radius: 0.375rem !important;
-}
-
-.btn-group .btn:not(:last-child) {
-    margin-right: 0.5rem;
-}
-
-.text-truncate-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-.status-indicator {
-    position: relative;
-}
-
-.status-indicator::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--bs-success);
-    border: 2px solid white;
-}
-
-.status-indicator.pending::before {
-    background: var(--bs-warning);
-}
-
-.status-indicator.failed::before {
-    background: var(--bs-danger);
-}
-
-.info-divider {
-    border-top: 1px solid #e2e8f0;
-    margin: 1rem 0 0.75rem 0;
-    padding-top: 0.75rem;
-}
-
-.metadata-section {
-    background-color: #f8fafc;
-    border-radius: 0.5rem;
-    padding: 0.75rem;
-    margin-top: 0.5rem;
-}
-</style>
+<link rel="stylesheet" href="<?= base_url('css/dashboard.css') ?>">
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
@@ -875,9 +215,9 @@ a.text-primary:hover {
                     <p class="text-muted mb-1" id="profileEmail">Loading...</p>
                     <p class="text-muted mb-3" id="profileInstitution">Loading...</p>
                     <div class="d-grid">
-                        <button class="btn btn-outline-primary btn-sm" onclick="editProfile()">
+                        <a href="/profile/edit" class="btn btn-outline-primary btn-sm">
                             <i class="fas fa-edit me-1"></i>Edit Profil
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -910,6 +250,125 @@ a.text-primary:hover {
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header section-header-primary">
+                <h5 class="modal-title" id="editProfileModalLabel">
+                    <i class="fas fa-user-edit me-2"></i>Edit Profil
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="editProfileForm">
+                    <!-- Profile Photo Section -->
+                    <div class="text-center mb-4">
+                        <div class="profile-photo-wrapper position-relative d-inline-block">
+                            <div id="currentProfilePhoto" class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
+                                <i class="fas fa-user fa-3x"></i>
+                            </div>
+                            <button type="button" class="btn btn-sm panel-btn-secondary position-absolute bottom-0 end-0 rounded-circle p-2" onclick="triggerPhotoUpload()">
+                                <i class="fas fa-camera"></i>
+                            </button>
+                        </div>
+                        <div class="mt-2">
+                            <small class="text-muted">Klik ikon kamera untuk mengubah foto profil</small>
+                        </div>
+                        <input type="file" id="profilePhotoInput" accept="image/*" style="display: none;">
+                    </div>
+
+                    <div class="row g-3">
+                        <!-- Personal Information -->
+                        <div class="col-12">
+                            <h6 class="fw-bold text-dark mb-3">
+                                <i class="fas fa-user me-2 text-primary"></i>Informasi Pribadi
+                            </h6>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="editFirstName" class="form-label">Nama Depan *</label>
+                            <input type="text" class="form-control" id="editFirstName" name="first_name" required>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="editLastName" class="form-label">Nama Belakang *</label>
+                            <input type="text" class="form-control" id="editLastName" name="last_name" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="editEmail" class="form-label">Email *</label>
+                            <input type="email" class="form-control" id="editEmail" name="email" required readonly>
+                            <small class="text-muted">Email tidak dapat diubah</small>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="editPhone" class="form-label">Nomor Telepon</label>
+                            <input type="tel" class="form-control" id="editPhone" name="phone">
+                        </div>
+
+                        <div class="col-12">
+                            <label for="editInstitution" class="form-label">Institusi/Organisasi</label>
+                            <input type="text" class="form-control" id="editInstitution" name="institution">
+                        </div>
+
+                        <!-- Security Section -->
+                        <div class="col-12 mt-4">
+                            <hr>
+                            <h6 class="fw-bold text-dark mb-3">
+                                <i class="fas fa-lock me-2 text-warning"></i>Ubah Password
+                                <small class="text-muted fw-normal">(Opsional)</small>
+                            </h6>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="currentPassword" class="form-label">Password Saat Ini</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="currentPassword" name="current_password">
+                                <button type="button" class="btn btn-outline-secondary" onclick="togglePasswordVisibility('currentPassword')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="newPassword" class="form-label">Password Baru</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="newPassword" name="new_password">
+                                <button type="button" class="btn btn-outline-secondary" onclick="togglePasswordVisibility('newPassword')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <small class="text-muted">Minimal 6 karakter</small>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="confirmPassword" class="form-label">Konfirmasi Password Baru</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="confirmPassword" name="confirm_password">
+                                <button type="button" class="btn btn-outline-secondary" onclick="togglePasswordVisibility('confirmPassword')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Batal
+                </button>
+                <button type="button" class="btn panel-btn-primary" id="saveProfileBtn" onclick="saveProfile()">
+                    <span class="loading spinner-border spinner-border-sm me-2" role="status" style="display: none;"></span>
+                    <span class="btn-text">
+                        <i class="fas fa-save me-1"></i>Simpan Perubahan
+                    </span>
+                </button>
             </div>
         </div>
     </div>
@@ -2375,8 +1834,230 @@ function viewMyAbstracts() {
     showAlert('Fitur kelola abstract akan segera tersedia', 'info');
 }
 
-function editProfile() {
-    showAlert('Fitur edit profil akan segera tersedia', 'info');
+// Edit profile functionality
+async function editProfile() {
+    try {
+        // Get current user data
+        const userData = getCurrentUserData();
+        if (!userData) {
+            showAlert('Data user tidak ditemukan', 'danger');
+            return;
+        }
+        
+        // Populate form with current data
+        populateEditProfileForm(userData);
+        
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('editProfileModal'));
+        modal.show();
+        
+    } catch (error) {
+        console.error('Error opening edit profile:', error);
+        showAlert('Terjadi kesalahan saat membuka form edit profil', 'danger');
+    }
+}
+
+// Get current user data from session or local storage
+function getCurrentUserData() {
+    // In a real app, this would come from session or API call
+    // For now, get from session data that's already loaded
+    return {
+        first_name: document.getElementById('profileName')?.textContent?.split(' ')[0] || '',
+        last_name: document.getElementById('profileName')?.textContent?.split(' ').slice(1).join(' ') || '',
+        email: document.getElementById('profileEmail')?.textContent || '',
+        institution: document.getElementById('profileInstitution')?.textContent || '',
+        phone: '' // This should come from API in real implementation
+    };
+}
+
+// Populate edit profile form with current data
+function populateEditProfileForm(userData) {
+    document.getElementById('editFirstName').value = userData.first_name;
+    document.getElementById('editLastName').value = userData.last_name;
+    document.getElementById('editEmail').value = userData.email;
+    document.getElementById('editInstitution').value = userData.institution;
+    document.getElementById('editPhone').value = userData.phone;
+    
+    // Clear password fields
+    document.getElementById('currentPassword').value = '';
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmPassword').value = '';
+}
+
+// Trigger photo upload
+function triggerPhotoUpload() {
+    document.getElementById('profilePhotoInput').click();
+}
+
+// Toggle password visibility
+function togglePasswordVisibility(fieldId) {
+    const field = document.getElementById(fieldId);
+    const button = field.nextElementSibling;
+    const icon = button.querySelector('i');
+    
+    if (field.type === 'password') {
+        field.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        field.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
+
+// Save profile changes
+async function saveProfile() {
+    const saveBtn = document.getElementById('saveProfileBtn');
+    const form = document.getElementById('editProfileForm');
+    
+    try {
+        // Validate form
+        if (!validateProfileForm()) {
+            return;
+        }
+        
+        // Show loading
+        showLoading(saveBtn);
+        
+        // Prepare form data
+        const formData = new FormData();
+        formData.append('first_name', document.getElementById('editFirstName').value.trim());
+        formData.append('last_name', document.getElementById('editLastName').value.trim());
+        formData.append('institution', document.getElementById('editInstitution').value.trim());
+        formData.append('phone', document.getElementById('editPhone').value.trim());
+        
+        // Add photo if uploaded
+        const photoInput = document.getElementById('profilePhotoInput');
+        if (photoInput.files[0]) {
+            formData.append('profile_photo', photoInput.files[0]);
+        }
+        
+        // Add password fields if filled
+        const currentPassword = document.getElementById('currentPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+        if (currentPassword && newPassword) {
+            formData.append('current_password', currentPassword);
+            formData.append('new_password', newPassword);
+        }
+        
+        // Send update request
+        const response = await fetch('/profile/update', {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            showAlert('Profil berhasil diperbarui!', 'success');
+            
+            // Update display
+            updateProfileDisplay(data.user);
+            
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('editProfileModal'));
+            modal.hide();
+            
+            // Refresh user info in dashboard
+            loadUserInfo();
+            
+        } else {
+            showAlert(data.message || 'Gagal memperbarui profil', 'danger');
+        }
+        
+    } catch (error) {
+        console.error('Error saving profile:', error);
+        showAlert('Terjadi kesalahan saat menyimpan profil', 'danger');
+    } finally {
+        hideLoading(saveBtn);
+    }
+}
+
+// Validate profile form
+function validateProfileForm() {
+    const firstName = document.getElementById('editFirstName').value.trim();
+    const lastName = document.getElementById('editLastName').value.trim();
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    
+    // Check required fields
+    if (!firstName) {
+        showAlert('Nama depan wajib diisi', 'warning');
+        document.getElementById('editFirstName').focus();
+        return false;
+    }
+    
+    if (!lastName) {
+        showAlert('Nama belakang wajib diisi', 'warning');
+        document.getElementById('editLastName').focus();
+        return false;
+    }
+    
+    // Validate password change if any field is filled
+    if (currentPassword || newPassword || confirmPassword) {
+        if (!currentPassword) {
+            showAlert('Password saat ini wajib diisi untuk mengubah password', 'warning');
+            document.getElementById('currentPassword').focus();
+            return false;
+        }
+        
+        if (!newPassword) {
+            showAlert('Password baru wajib diisi', 'warning');
+            document.getElementById('newPassword').focus();
+            return false;
+        }
+        
+        if (newPassword.length < 6) {
+            showAlert('Password baru minimal 6 karakter', 'warning');
+            document.getElementById('newPassword').focus();
+            return false;
+        }
+        
+        if (newPassword !== confirmPassword) {
+            showAlert('Konfirmasi password tidak sama', 'warning');
+            document.getElementById('confirmPassword').focus();
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+// Update profile display after successful save
+function updateProfileDisplay(userData) {
+    const profileName = document.getElementById('profileName');
+    const profileEmail = document.getElementById('profileEmail');
+    const profileInstitution = document.getElementById('profileInstitution');
+    const userName = document.getElementById('userName');
+    
+    if (profileName) {
+        profileName.textContent = `${userData.first_name} ${userData.last_name}`;
+    }
+    
+    if (profileEmail) {
+        profileEmail.textContent = userData.email;
+    }
+    
+    if (profileInstitution) {
+        profileInstitution.textContent = userData.institution || 'Tidak diisi';
+    }
+    
+    if (userName) {
+        userName.textContent = `${userData.first_name} ${userData.last_name}`;
+    }
+    
+    // Update profile photo if provided
+    if (userData.profile_photo_url) {
+        const profilePhotos = document.querySelectorAll('.bg-primary.rounded-circle');
+        profilePhotos.forEach(photo => {
+            photo.innerHTML = `<img src="${userData.profile_photo_url}" alt="Profile" class="rounded-circle w-100 h-100" style="object-fit: cover;">`;
+        });
+    }
 }
 
 function viewAbstract(id) {

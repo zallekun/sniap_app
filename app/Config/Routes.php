@@ -252,6 +252,10 @@ $routes->group('', ['namespace' => 'App\Controllers'], function($routes) {
     $routes->get('dashboard/profile', 'DashboardController::profile', ['filter' => 'auth']);
     $routes->post('dashboard/profile', 'DashboardController::updateProfile', ['filter' => 'auth']);
     $routes->post('dashboard/change-password', 'DashboardController::changePassword', ['filter' => 'auth']);
+    
+    // Profile management routes
+    $routes->get('profile/edit', 'User\ProfileController::edit', ['filter' => 'auth']);
+    $routes->post('profile/update', 'User\ProfileController::update', ['filter' => 'auth']);
     $routes->get('dashboard/stats', 'DashboardController::stats', ['filter' => 'auth']);
     $routes->get('dashboard/registrations', 'DashboardController::registrations', ['filter' => 'auth']);
     $routes->get('dashboard/events', 'DashboardController::events', ['filter' => 'auth']);

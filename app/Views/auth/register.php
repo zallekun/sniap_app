@@ -1,5 +1,9 @@
 <?= $this->extend('layouts/main') ?>
 
+<?= $this->section('styles') ?>
+<link rel="stylesheet" href="<?= base_url('css/auth.css') ?>">
+<?= $this->endSection() ?>
+
 <?= $this->section('content') ?>
 <div class="auth-container">
     <div class="auth-card">
@@ -84,8 +88,15 @@
 
                     <div class="mb-3">
                         <label for="phone" class="form-label">Nomor Telepon *</label>
-                        <input type="tel" class="form-control" id="phone" name="phone" placeholder="+62812xxxxxxxx" required>
+                        <div class="input-group">
+                            <span class="input-group-text phone-prefix">
+                                <i class="fas fa-phone"></i>
+                                <span class="ms-1">+62</span>
+                            </span>
+                            <input type="tel" class="form-control" id="phone" name="phone" placeholder="812xxxxxxxx" required>
+                        </div>
                         <div class="invalid-feedback">Nomor telepon tidak valid</div>
+                        <small class="text-muted">Masukkan nomor tanpa awalan +62</small>
                     </div>
 
                     <!-- Password -->
@@ -193,15 +204,34 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Phone number formatting
+    // Phone number formatting - only allow numbers and format nicely
     document.getElementById('phone').addEventListener('input', function() {
-        let value = this.value.replace(/\D/g, '');
+        let value = this.value.replace(/\D/g, ''); // Remove non-digits
+        
+        // Remove leading zero if present (Indonesian format)
         if (value.startsWith('0')) {
-            value = '62' + value.substring(1);
-        } else if (!value.startsWith('62')) {
-            value = '62' + value;
+            value = value.substring(1);
         }
-        this.value = '+' + value;
+        
+        // Format as: 812-3456-7890
+        if (value.length > 3 && value.length <= 7) {
+            value = value.substring(0, 3) + '-' + value.substring(3);
+        } else if (value.length > 7) {
+            value = value.substring(0, 3) + '-' + value.substring(3, 7) + '-' + value.substring(7, 11);
+        }
+        
+        this.value = value;
+    });
+
+    // Phone validation
+    document.getElementById('phone').addEventListener('blur', function() {
+        const phoneRegex = /^8\d{2}-?\d{4}-?\d{4}$/; // Indonesian mobile format starting with 8
+        if (this.value && !phoneRegex.test(this.value.replace(/-/g, ''))) {
+            this.classList.add('is-invalid');
+            this.nextElementSibling.textContent = 'Format: 812-3456-7890 (tanpa +62)';
+        } else {
+            this.classList.remove('is-invalid');
+        }
     });
 
     // Form submission
@@ -267,7 +297,7 @@ document.addEventListener('DOMContentLoaded', function() {
             last_name: document.getElementById('last_name').value,
             email: document.getElementById('email').value,
             institution: document.getElementById('institution').value,
-            phone_number: document.getElementById('phone').value,
+            phone_number: '+62' + document.getElementById('phone').value.replace(/-/g, ''),
             password: passwordField.value,
             confirm_password: confirmPasswordField.value,
             role: roleInput.value

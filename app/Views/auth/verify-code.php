@@ -1,5 +1,9 @@
 <?= $this->extend('layouts/main') ?>
 
+<?= $this->section('styles') ?>
+<link rel="stylesheet" href="<?= base_url('css/auth.css') ?>">
+<?= $this->endSection() ?>
+
 <?= $this->section('content') ?>
 <div class="auth-container">
     <div class="auth-card">
@@ -62,116 +66,6 @@
     </div>
 </div>
 
-<style>
-.auth-container {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 20px;
-}
-
-.auth-card {
-    width: 100%;
-    max-width: 450px;
-}
-
-.logo-section {
-    text-align: center;
-    margin-bottom: 2rem;
-}
-
-.logo-section h1 {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-}
-
-.logo-section h2 {
-    color: #333;
-    margin-bottom: 0.5rem;
-}
-
-.logo-section p {
-    color: #666;
-    margin-bottom: 0;
-}
-
-.card {
-    border: none;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-}
-
-.btn-lg {
-    padding: 12px 24px;
-    font-size: 1.1rem;
-}
-
-.verification-code-container {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-    margin: 20px 0;
-}
-
-.code-input {
-    width: 50px;
-    height: 60px;
-    text-align: center;
-    border: 2px solid #ddd;
-    border-radius: 8px;
-    font-size: 1.8rem;
-    font-weight: bold;
-    color: #333;
-    background: #fff;
-    transition: all 0.3s ease;
-}
-
-.code-input:focus {
-    outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
-    background: #f8f9fa;
-}
-
-.code-input.is-invalid {
-    border-color: #dc3545;
-}
-
-.code-input.filled {
-    border-color: #28a745;
-    background: #f8fff9;
-}
-
-.alert {
-    border-radius: 10px;
-}
-
-@media (max-width: 576px) {
-    .auth-container {
-        padding: 10px;
-    }
-    
-    .card-body {
-        padding: 2rem !important;
-    }
-    
-    .logo-section h1 {
-        font-size: 2.5rem;
-    }
-    
-    .verification-code-container {
-        gap: 8px;
-    }
-    
-    .code-input {
-        width: 45px;
-        height: 55px;
-        font-size: 1.6rem;
-    }
-}
-</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
