@@ -105,7 +105,7 @@ class AuthApiController extends BaseController
                 'exp' => time() + $this->jwtExpire
             ];
 
-            $jwt = \Firebase\JWT\JWT::encode($payload, $this->jwtSecret, 'HS256');
+            $jwt = \Firebase\JWT\JWT::encode($payload, $this->jwtKey, 'HS256');
 
             // Send verification email
             try {

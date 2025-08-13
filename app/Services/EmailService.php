@@ -121,6 +121,7 @@ class EmailService
         }
         
         return [
+            'title' => $event['title'], // Add for compatibility
             'eventTitle' => $event['title'],
             'eventDate' => $event['event_date'],
             'eventEndDate' => $event['event_date'], // Use same date as end date
