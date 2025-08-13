@@ -191,69 +191,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Login form submission - Use web route instead of API
+    // Login form submission - Use standard form submission
     loginForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
         const submitBtn = loginForm.querySelector('button[type="submit"]');
         showLoading(submitBtn);
-
-        // Create form data for web submission
-        const formData = new FormData();
-        formData.append('email', emailField.value);
-        formData.append('password', passwordField.value);
         
-        if (document.getElementById('remember').checked) {
-            formData.append('remember_me', '1');
-        }
-
-        // Add CSRF token
-        const csrfToken = document.querySelector('input[name="<?= csrf_token() ?>"]');
-        if (csrfToken) {
-            formData.append('<?= csrf_token() ?>', csrfToken.value);
-        }
-
-        // Submit to web login route
-        fetch('/login', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => {
-            if (response.redirected) {
-                // Login successful - redirect to dashboard
-                showAlert('Login berhasil! Mengarahkan ke dashboard...', 'success');
-                setTimeout(() => {
-                    window.location.href = response.url;
-                }, 1000);
-            } else {
-                return response.text();
-            }
-        })
-        .then(html => {
-            if (html) {
-                // Parse response for error messages
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                const errorAlert = doc.querySelector('.alert-danger');
-                
-                if (errorAlert) {
-                    const errorMessage = errorAlert.textContent.trim();
-                    showAlert(errorMessage, 'danger');
-                } else {
-                    showAlert('Login gagal. Silakan periksa email dan password Anda.', 'danger');
-                }
-            }
-        })
-        .catch(error => {
-            console.error('Login error:', error);
-            showAlert('Terjadi kesalahan sistem. Silakan coba lagi.', 'danger');
-        })
-        .finally(() => {
-            hideLoading(submitBtn);
-        });
+        // Let the form submit normally to avoid CSRF issues
+        // The form will submit to the same page (POST /login)
     });
 
     // Remove validation classes on input

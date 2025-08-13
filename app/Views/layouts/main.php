@@ -152,6 +152,7 @@
     </style>
     
     <?= $this->renderSection('styles') ?>
+    <?= $this->renderSection('head') ?>
 </head>
 <body>
     <!-- Navigation -->

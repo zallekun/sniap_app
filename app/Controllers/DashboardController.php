@@ -297,15 +297,18 @@ class DashboardController extends BaseController
             $db = \Config\Database::connect();
             $events = $db->table('events')
                 ->where('is_active', true)
-                ->where('event_date >=', date('Y-m-d'))
                 ->orderBy('event_date', 'ASC')
                 ->limit(10)
                 ->get()
                 ->getResultArray();
 
+            log_message('debug', 'Events loaded: ' . count($events) . ' events found');
+            log_message('debug', 'Events data: ' . json_encode($events));
+
             return $this->response->setJSON([
                 'status' => 'success',
-                'data' => $events
+                'data' => $events,
+                'count' => count($events)
             ]);
         } catch (\Exception $e) {
             log_message('error', 'Load events error: ' . $e->getMessage());

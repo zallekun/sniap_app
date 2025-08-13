@@ -246,10 +246,15 @@ class AuthController extends BaseController
         $token = bin2hex(random_bytes(32));
         $expires = time() + (30 * 24 * 60 * 60); // 30 days
 
-        // Save token to database (you might want to create a separate table for this)
-        $this->userModel->update($userId, ['remember_token' => $token]);
+        // Save token to database with error handling
+        try {
+            $this->userModel->update($userId, ['remember_token' => $token]);
+        } catch (\Exception $e) {
+            // Column might not exist, log but continue
+            log_message('warning', 'Could not update remember_token: ' . $e->getMessage());
+        }
 
-        // Set cookie
+        // Set cookie regardless of database update success
         setcookie('remember_token', $token, $expires, '/', '', false, true);
     }
 
