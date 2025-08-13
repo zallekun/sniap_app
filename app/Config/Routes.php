@@ -242,6 +242,10 @@ $routes->group('', ['namespace' => 'App\Controllers'], function($routes) {
     // DASHBOARD ROUTES
     // =================
     $routes->get('dashboard', 'DashboardController::index', ['filter' => 'auth']);
+    $routes->get('dashboard/profile', 'DashboardController::profile', ['filter' => 'auth']);
+    $routes->post('dashboard/profile', 'DashboardController::updateProfile', ['filter' => 'auth']);
+    $routes->post('dashboard/change-password', 'DashboardController::changePassword', ['filter' => 'auth']);
+    $routes->get('dashboard/stats', 'DashboardController::stats', ['filter' => 'auth']);
     
     // =================
     // ADMIN ROUTES

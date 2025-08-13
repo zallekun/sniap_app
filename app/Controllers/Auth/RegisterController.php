@@ -31,6 +31,8 @@ class RegisterController extends BaseController
 
         $data = [
             'title' => 'Register - SNIA Conference',
+            'hideNavbar' => true,
+            'hideFooter' => true,
             'validation' => \Config\Services::validation()
         ];
 

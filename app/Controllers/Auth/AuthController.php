@@ -29,6 +29,8 @@ class AuthController extends BaseController
 
         $data = [
             'title' => 'Login - SNIA Conference',
+            'hideNavbar' => true,
+            'hideFooter' => true,
             'validation' => \Config\Services::validation()
         ];
 
