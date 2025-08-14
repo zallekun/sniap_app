@@ -50,7 +50,7 @@ class PresenterController extends BaseController
                 'stats' => $this->getDashboardStats($userId)
             ];
             
-            return view('presenter/dashboard', $data);
+            return view('roles/presenter/dashboard', $data);
         } catch (\Exception $e) {
             log_message('error', 'Presenter dashboard error: ' . $e->getMessage());
             return redirect()->to('/dashboard')->with('error', 'Failed to load presenter dashboard');
@@ -75,7 +75,7 @@ class PresenterController extends BaseController
                 'abstracts' => $this->getUserAbstracts($userId)
             ];
             
-            return view('presenter/abstracts', $data);
+            return view('roles/presenter/abstracts', $data);
         } catch (\Exception $e) {
             log_message('error', 'Presenter abstracts error: ' . $e->getMessage());
             return redirect()->to('/presenter/dashboard')->with('error', 'Failed to load abstracts');
@@ -100,7 +100,7 @@ class PresenterController extends BaseController
                 'presentations' => $this->getUserPresentations($userId)
             ];
             
-            return view('presenter/presentations', $data);
+            return view('roles/presenter/presentations', $data);
         } catch (\Exception $e) {
             log_message('error', 'Presenter presentations error: ' . $e->getMessage());
             return redirect()->to('/presenter/dashboard')->with('error', 'Failed to load presentations');
@@ -125,7 +125,7 @@ class PresenterController extends BaseController
                 'registrations' => $this->getUserRegistrations($userId)
             ];
             
-            return view('presenter/registrations', $data);
+            return view('roles/presenter/registrations', $data);
         } catch (\Exception $e) {
             log_message('error', 'Presenter registrations error: ' . $e->getMessage());
             return redirect()->to('/presenter/dashboard')->with('error', 'Failed to load registrations');
@@ -150,7 +150,7 @@ class PresenterController extends BaseController
                 'schedule' => $this->getPresenterSchedule($userId)
             ];
             
-            return view('presenter/schedule', $data);
+            return view('roles/presenter/schedule', $data);
         } catch (\Exception $e) {
             log_message('error', 'Presenter schedule error: ' . $e->getMessage());
             return redirect()->to('/presenter/dashboard')->with('error', 'Failed to load schedule');

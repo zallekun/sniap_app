@@ -39,7 +39,7 @@ class RegisterController extends BaseController
             'validation' => \Config\Services::validation()
         ];
 
-        return view('auth/register', $data);
+        return view('shared/auth/register', $data);
     }
 
     /**
@@ -188,7 +188,7 @@ class RegisterController extends BaseController
             'hideFooter' => true
         ];
 
-        return view('auth/verify-code', $data);
+        return view('shared/auth/verify-code', $data);
     }
 
     /**

@@ -286,6 +286,11 @@ $routes->group('', ['namespace' => 'App\Controllers'], function($routes) {
         $routes->get('api/stats', 'Admin\AdminController::getDashboardStatsApi');
         $routes->get('api/users', 'Admin\AdminController::getUsersData');
         $routes->get('api/registrations', 'Admin\AdminController::getRegistrationsData');
+        $routes->get('api/abstracts', 'Admin\AdminController::getAbstractsData');
+        $routes->get('api/reviewers', 'Admin\AdminController::getReviewersData');
+        $routes->get('api/abstract-stats', 'Admin\AdminController::getAbstractStatsApi');
+        $routes->post('api/assign-reviewer', 'Admin\AdminController::assignReviewer');
+        $routes->post('api/bulk-assign-reviewers', 'Admin\AdminController::bulkAssignReviewers');
     });
 
     // =================

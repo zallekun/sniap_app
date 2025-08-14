@@ -91,7 +91,7 @@ class ProfileController extends BaseController
             'validation' => \Config\Services::validation()
         ];
 
-        return view('user/edit_profile', $data);
+        return view('shared/edit_profile', $data);
     }
 
     /**

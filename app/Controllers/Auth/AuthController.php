@@ -34,7 +34,7 @@ class AuthController extends BaseController
             'validation' => \Config\Services::validation()
         ];
 
-        return view('auth/login', $data);
+        return view('shared/auth/login', $data);
     }
 
     /**
@@ -133,7 +133,7 @@ class AuthController extends BaseController
             'validation' => \Config\Services::validation()
         ];
 
-        return view('auth/forgot_password', $data);
+        return view('shared/auth/forgot_password', $data);
     }
 
     /**
@@ -196,7 +196,7 @@ class AuthController extends BaseController
             'validation' => \Config\Services::validation()
         ];
 
-        return view('auth/reset_password', $data);
+        return view('shared/auth/reset_password', $data);
     }
 
     /**

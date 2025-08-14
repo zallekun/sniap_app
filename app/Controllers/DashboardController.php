@@ -51,7 +51,7 @@ class DashboardController extends BaseController
             ];
         }
 
-        return view('dashboard/index', $data);
+        return view('roles/audience/dashboard', $data);
     }
 
     /**
@@ -456,7 +456,7 @@ class DashboardController extends BaseController
                 'validation' => \Config\Services::validation()
             ];
 
-            return view('user/event_schedule', $data);
+            return view('roles/audience/event_schedule', $data);
         } catch (\Exception $e) {
             log_message('error', 'Event schedule page error: ' . $e->getMessage());
             return redirect()->to('/dashboard')->with('error', 'Failed to load event schedule page');

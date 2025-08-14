@@ -50,7 +50,7 @@ class ReviewerController extends BaseController
                 'stats' => $this->getDashboardStats($userId)
             ];
             
-            return view('reviewer/dashboard', $data);
+            return view('roles/reviewer/dashboard', $data);
         } catch (\Exception $e) {
             log_message('error', 'Reviewer dashboard error: ' . $e->getMessage());
             return redirect()->to('/dashboard')->with('error', 'Failed to load reviewer dashboard');
@@ -75,7 +75,7 @@ class ReviewerController extends BaseController
                 'assigned_abstracts' => $this->getAssignedAbstracts($userId)
             ];
             
-            return view('reviewer/assigned', $data);
+            return view('roles/reviewer/assigned', $data);
         } catch (\Exception $e) {
             log_message('error', 'Reviewer assigned abstracts error: ' . $e->getMessage());
             return redirect()->to('/reviewer/dashboard')->with('error', 'Failed to load assigned abstracts');
@@ -100,7 +100,7 @@ class ReviewerController extends BaseController
                 'completed_reviews' => $this->getCompletedReviews($userId)
             ];
             
-            return view('reviewer/reviews', $data);
+            return view('roles/reviewer/reviews', $data);
         } catch (\Exception $e) {
             log_message('error', 'Reviewer reviews error: ' . $e->getMessage());
             return redirect()->to('/reviewer/dashboard')->with('error', 'Failed to load review history');
@@ -136,7 +136,7 @@ class ReviewerController extends BaseController
                 'existing_review' => $this->getExistingReview($abstractId, $userId)
             ];
             
-            return view('reviewer/review_form', $data);
+            return view('roles/reviewer/review_form', $data);
         } catch (\Exception $e) {
             log_message('error', 'Reviewer review form error: ' . $e->getMessage());
             return redirect()->to('/reviewer/assigned')->with('error', 'Failed to load review form');
