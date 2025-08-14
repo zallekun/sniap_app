@@ -3,12 +3,16 @@
 <?= $this->section('styles') ?>
 <link rel="stylesheet" href="<?= base_url('css/shared/landing.css') ?>">
 <style>
-    /* Dynamic background image with proper URL */
-    .hero-section {
-        background:
-            linear-gradient(135deg, rgba(44, 62, 80, 0.75), rgba(52, 152, 219, 0.75)),
-            url('<?= base_url('assets/img/Background.jpg') ?>') center/cover no-repeat !important;
-    }
+.hero-section {
+    background:
+        linear-gradient(135deg, rgba(44, 62, 80, 0.75), rgba(52, 152, 219, 0.75)),
+        url('<?= base_url('assets/img/Background.jpg') ?>') center/cover no-repeat;
+    min-height: 100vh;
+    color: white;
+    display: flex;
+    align-items: center;
+    padding-top: 100px;
+}
 </style>
 <?= $this->endSection() ?>
 
