@@ -6,8 +6,10 @@ $this->endSection();
 
 $this->section('additional_css');
 ?>
-<link rel="stylesheet" href="/css/colors.css">
-<style>
+<link rel="stylesheet" href="/css/reviewer/dashboard.css">
+<?php $this->endSection(); ?>
+
+<?php $this->section('content'); ?>
 /* Reviewer Dashboard Specific Styles */
 :root {
     --sidebar-width: 280px;

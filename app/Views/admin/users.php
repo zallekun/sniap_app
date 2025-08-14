@@ -6,7 +6,7 @@ $this->endSection();
 
 $this->section('additional_css');
 ?>
-<link rel="stylesheet" href="/css/colors.css">
+<link rel="stylesheet" href="/css/admin/user-management.css">
 <style>
 /* Admin User Management Specific Styles */
 :root {

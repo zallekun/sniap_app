@@ -1,7 +1,7 @@
 <?= $this->extend('layouts/main') ?>
 
 <?= $this->section('styles') ?>
-<link rel="stylesheet" href="<?= base_url('css/auth.css') ?>">
+<link rel="stylesheet" href="<?= base_url('css/shared/auth.css') ?>">
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>

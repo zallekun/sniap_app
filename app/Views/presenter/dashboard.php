@@ -6,8 +6,10 @@ $this->endSection();
 
 $this->section('additional_css');
 ?>
-<link rel="stylesheet" href="/css/colors.css">
-<style>
+<link rel="stylesheet" href="/css/presenter/dashboard.css">
+<?php $this->endSection(); ?>
+
+<?php $this->section('content'); ?>
 /* Presenter Dashboard Specific Styles */
 :root {
     --sidebar-width: 280px;

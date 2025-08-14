@@ -5,8 +5,8 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('styles') ?>
-<link rel="stylesheet" href="<?= base_url('css/dashboard.css') ?>">
-<link rel="stylesheet" href="<?= base_url('css/event-schedule.css') ?>">
+<link rel="stylesheet" href="<?= base_url('css/audience/dashboard.css') ?>">
+<link rel="stylesheet" href="<?= base_url('css/audience/event-schedule.css') ?>">
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>

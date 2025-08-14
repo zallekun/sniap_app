@@ -5,7 +5,7 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('styles') ?>
-<link rel="stylesheet" href="<?= base_url('css/edit-profile.css') ?>">
+<link rel="stylesheet" href="<?= base_url('css/shared/edit-profile.css') ?>">
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>

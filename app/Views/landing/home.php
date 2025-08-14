@@ -1,7 +1,7 @@
 <?= $this->extend('layouts/main') ?>
 
 <?= $this->section('styles') ?>
-<link rel="stylesheet" href="<?= base_url('css/landing.css') ?>">
+<link rel="stylesheet" href="<?= base_url('css/shared/landing.css') ?>">
 <style>
     /* Dynamic background image with proper URL */
     .hero-section {
