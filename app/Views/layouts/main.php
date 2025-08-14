@@ -9,21 +9,20 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Global Colors -->
+    <link rel="stylesheet" href="<?= base_url('css/colors.css') ?>">
     <!-- Custom CSS -->
     <style>
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --accent-color: #e74c3c;
-            --success-color: #27ae60;
-            --warning-color: #f39c12;
-            --light-bg: #ecf0f1;
-        }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, var(--light-bg) 0%, #bdc3c7 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%);
             min-height: 100vh;
+            line-height: 1.6;
+            color: var(--text-primary);
+            /* Reduce eye strain with subtle text smoothing */
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         .navbar-brand {
@@ -33,12 +32,12 @@
 
         .card {
             border: none;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-lg);
         }
 
         .btn-primary {
-            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            background: var(--primary-gradient);
             border: none;
             border-radius: 25px;
             padding: 12px 30px;
@@ -58,14 +57,27 @@
         }
 
         .form-control {
-            border-radius: 10px;
-            border: 2px solid #e9ecef;
+            border-radius: var(--radius-lg);
+            border: 2px solid var(--border-light);
             padding: 12px 15px;
         }
 
         .form-control:focus {
-            border-color: var(--secondary-color);
-            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+        }
+        
+        /* HCI Principle: Clear Focus States for Accessibility */
+        *:focus {
+            outline: 2px solid var(--primary-color);
+            outline-offset: 2px;
+            transition: outline-color var(--transition-fast);
+        }
+        
+        /* Soft hover states to reduce jarring interactions */
+        .btn:hover {
+            transform: translateY(-1px);
+            transition: var(--transition-normal);
         }
 
         .auth-container {

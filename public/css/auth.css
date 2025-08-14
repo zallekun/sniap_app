@@ -1,18 +1,5 @@
 /* Auth Pages Styles - Professional Design */
-
-:root {
-    --auth-primary: #2c3e50;
-    --auth-secondary: #3498db;
-    --auth-gradient: linear-gradient(135deg, #2c3e50, #3498db);
-    --auth-gradient-alt: linear-gradient(135deg, #667eea, #764ba2);
-    --auth-success: #27ae60;
-    --auth-warning: #f39c12;
-    --auth-danger: #e74c3c;
-    --auth-light: #f8f9fa;
-    --auth-dark: #2c3e50;
-    --shadow-soft: 0 15px 35px rgba(0,0,0,0.1);
-    --shadow-strong: 0 20px 40px rgba(0,0,0,0.15);
-}
+@import url('colors.css');
 
 .auth-container {
     min-height: 100vh;
@@ -20,7 +7,7 @@
     align-items: center;
     justify-content: center;
     background: 
-        linear-gradient(135deg, rgba(44, 62, 80, 0.85), rgba(52, 152, 219, 0.75)),
+        linear-gradient(135deg, rgba(37, 99, 235, 0.85), rgba(30, 64, 175, 0.75)),
         url('../assets/img/Background.jpg') center/cover no-repeat fixed;
     padding: 20px;
     position: relative;
@@ -87,7 +74,7 @@
     transform: translateX(-50%);
     width: 80px; /* Wider for better visual balance */
     height: 4px;
-    background: var(--auth-gradient);
+    background: var(--primary-gradient);
     border-radius: 2px;
     box-shadow: 0 2px 8px rgba(44, 62, 80, 0.3);
 }
@@ -96,7 +83,7 @@
 .logo-section h1 {
     font-size: 4rem; /* Larger for better visibility */
     margin-bottom: 1rem;
-    background: var(--auth-gradient);
+    background: var(--primary-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -156,7 +143,7 @@
     left: 0;
     right: 0;
     height: 6px; /* Thicker for better visibility */
-    background: var(--auth-gradient);
+    background: var(--primary-gradient);
     box-shadow: 0 2px 10px rgba(44, 62, 80, 0.3);
 }
 
@@ -170,7 +157,7 @@
     font-size: 1.1rem;
     font-weight: 600;
     border-radius: 12px;
-    background: var(--auth-gradient);
+    background: var(--primary-gradient);
     border: none;
     box-shadow: 0 4px 15px rgba(44, 62, 80, 0.3);
     transition: all 0.3s ease;

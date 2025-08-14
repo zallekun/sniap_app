@@ -1,20 +1,10 @@
 /* Landing Page Styles - Clean Version without card hover effects */
-
-:root {
-    --primary-color: #2c3e50;
-    --secondary-color: #3498db;
-    --accent-color: #e74c3c;
-    --warning-color: #f39c12;
-    --light-bg: #f8f9fa;
-    --shadow-light: 0 5px 15px rgba(0,0,0,0.08);
-    --shadow-medium: 0 10px 25px rgba(0,0,0,0.12);
-    --border-radius: 15px;
-}
+@import url('colors.css');
 
 /* ===== HERO SECTION ===== */
 .hero-section {
     background:
-        linear-gradient(135deg, rgba(44, 62, 80, 0.75), rgba(52, 152, 219, 0.75)),
+        linear-gradient(135deg, rgba(37, 99, 235, 0.80), rgba(30, 64, 175, 0.70)),
         url('../assets/img/Background.jpg') center/cover no-repeat;
     min-height: 100vh;
     color: white;

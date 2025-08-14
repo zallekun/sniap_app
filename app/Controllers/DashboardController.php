@@ -320,6 +320,150 @@ class DashboardController extends BaseController
     }
 
     /**
+     * Get event schedule data for calendar view
+     */
+    public function eventSchedule()
+    {
+        try {
+            // Check if user is logged in
+            $userId = $this->session->get('user_id');
+            if (!$userId) {
+                return $this->response->setStatusCode(401)->setJSON([
+                    'status' => 'error',
+                    'message' => 'User not authenticated'
+                ]);
+            }
+            
+            $db = \Config\Database::connect();
+            log_message('debug', 'Event schedule - User ID: ' . $userId);
+            
+            // First, check if we have any events at all
+            $totalEventsCount = $db->table('events')->countAllResults();
+            log_message('debug', 'Total events in database: ' . $totalEventsCount);
+            
+            // Check active events
+            $activeEventsCount = $db->table('events')->where('is_active', true)->countAllResults();
+            log_message('debug', 'Active events in database: ' . $activeEventsCount);
+            
+            // Get all active events first
+            $allEvents = $db->table('events')
+                ->where('is_active', true)
+                ->orderBy('event_date', 'ASC')
+                ->orderBy('event_time', 'ASC')
+                ->get()
+                ->getResultArray();
+            
+            // Get user registrations
+            $userRegistrations = $db->table('registrations')
+                ->where('user_id', $userId)
+                ->get()
+                ->getResultArray();
+            
+            // Create a map of registered event IDs
+            $registeredEventIds = [];
+            $registrationData = [];
+            foreach ($userRegistrations as $reg) {
+                $registeredEventIds[] = $reg['event_id'];
+                $registrationData[$reg['event_id']] = $reg;
+            }
+            
+            // Combine events with registration status
+            $events = [];
+            foreach ($allEvents as $event) {
+                $isRegistered = in_array($event['id'], $registeredEventIds);
+                $regData = $registrationData[$event['id']] ?? null;
+                
+                $events[] = array_merge($event, [
+                    'is_registered' => $isRegistered ? 1 : 0,
+                    'registration_status' => $regData['registration_status'] ?? null,
+                    'payment_status' => $regData['payment_status'] ?? null
+                ]);
+            }
+            
+            log_message('debug', 'Event schedule data count: ' . count($events));
+            
+            if (count($events) > 0) {
+                log_message('debug', 'First event sample: ' . json_encode($events[0]));
+            }
+
+            // Transform events for calendar format
+            $calendarEvents = [];
+            foreach ($events as $event) {
+                $calendarEvents[] = [
+                    'id' => $event['id'],
+                    'title' => $event['title'],
+                    'description' => $event['description'],
+                    'start' => $event['event_date'] . 'T' . $event['event_time'],
+                    'date' => $event['event_date'],
+                    'time' => date('H:i', strtotime($event['event_time'])),
+                    'format' => $event['format'],
+                    'location' => $event['location'],
+                    'zoom_link' => $event['zoom_link'],
+                    'registration_fee' => $event['registration_fee'],
+                    'max_participants' => $event['max_participants'],
+                    'registration_deadline' => $event['registration_deadline'],
+                    'abstract_deadline' => $event['abstract_deadline'],
+                    'is_registered' => (bool)$event['is_registered'],
+                    'registration_status' => $event['registration_status'],
+                    'payment_status' => $event['payment_status'],
+                    'className' => $event['is_registered'] ? 'event-registered' : 'event-available'
+                ];
+            }
+
+            log_message('debug', 'Calendar events count: ' . count($calendarEvents));
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'data' => $calendarEvents,
+                'count' => count($calendarEvents),
+                'debug' => [
+                    'user_id' => $userId,
+                    'total_events' => $totalEventsCount,
+                    'active_events' => $activeEventsCount,
+                    'registered_events' => count($userRegistrations)
+                ]
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'Load event schedule error: ' . $e->getMessage());
+            return $this->response->setStatusCode(500)->setJSON([
+                'status' => 'error',
+                'message' => 'Failed to load event schedule: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Display event schedule page
+     */
+    public function eventSchedulePage()
+    {
+        try {
+            $userId = $this->session->get('user_id');
+            
+            if (!$userId) {
+                return redirect()->to('/login')->with('error', 'Please login first');
+            }
+            
+            $user = $this->userModel->find($userId);
+
+            if (!$user) {
+                return redirect()->to('/login')->with('error', 'User not found');
+            }
+
+            $data = [
+                'title' => 'Jadwal Acara - SNIA Conference',
+                'user' => $user,
+                'validation' => \Config\Services::validation()
+            ];
+
+            return view('user/event_schedule', $data);
+        } catch (\Exception $e) {
+            log_message('error', 'Event schedule page error: ' . $e->getMessage());
+            return redirect()->to('/dashboard')->with('error', 'Failed to load event schedule page');
+        }
+    }
+
+    /**
      * Register for event
      */
     public function registerEvent()

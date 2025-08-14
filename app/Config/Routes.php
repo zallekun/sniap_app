@@ -256,9 +256,14 @@ $routes->group('', ['namespace' => 'App\Controllers'], function($routes) {
     // Profile management routes
     $routes->get('profile/edit', 'User\ProfileController::edit', ['filter' => 'auth']);
     $routes->post('profile/update', 'User\ProfileController::update', ['filter' => 'auth']);
+    
+    // Event Schedule routes
+    $routes->get('dashboard/event-schedule-page', 'DashboardController::eventSchedulePage', ['filter' => 'auth']);
+    
     $routes->get('dashboard/stats', 'DashboardController::stats', ['filter' => 'auth']);
     $routes->get('dashboard/registrations', 'DashboardController::registrations', ['filter' => 'auth']);
     $routes->get('dashboard/events', 'DashboardController::events', ['filter' => 'auth']);
+    $routes->get('dashboard/event-schedule', 'DashboardController::eventSchedule', ['filter' => 'auth']);
     $routes->post('dashboard/register-event', 'DashboardController::registerEvent', ['filter' => 'auth']);
     
     // =================

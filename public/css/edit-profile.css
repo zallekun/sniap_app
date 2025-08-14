@@ -1,15 +1,9 @@
 /* Edit Profile Page Styles */
-:root {
-    --theme-primary: #2c3e50;
-    --theme-secondary: #3498db;
-    --theme-gradient: linear-gradient(45deg, #2c3e50, #3498db);
-    --theme-success: #27ae60;
-    --theme-warning: #f39c12;
-}
+@import url('colors.css');
 
 /* Profile Header */
 .profile-header {
-    background: var(--theme-gradient);
+    background: var(--primary-gradient);
     color: white;
     padding: 2rem 0;
     margin-bottom: 2rem;
@@ -65,7 +59,7 @@
 /* Form Sections - Remove animations */
 .form-section {
     background: white;
-    border-radius: 15px;
+    border-radius: var(--radius-2xl);
     padding: 2rem;
     box-shadow: 0 4px 15px rgba(0,0,0,0.08);
     margin-bottom: 2rem;
@@ -81,7 +75,7 @@
 
 /* Buttons - Keep Animations */
 .btn-primary {
-    background: var(--theme-gradient);
+    background: var(--primary-gradient);
     border: none;
     border-radius: 25px;
     padding: 12px 30px;
@@ -112,7 +106,7 @@
 
 /* Form Controls - No animations */
 .form-control {
-    border-radius: 10px;
+    border-radius: var(--radius-lg);
     border: 2px solid #e9ecef;
     padding: 12px 15px;
     transition: border-color 0.3s ease; /* Only border color transition */
@@ -139,7 +133,7 @@
 
 /* Alert Styles */
 .alert {
-    border-radius: 10px;
+    border-radius: var(--radius-lg);
     border: none;
 }
 
