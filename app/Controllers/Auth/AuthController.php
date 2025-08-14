@@ -280,17 +280,9 @@ class AuthController extends BaseController
      */
     private function getRedirectUrl($role)
     {
-        switch ($role) {
-            case 'admin':
-                return '/admin/dashboard';
-            case 'reviewer':
-                return '/reviewer/dashboard';
-            case 'presenter':
-                return '/presenter/dashboard';
-            default:
-                return '/dashboard';
-        }
+    return '/dashboard';
     }
+
 
     /**
      * Send password reset email
