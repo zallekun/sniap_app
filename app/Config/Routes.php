@@ -270,9 +270,60 @@ $routes->group('', ['namespace' => 'App\Controllers'], function($routes) {
     // ADMIN ROUTES
     // =================
     $routes->group('admin', ['filter' => 'auth'], function($routes) {
-        $routes->get('/', 'Admin\DashboardController::index');
-        $routes->get('users', 'Admin\UserController::index');
-        // Add more admin routes as needed
+        // Main admin dashboard
+        $routes->get('dashboard', 'Admin\AdminController::dashboard');
+        $routes->get('/', 'Admin\AdminController::dashboard'); // Redirect to dashboard
+        
+        // Admin management pages
+        $routes->get('users', 'Admin\AdminController::users');
+        $routes->get('events', 'Admin\AdminController::events');
+        $routes->get('registrations', 'Admin\AdminController::registrations');
+        $routes->get('abstracts', 'Admin\AdminController::abstracts');
+        $routes->get('settings', 'Admin\AdminController::settings');
+        $routes->get('analytics', 'Admin\AdminController::analytics');
+        
+        // Admin API endpoints
+        $routes->get('api/stats', 'Admin\AdminController::getDashboardStatsApi');
+        $routes->get('api/users', 'Admin\AdminController::getUsersData');
+        $routes->get('api/registrations', 'Admin\AdminController::getRegistrationsData');
+    });
+
+    // =================
+    // PRESENTER ROUTES
+    // =================
+    $routes->group('presenter', ['filter' => 'auth'], function($routes) {
+        // Main presenter dashboard
+        $routes->get('dashboard', 'Presenter\PresenterController::dashboard');
+        $routes->get('/', 'Presenter\PresenterController::dashboard'); // Redirect to dashboard
+        
+        // Presenter management pages
+        $routes->get('abstracts', 'Presenter\PresenterController::abstracts');
+        $routes->get('presentations', 'Presenter\PresenterController::presentations');
+        $routes->get('registrations', 'Presenter\PresenterController::registrations');
+        $routes->get('schedule', 'Presenter\PresenterController::schedule');
+        
+        // Presenter API endpoints
+        $routes->get('api/stats', 'Presenter\PresenterController::getStatsApi');
+        $routes->get('api/abstracts', 'Presenter\PresenterController::getAbstractsApi');
+    });
+
+    // =================
+    // REVIEWER ROUTES
+    // =================
+    $routes->group('reviewer', ['filter' => 'auth'], function($routes) {
+        // Main reviewer dashboard
+        $routes->get('dashboard', 'Reviewer\ReviewerController::dashboard');
+        $routes->get('/', 'Reviewer\ReviewerController::dashboard'); // Redirect to dashboard
+        
+        // Reviewer management pages
+        $routes->get('assigned', 'Reviewer\ReviewerController::assigned');
+        $routes->get('reviews', 'Reviewer\ReviewerController::reviews');
+        $routes->get('review/(:num)', 'Reviewer\ReviewerController::review/$1');
+        
+        // Reviewer API endpoints
+        $routes->post('submit-review', 'Reviewer\ReviewerController::submitReview');
+        $routes->get('api/stats', 'Reviewer\ReviewerController::getStatsApi');
+        $routes->get('api/assigned', 'Reviewer\ReviewerController::getAssignedApi');
     });
 
     $routes->group('', ['namespace' => 'App\Controllers'], function($routes) {
