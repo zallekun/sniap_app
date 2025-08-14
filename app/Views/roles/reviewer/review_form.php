@@ -6,7 +6,7 @@ $this->endSection();
 
 $this->section('additional_css');
 ?>
-<link rel="stylesheet" href="/css/reviewer/dashboard.css">
+<link rel="stylesheet" href="<?= base_url('css/reviewer/dashboard.css') ?>">
 <style>
 .review-form-container {
     max-width: 1200px;

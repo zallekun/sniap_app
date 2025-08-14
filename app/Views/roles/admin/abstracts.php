@@ -6,7 +6,7 @@ $this->endSection();
 
 $this->section('additional_css');
 ?>
-<link rel="stylesheet" href="/css/admin/dashboard.css">
+<link rel="stylesheet" href="<?= base_url('css/admin/dashboard.css') ?>">
 <style>
 .abstract-actions {
     display: flex;

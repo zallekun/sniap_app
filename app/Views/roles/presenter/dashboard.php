@@ -6,7 +6,7 @@ $this->endSection();
 
 $this->section('additional_css');
 ?>
-<link rel="stylesheet" href="/css/presenter/dashboard.css">
+<link rel="stylesheet" href="<?= base_url('css/presenter/dashboard.css') ?>">
 <?php $this->endSection(); ?>
 
 <?php $this->section('content'); ?>
