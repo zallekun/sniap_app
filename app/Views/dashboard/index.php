@@ -1,4 +1,4 @@
-<?= $this->extend('layouts/main') ?>
+<?= $this->extend('shared/layouts/main') ?>
 
 <?= $this->section('head') ?>
 <meta name="csrf-token" content="<?= csrf_hash() ?>">
