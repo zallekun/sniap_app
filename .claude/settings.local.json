@@ -11,7 +11,8 @@
       "Bash(mv:*)",
       "Bash(cp:*)",
       "Bash(find:*)",
-      "Bash(echo:*)"
+      "Bash(echo:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "additionalDirectories": [
