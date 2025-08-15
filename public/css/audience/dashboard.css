@@ -1,5 +1,185 @@
-/* Professional Dashboard Styles - HCI Optimized */
+/* Audience Dashboard Styles - HCI Optimized */
 @import url('colors.css');
+
+/* ===== AUDIENCE SPECIFIC BODY STYLES ===== */
+body.audience-body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+/* Override any Bootstrap defaults for audience */
+body.audience-body .navbar {
+    display: none !important; /* Hide any default navbar */
+}
+
+body.audience-body .navbar-brand {
+    display: none !important; /* Hide any default navbar brand */
+}
+
+/* Layout Structure */
+.audience-layout {
+    display: flex;
+    min-height: 100vh;
+    background: #eff6ff;
+}
+
+/* Sidebar */
+.audience-sidebar {
+    width: 280px;
+    background: #1e40af;
+    color: #dbeafe;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+}
+
+.audience-sidebar .sidebar-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #1d4ed8;
+    text-align: center;
+}
+
+.audience-sidebar .sidebar-logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
+    text-decoration: none;
+}
+
+.audience-sidebar .sidebar-subtitle {
+    font-size: 0.875rem;
+    color: #bfdbfe;
+    margin-top: 0.25rem;
+}
+
+.audience-sidebar .sidebar-nav {
+    padding: 1rem 0;
+}
+
+.audience-sidebar .nav-section {
+    margin-bottom: 2rem;
+}
+
+.audience-sidebar .nav-section-title {
+    padding: 0.5rem 1.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #bfdbfe;
+    margin-bottom: 0.5rem;
+}
+
+.audience-sidebar .nav-item {
+    margin-bottom: 0.25rem;
+}
+
+.audience-sidebar .nav-link {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    color: #dbeafe;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.audience-sidebar .nav-link:hover {
+    background: rgba(59, 130, 246, 0.1);
+    color: white;
+}
+
+.audience-sidebar .nav-link.active {
+    background: rgba(59, 130, 246, 0.2);
+    color: white;
+    border-right: 3px solid #3b82f6;
+}
+
+.audience-sidebar .nav-link i {
+    width: 20px;
+    margin-right: 0.75rem;
+    font-size: 1rem;
+}
+
+/* Main Content Area */
+.audience-main {
+    flex: 1;
+    margin-left: 280px;
+    min-height: 100vh;
+}
+
+.audience-header {
+    background: white;
+    height: 70px;
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.audience-header .header-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+}
+
+.audience-header .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.audience-header .user-menu {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.audience-header .user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #2563eb;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+}
+
+.audience-content {
+    padding: 2rem;
+}
+
+/* Responsive Design for Audience Layout */
+@media (max-width: 768px) {
+    .audience-sidebar {
+        transform: translateX(-100%);
+    }
+    
+    .audience-main {
+        margin-left: 0;
+    }
+    
+    .audience-header {
+        padding: 0 1rem;
+    }
+    
+    .audience-content {
+        padding: 1rem;
+    }
+}
 
 /* ===== DESIGN SYSTEM - UNIFIED COLOR PALETTE ===== */
 :root {

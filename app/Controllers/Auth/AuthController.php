@@ -34,7 +34,7 @@ class AuthController extends BaseController
             'validation' => \Config\Services::validation()
         ];
 
-        return view('shared/auth/login', $data);
+        return view('shared/auth/login_clean', $data);
     }
 
     /**
@@ -48,6 +48,13 @@ class AuthController extends BaseController
         ];
 
         if (!$this->validate($rules)) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Validation failed',
+                    'errors' => $this->validator->getErrors()
+                ]);
+            }
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
@@ -59,21 +66,34 @@ class AuthController extends BaseController
         $user = $this->userModel->where('email', $email)->first();
 
         if (!$user) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Email not found.'
+                ]);
+            }
             return redirect()->back()->withInput()->with('error', 'Email not found.');
         }
 
         // Verify password
         if (!password_verify($password, $user['password'])) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Invalid password.'
+                ]);
+            }
             return redirect()->back()->withInput()->with('error', 'Invalid password.');
         }
 
-        // Note: is_active column doesn't exist in current schema, so skip this check
-        // if (!$user['is_active']) {
-        //     return redirect()->back()->withInput()->with('error', 'Account is inactive. Please contact administrator.');
-        // }
-
         // Check if email is verified
         if (!$user['is_verified']) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Please verify your email address before logging in. Check your email for verification instructions.'
+                ]);
+            }
             return redirect()->back()->withInput()->with('error', 'Please verify your email address before logging in. Check your email for verification instructions.');
         }
 
@@ -105,6 +125,14 @@ class AuthController extends BaseController
 
         // Redirect based on role
         $redirectUrl = $this->getRedirectUrl($user['role']);
+        
+        if ($this->request->isAJAX()) {
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'Login successful!',
+                'redirect' => $redirectUrl
+            ]);
+        }
         
         return redirect()->to($redirectUrl)->with('success', 'Login successful!');
     }

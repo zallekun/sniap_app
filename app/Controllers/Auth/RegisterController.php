@@ -39,7 +39,7 @@ class RegisterController extends BaseController
             'validation' => \Config\Services::validation()
         ];
 
-        return view('shared/auth/register', $data);
+        return view('shared/auth/register_clean', $data);
     }
 
     /**
@@ -104,6 +104,13 @@ class RegisterController extends BaseController
 
         if (!$this->validate($rules, $messages)) {
             log_message('error', 'Validation failed: ' . json_encode($this->validator->getErrors()));
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Validation failed',
+                    'errors' => $this->validator->getErrors()
+                ]);
+            }
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
         
@@ -114,6 +121,12 @@ class RegisterController extends BaseController
         $existingPending = $this->pendingModel->findByEmail($email);
         
         if ($existingUser) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Email sudah terdaftar. Silakan gunakan email lain atau login.'
+                ]);
+            }
             return redirect()->back()->withInput()->with('error', 'Email sudah terdaftar. Silakan gunakan email lain atau login.');
         }
         
@@ -162,10 +175,23 @@ class RegisterController extends BaseController
             $this->session->set('verification_email', $email);
 
             // Redirect to verification code page
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON([
+                    'status' => 'success',
+                    'message' => 'Registration successful! Please check your email for verification code.',
+                    'redirect' => '/auth/verify-code'
+                ]);
+            }
             return redirect()->to('/auth/verify-code')->with('success', 'Registration successful! Please check your email for verification code.');
 
         } catch (\Exception $e) {
             log_message('error', 'Registration error: ' . $e->getMessage());
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Registration failed. Please try again.'
+                ]);
+            }
             return redirect()->back()->withInput()->with('error', 'Registration failed. Please try again.');
         }
     }

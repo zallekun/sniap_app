@@ -1,11 +1,9 @@
-<?= $this->extend('shared/layouts/main') ?>
+<?= $this->extend('shared/layouts/audience_layout') ?>
+
+<?= $this->section('title') ?><?= $title ?? 'Audience Dashboard' ?><?= $this->endSection() ?>
 
 <?= $this->section('head') ?>
 <meta name="csrf-token" content="<?= csrf_hash() ?>">
-<?= $this->endSection() ?>
-
-<?= $this->section('styles') ?>
-<link rel="stylesheet" href="<?= base_url('css/audience/dashboard.css') ?>">
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>

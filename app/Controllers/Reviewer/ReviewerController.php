@@ -47,10 +47,11 @@ class ReviewerController extends BaseController
             $data = [
                 'title' => 'Reviewer Dashboard - SNIA Conference',
                 'user' => $user,
-                'stats' => $this->getDashboardStats($userId)
+                'stats' => $this->getDashboardStats($userId),
+                'assigned_abstracts' => $this->getAssignedAbstracts($userId)
             ];
             
-            return view('roles/reviewer/dashboard', $data);
+            return view('roles/reviewer/dashboard_clean', $data);
         } catch (\Exception $e) {
             log_message('error', 'Reviewer dashboard error: ' . $e->getMessage());
             return redirect()->to('/dashboard')->with('error', 'Failed to load reviewer dashboard');

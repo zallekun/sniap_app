@@ -1,439 +1,13 @@
-<?php
-$this->extend('shared/layouts/main');
-$this->section('title');
-echo $title ?? 'Presenter Dashboard';
-$this->endSection();
+<?= $this->extend('shared/layouts/user_layout') ?>
 
-$this->section('additional_css');
-?>
-<link rel="stylesheet" href="<?= base_url('css/presenter/dashboard.css') ?>">
-<?php $this->endSection(); ?>
+<?= $this->section('title') ?>Presenter Dashboard<?= $this->endSection() ?>
 
-<?php $this->section('content'); ?>
-/* Presenter Dashboard Specific Styles */
-:root {
-    --sidebar-width: 280px;
-    --header-height: 70px;
-    --presenter-primary: #059669;
-    --presenter-secondary: #10b981;
-    --presenter-accent: #34d399;
-    --presenter-warning: #f59e0b;
-    --presenter-danger: #ef4444;
-    --presenter-info: #06b6d4;
-    --sidebar-bg: #064e3b;
-    --sidebar-text: #d1fae5;
-    --sidebar-active: #10b981;
-}
-
-/* Layout Structure */
-.presenter-layout {
-    display: flex;
-    min-height: 100vh;
-    background: #f0fdfa;
-}
-
-/* Sidebar */
-.presenter-sidebar {
-    width: var(--sidebar-width);
-    background: var(--sidebar-bg);
-    color: var(--sidebar-text);
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    overflow-y: auto;
-    z-index: 1000;
-    transition: transform 0.3s ease;
-}
-
-.sidebar-header {
-    padding: 1.5rem;
-    border-bottom: 1px solid #047857;
-    text-align: center;
-}
-
-.sidebar-logo {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: white;
-    text-decoration: none;
-}
-
-.sidebar-subtitle {
-    font-size: 0.875rem;
-    color: #a7f3d0;
-    margin-top: 0.25rem;
-}
-
-.sidebar-nav {
-    padding: 1rem 0;
-}
-
-.nav-section {
-    margin-bottom: 2rem;
-}
-
-.nav-section-title {
-    padding: 0.5rem 1.5rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: #a7f3d0;
-    margin-bottom: 0.5rem;
-}
-
-.nav-item {
-    margin-bottom: 0.25rem;
-}
-
-.nav-link {
-    display: flex;
-    align-items: center;
-    padding: 0.75rem 1.5rem;
-    color: var(--sidebar-text);
-    text-decoration: none;
-    transition: all 0.2s ease;
-    position: relative;
-}
-
-.nav-link:hover {
-    background: rgba(16, 185, 129, 0.1);
-    color: white;
-}
-
-.nav-link.active {
-    background: rgba(16, 185, 129, 0.2);
-    color: white;
-    border-right: 3px solid var(--sidebar-active);
-}
-
-.nav-link i {
-    width: 20px;
-    margin-right: 0.75rem;
-    font-size: 1rem;
-}
-
-.nav-badge {
-    background: var(--presenter-warning);
-    color: white;
-    font-size: 0.75rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 1rem;
-    margin-left: auto;
-}
-
-/* Main Content Area */
-.presenter-main {
-    flex: 1;
-    margin-left: var(--sidebar-width);
-    min-height: 100vh;
-}
-
-.presenter-header {
-    background: white;
-    height: var(--header-height);
-    padding: 0 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid #e5e7eb;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.header-title {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: #1f2937;
-    margin: 0;
-}
-
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.user-menu {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.user-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: var(--presenter-primary);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-}
-
-.presenter-content {
-    padding: 2rem;
-}
-
-/* Dashboard Stats Cards */
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-}
-
-.stat-card {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 0.75rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e5e7eb;
-    transition: all 0.2s ease;
-}
-
-.stat-card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    transform: translateY(-2px);
-}
-
-.stat-header {
-    display: flex;
-    align-items: center;
-    justify-content: between;
-    margin-bottom: 1rem;
-}
-
-.stat-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 0.75rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    color: white;
-    margin-right: 1rem;
-}
-
-.stat-icon.abstracts { background: var(--presenter-primary); }
-.stat-icon.accepted { background: var(--presenter-secondary); }
-.stat-icon.pending { background: var(--presenter-warning); }
-.stat-icon.rejected { background: var(--presenter-danger); }
-.stat-icon.registrations { background: var(--presenter-info); }
-.stat-icon.presentations { background: #8b5cf6; }
-.stat-icon.payments { background: #f59e0b; }
-
-.stat-content {
-    flex: 1;
-}
-
-.stat-label {
-    font-size: 0.875rem;
-    color: #6b7280;
-    margin-bottom: 0.25rem;
-}
-
-.stat-value {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #1f2937;
-    line-height: 1;
-}
-
-.stat-change {
-    font-size: 0.875rem;
-    margin-top: 0.5rem;
-}
-
-.stat-change.positive {
-    color: var(--presenter-secondary);
-}
-
-.stat-change.negative {
-    color: var(--presenter-danger);
-}
-
-/* Content Cards */
-.content-card {
-    background: white;
-    border-radius: 0.75rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e5e7eb;
-    margin-bottom: 1.5rem;
-}
-
-.card-header {
-    padding: 1.5rem;
-    border-bottom: 1px solid #e5e7eb;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.card-title {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: #1f2937;
-    margin: 0;
-}
-
-.card-body {
-    padding: 1.5rem;
-}
-
-/* Status Badges */
-.status-badge {
-    padding: 0.25rem 0.75rem;
-    border-radius: 1rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-.status-badge.accepted {
-    background: #d1fae5;
-    color: #065f46;
-}
-
-.status-badge.pending {
-    background: #fef3c7;
-    color: #92400e;
-}
-
-.status-badge.rejected {
-    background: #fee2e2;
-    color: #991b1b;
-}
-
-.status-badge.confirmed {
-    background: #dbeafe;
-    color: #1e40af;
-}
-
-.status-badge.draft {
-    background: #f3f4f6;
-    color: #374151;
-}
-
-/* Progress Bar */
-.progress-container {
-    margin-bottom: 1rem;
-}
-
-.progress-label {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.875rem;
-    margin-bottom: 0.5rem;
-}
-
-.progress-bar {
-    width: 100%;
-    height: 8px;
-    background: #e5e7eb;
-    border-radius: 4px;
-    overflow: hidden;
-}
-
-.progress-fill {
-    height: 100%;
-    background: var(--presenter-primary);
-    transition: width 0.3s ease;
-}
-
-/* Timeline */
-.timeline {
-    position: relative;
-    padding: 1rem 0;
-}
-
-.timeline-item {
-    position: relative;
-    padding-left: 2rem;
-    margin-bottom: 1.5rem;
-}
-
-.timeline-item::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0.5rem;
-    width: 12px;
-    height: 12px;
-    background: var(--presenter-primary);
-    border-radius: 50%;
-    border: 3px solid white;
-    box-shadow: 0 0 0 3px var(--presenter-primary);
-}
-
-.timeline-item:not(:last-child)::after {
-    content: '';
-    position: absolute;
-    left: 5px;
-    top: 1.5rem;
-    width: 2px;
-    height: calc(100% + 0.5rem);
-    background: #e5e7eb;
-}
-
-.timeline-content {
-    background: white;
-    padding: 1rem;
-    border-radius: 0.5rem;
-    border: 1px solid #e5e7eb;
-}
-
-.timeline-title {
-    font-weight: 600;
-    color: #1f2937;
-    margin-bottom: 0.25rem;
-}
-
-.timeline-date {
-    font-size: 0.875rem;
-    color: #6b7280;
-    margin-bottom: 0.5rem;
-}
-
-.timeline-description {
-    font-size: 0.875rem;
-    color: #4b5563;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .presenter-sidebar {
-        transform: translateX(-100%);
-    }
-    
-    .presenter-main {
-        margin-left: 0;
-    }
-    
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .presenter-header {
-        padding: 0 1rem;
-    }
-    
-    .presenter-content {
-        padding: 1rem;
-    }
-}
-</style>
-<?php $this->endSection(); ?>
-
-<?php $this->section('content'); ?>
-<div class="presenter-layout">
+<?= $this->section('content') ?>
     <!-- Sidebar -->
     <aside class="presenter-sidebar">
         <div class="sidebar-header">
             <a href="/presenter/dashboard" class="sidebar-logo">SNIA Presenter</a>
-            <div class="sidebar-subtitle">Conference Management</div>
+            <div class="sidebar-subtitle">Conference Presentation</div>
         </div>
         
         <nav class="sidebar-nav">
@@ -448,11 +22,11 @@ $this->section('additional_css');
             </div>
             
             <div class="nav-section">
-                <div class="nav-section-title">My Content</div>
+                <div class="nav-section-title">Presentations</div>
                 <div class="nav-item">
                     <a href="/presenter/abstracts" class="nav-link">
                         <i class="fas fa-file-alt"></i>
-                        My Abstracts
+                        Abstract Submissions
                         <?php if (isset($stats['pending_abstracts']) && $stats['pending_abstracts'] > 0): ?>
                             <span class="nav-badge"><?= $stats['pending_abstracts'] ?></span>
                         <?php endif; ?>
@@ -460,27 +34,27 @@ $this->section('additional_css');
                 </div>
                 <div class="nav-item">
                     <a href="/presenter/presentations" class="nav-link">
-                        <i class="fas fa-presentation"></i>
-                        Presentations
+                        <i class="fas fa-presentation-screen"></i>
+                        My Presentations
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/presenter/schedule" class="nav-link">
+                        <i class="fas fa-calendar-alt"></i>
+                        Presentation Schedule
                     </a>
                 </div>
             </div>
             
             <div class="nav-section">
-                <div class="nav-section-title">Events</div>
+                <div class="nav-section-title">Registration</div>
                 <div class="nav-item">
                     <a href="/presenter/registrations" class="nav-link">
-                        <i class="fas fa-user-check"></i>
+                        <i class="fas fa-ticket-alt"></i>
                         My Registrations
-                        <?php if (isset($stats['pending_payments']) && $stats['pending_payments'] > 0): ?>
-                            <span class="nav-badge"><?= $stats['pending_payments'] ?></span>
+                        <?php if (isset($stats['upcoming_events']) && $stats['upcoming_events'] > 0): ?>
+                            <span class="nav-badge nav-badge-success"><?= $stats['upcoming_events'] ?></span>
                         <?php endif; ?>
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="/presenter/schedule" class="nav-link">
-                        <i class="fas fa-calendar"></i>
-                        Presentation Schedule
                     </a>
                 </div>
             </div>
@@ -494,225 +68,259 @@ $this->section('additional_css');
                     </a>
                 </div>
                 <div class="nav-item">
-                    <a href="/dashboard" class="nav-link">
-                        <i class="fas fa-arrow-left"></i>
-                        Back to Main Dashboard
+                    <a href="/logout" class="nav-link">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Logout
                     </a>
                 </div>
             </div>
         </nav>
     </aside>
-    
+
     <!-- Main Content -->
     <main class="presenter-main">
         <!-- Header -->
         <header class="presenter-header">
-            <h1 class="header-title">Presenter Dashboard</h1>
+            <div class="header-left">
+                <button class="sidebar-toggle" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1>Presenter Dashboard</h1>
+            </div>
             <div class="header-actions">
                 <div class="user-menu">
                     <div class="user-avatar">
                         <?= strtoupper(substr($user['first_name'] ?? 'P', 0, 1)) ?>
                     </div>
-                    <div>
-                        <div style="font-weight: 600; color: #1f2937;">
-                            <?= esc($user['first_name'] ?? '') ?> <?= esc($user['last_name'] ?? '') ?>
-                        </div>
-                        <div style="font-size: 0.875rem; color: #6b7280;">
-                            Conference Presenter
-                        </div>
+                    <div class="user-info">
+                        <div class="user-name"><?= esc($user['first_name'] ?? 'Presenter') ?> <?= esc($user['last_name'] ?? '') ?></div>
+                        <div class="user-role">Presenter</div>
                     </div>
                 </div>
             </div>
         </header>
-        
-        <!-- Content -->
+
+        <!-- Dashboard Content -->
         <div class="presenter-content">
-            <!-- Statistics Overview -->
+            <!-- Stats Cards -->
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-header">
-                        <div class="stat-icon abstracts">
-                            <i class="fas fa-file-alt"></i>
-                        </div>
-                        <div class="stat-content">
-                            <div class="stat-label">Total Abstracts</div>
-                            <div class="stat-value"><?= number_format($stats['total_abstracts'] ?? 0) ?></div>
-                        </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3><?= $stats['total_abstracts'] ?? 0 ?></h3>
+                        <p>Total Abstracts</p>
+                    </div>
+                    <div class="stat-trend positive">
+                        <i class="fas fa-arrow-up"></i>
                     </div>
                 </div>
-                
+
                 <div class="stat-card">
-                    <div class="stat-header">
-                        <div class="stat-icon accepted">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                        <div class="stat-content">
-                            <div class="stat-label">Accepted Abstracts</div>
-                            <div class="stat-value"><?= number_format($stats['accepted_abstracts'] ?? 0) ?></div>
-                        </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3><?= $stats['accepted_abstracts'] ?? 0 ?></h3>
+                        <p>Accepted Abstracts</p>
+                    </div>
+                    <div class="stat-trend positive">
+                        <i class="fas fa-check"></i>
                     </div>
                 </div>
-                
+
                 <div class="stat-card">
-                    <div class="stat-header">
-                        <div class="stat-icon pending">
-                            <i class="fas fa-clock"></i>
-                        </div>
-                        <div class="stat-content">
-                            <div class="stat-label">Pending Review</div>
-                            <div class="stat-value"><?= number_format($stats['pending_abstracts'] ?? 0) ?></div>
-                        </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3><?= $stats['pending_abstracts'] ?? 0 ?></h3>
+                        <p>Pending Review</p>
+                    </div>
+                    <div class="stat-trend neutral">
+                        <i class="fas fa-clock"></i>
                     </div>
                 </div>
-                
+
                 <div class="stat-card">
-                    <div class="stat-header">
-                        <div class="stat-icon registrations">
-                            <i class="fas fa-user-check"></i>
-                        </div>
-                        <div class="stat-content">
-                            <div class="stat-label">Active Registrations</div>
-                            <div class="stat-value"><?= number_format($stats['active_registrations'] ?? 0) ?></div>
-                        </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar"></i>
                     </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <div class="stat-icon presentations">
-                            <i class="fas fa-presentation"></i>
-                        </div>
-                        <div class="stat-content">
-                            <div class="stat-label">Upcoming Presentations</div>
-                            <div class="stat-value"><?= number_format($stats['upcoming_presentations'] ?? 0) ?></div>
-                        </div>
+                    <div class="stat-content">
+                        <h3><?= $stats['upcoming_events'] ?? 0 ?></h3>
+                        <p>Upcoming Events</p>
                     </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <div class="stat-icon payments">
-                            <i class="fas fa-exclamation-triangle"></i>
-                        </div>
-                        <div class="stat-content">
-                            <div class="stat-label">Pending Payments</div>
-                            <div class="stat-value"><?= number_format($stats['pending_payments'] ?? 0) ?></div>
-                        </div>
+                    <div class="stat-trend positive">
+                        <i class="fas fa-calendar-alt"></i>
                     </div>
                 </div>
             </div>
-            
-            <!-- Quick Actions -->
-            <div class="content-card">
-                <div class="card-header">
-                    <h3 class="card-title">Quick Actions</h3>
-                </div>
-                <div class="card-body">
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                        <a href="/presenter/abstracts" class="btn btn-success btn-sm">
-                            <i class="fas fa-plus me-2"></i>Submit New Abstract
-                        </a>
-                        <a href="/presenter/presentations" class="btn btn-primary btn-sm">
-                            <i class="fas fa-presentation me-2"></i>Manage Presentations
-                        </a>
-                        <a href="/presenter/registrations" class="btn btn-warning btn-sm">
-                            <i class="fas fa-credit-card me-2"></i>Check Payment Status
-                        </a>
-                        <a href="/presenter/schedule" class="btn btn-info btn-sm">
-                            <i class="fas fa-calendar-check me-2"></i>View Schedule
-                        </a>
-                    </div>
-                </div>
-            </div>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
-                <!-- Abstract Progress -->
-                <div class="content-card">
+
+            <!-- Main Dashboard Content -->
+            <div class="dashboard-grid">
+                <!-- Recent Abstracts -->
+                <div class="dashboard-card">
                     <div class="card-header">
-                        <h3 class="card-title">Abstract Submission Progress</h3>
+                        <h3>Recent Abstract Submissions</h3>
+                        <a href="/presenter/abstracts" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus"></i> Submit New Abstract
+                        </a>
                     </div>
                     <div class="card-body">
-                        <?php 
-                        $totalAbstracts = $stats['total_abstracts'] ?? 0;
-                        $acceptedAbstracts = $stats['accepted_abstracts'] ?? 0;
-                        $acceptanceRate = $totalAbstracts > 0 ? ($acceptedAbstracts / $totalAbstracts) * 100 : 0;
-                        ?>
-                        
-                        <div class="progress-container">
-                            <div class="progress-label">
-                                <span>Acceptance Rate</span>
-                                <span><?= number_format($acceptanceRate, 1) ?>%</span>
+                        <div class="abstracts-list">
+                            <!-- Sample abstract items - these would come from database -->
+                            <div class="abstract-item">
+                                <div class="abstract-status status-pending"></div>
+                                <div class="abstract-content">
+                                    <h5>AI in Healthcare: Current Trends and Future Prospects</h5>
+                                    <p class="abstract-meta">
+                                        <span>Submitted: <?= date('M j, Y') ?></span>
+                                        <span class="status-badge status-pending">Under Review</span>
+                                    </p>
+                                </div>
+                                <div class="abstract-actions">
+                                    <button class="btn btn-outline-primary btn-sm">View</button>
+                                </div>
                             </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: <?= $acceptanceRate ?>%"></div>
+
+                            <div class="abstract-item">
+                                <div class="abstract-status status-accepted"></div>
+                                <div class="abstract-content">
+                                    <h5>Machine Learning Applications in Data Storage</h5>
+                                    <p class="abstract-meta">
+                                        <span>Submitted: <?= date('M j, Y', strtotime('-1 week')) ?></span>
+                                        <span class="status-badge status-accepted">Accepted</span>
+                                    </p>
+                                </div>
+                                <div class="abstract-actions">
+                                    <button class="btn btn-outline-primary btn-sm">View</button>
+                                </div>
+                            </div>
+
+                            <div class="abstract-item">
+                                <div class="abstract-status status-revision"></div>
+                                <div class="abstract-content">
+                                    <h5>Cloud Storage Security: Best Practices</h5>
+                                    <p class="abstract-meta">
+                                        <span>Submitted: <?= date('M j, Y', strtotime('-2 weeks')) ?></span>
+                                        <span class="status-badge status-revision">Needs Revision</span>
+                                    </p>
+                                </div>
+                                <div class="abstract-actions">
+                                    <button class="btn btn-warning btn-sm">Revise</button>
+                                </div>
                             </div>
                         </div>
-                        
-                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1rem;">
-                            <div style="text-align: center;">
-                                <div class="stat-value" style="font-size: 1.5rem; color: var(--presenter-secondary);">
-                                    <?= $stats['accepted_abstracts'] ?? 0 ?>
-                                </div>
-                                <div class="stat-label">Accepted</div>
-                            </div>
-                            <div style="text-align: center;">
-                                <div class="stat-value" style="font-size: 1.5rem; color: var(--presenter-warning);">
-                                    <?= $stats['pending_abstracts'] ?? 0 ?>
-                                </div>
-                                <div class="stat-label">Pending</div>
-                            </div>
-                            <div style="text-align: center;">
-                                <div class="stat-value" style="font-size: 1.5rem; color: var(--presenter-danger);">
-                                    <?= $stats['rejected_abstracts'] ?? 0 ?>
-                                </div>
-                                <div class="stat-label">Rejected</div>
-                            </div>
+
+                        <div class="text-center mt-3">
+                            <a href="/presenter/abstracts" class="btn btn-outline-primary">View All Abstracts</a>
                         </div>
                     </div>
                 </div>
-                
-                <!-- Recent Activity -->
-                <div class="content-card">
+
+                <!-- Upcoming Presentations -->
+                <div class="dashboard-card">
                     <div class="card-header">
-                        <h3 class="card-title">Recent Activity</h3>
+                        <h3>Upcoming Presentations</h3>
+                        <a href="/presenter/schedule" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-calendar"></i> View Schedule
+                        </a>
                     </div>
                     <div class="card-body">
-                        <div class="timeline">
-                            <div class="timeline-item">
-                                <div class="timeline-content">
-                                    <div class="timeline-title">Welcome to SNIA Presenter Dashboard</div>
-                                    <div class="timeline-date">Today</div>
-                                    <div class="timeline-description">
-                                        You can now manage your abstracts, presentations, and registrations from this dashboard.
-                                    </div>
+                        <div class="presentations-list">
+                            <!-- Sample presentation items -->
+                            <div class="presentation-item">
+                                <div class="presentation-date">
+                                    <div class="day"><?= date('d') ?></div>
+                                    <div class="month"><?= date('M') ?></div>
+                                </div>
+                                <div class="presentation-content">
+                                    <h5>Machine Learning Applications in Data Storage</h5>
+                                    <p class="presentation-meta">
+                                        <i class="fas fa-clock"></i> 10:30 AM - 11:00 AM
+                                        <i class="fas fa-map-marker-alt"></i> Room A-101
+                                    </p>
+                                </div>
+                                <div class="presentation-actions">
+                                    <button class="btn btn-success btn-sm">Ready</button>
                                 </div>
                             </div>
-                            
-                            <?php if (isset($stats['pending_payments']) && $stats['pending_payments'] > 0): ?>
-                            <div class="timeline-item">
-                                <div class="timeline-content">
-                                    <div class="timeline-title">Payment Required</div>
-                                    <div class="timeline-date">Action Required</div>
-                                    <div class="timeline-description">
-                                        You have <?= $stats['pending_payments'] ?> registration(s) with pending payments. 
-                                        <a href="/presenter/registrations" class="text-decoration-none">Complete payment</a>
-                                    </div>
+
+                            <div class="presentation-item">
+                                <div class="presentation-date">
+                                    <div class="day"><?= date('d', strtotime('+1 day')) ?></div>
+                                    <div class="month"><?= date('M', strtotime('+1 day')) ?></div>
+                                </div>
+                                <div class="presentation-content">
+                                    <h5>Workshop: AI Implementation Strategies</h5>
+                                    <p class="presentation-meta">
+                                        <i class="fas fa-clock"></i> 2:00 PM - 3:30 PM
+                                        <i class="fas fa-map-marker-alt"></i> Workshop Room B
+                                    </p>
+                                </div>
+                                <div class="presentation-actions">
+                                    <button class="btn btn-warning btn-sm">Prepare</button>
                                 </div>
                             </div>
-                            <?php endif; ?>
-                            
-                            <?php if (isset($stats['upcoming_presentations']) && $stats['upcoming_presentations'] > 0): ?>
-                            <div class="timeline-item">
-                                <div class="timeline-content">
-                                    <div class="timeline-title">Upcoming Presentations</div>
-                                    <div class="timeline-date">Schedule</div>
-                                    <div class="timeline-description">
-                                        You have <?= $stats['upcoming_presentations'] ?> upcoming presentation(s). 
-                                        <a href="/presenter/schedule" class="text-decoration-none">View schedule</a>
-                                    </div>
+                        </div>
+
+                        <div class="text-center mt-3">
+                            <a href="/presenter/presentations" class="btn btn-outline-primary">View All Presentations</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Registration Status -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3>Event Registrations</h3>
+                        <a href="/presenter/registrations" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-ticket-alt"></i> View All
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <div class="registrations-list">
+                            <div class="registration-item">
+                                <div class="registration-status status-confirmed"></div>
+                                <div class="registration-content">
+                                    <h5>SNIA Conference 2025</h5>
+                                    <p class="registration-meta">
+                                        <span>Registration: Confirmed</span>
+                                        <span>Payment: Completed</span>
+                                    </p>
+                                </div>
+                                <div class="registration-actions">
+                                    <button class="btn btn-outline-primary btn-sm">View Details</button>
                                 </div>
                             </div>
-                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3>Quick Actions</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="quick-actions">
+                            <a href="/presenter/abstracts" class="quick-action-btn">
+                                <i class="fas fa-plus"></i>
+                                <span>Submit Abstract</span>
+                            </a>
+                            <a href="/presenter/presentations" class="quick-action-btn">
+                                <i class="fas fa-presentation-screen"></i>
+                                <span>Manage Presentations</span>
+                            </a>
+                            <a href="/presenter/schedule" class="quick-action-btn">
+                                <i class="fas fa-calendar"></i>
+                                <span>View Schedule</span>
+                            </a>
+                            <a href="/profile/edit" class="quick-action-btn">
+                                <i class="fas fa-user-edit"></i>
+                                <span>Edit Profile</span>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -720,35 +328,67 @@ $this->section('additional_css');
         </div>
     </main>
 </div>
-<?php $this->endSection(); ?>
+<?= $this->endSection() ?>
 
-<?php $this->section('additional_js'); ?>
+<?= $this->section('scripts') ?>
 <script>
-// Presenter Dashboard JavaScript
+// Presenter dashboard functionality
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Presenter Dashboard loaded');
-    
-    // Add any presenter-specific JavaScript here
-    // Example: Auto-refresh stats every 30 seconds
-    // setInterval(updatePresenterStats, 30000);
+    loadPresenterStats();
+    loadRecentAbstracts();
+    loadUpcomingPresentations();
 });
 
-function updatePresenterStats() {
-    // Fetch updated stats via AJAX
+function toggleSidebar() {
+    document.querySelector('.presenter-sidebar').classList.toggle('collapsed');
+}
+
+function loadPresenterStats() {
+    // Load presenter statistics via AJAX
     fetch('/presenter/api/stats')
         .then(response => response.json())
         .then(data => {
-            if (data.status === 'success') {
-                // Update stat values
-                Object.keys(data.data).forEach(key => {
-                    const elements = document.querySelectorAll(`[data-stat="${key}"]`);
-                    elements.forEach(element => {
-                        element.textContent = data.data[key];
-                    });
-                });
+            if (data.success) {
+                updateStatsCards(data.stats);
             }
         })
-        .catch(error => console.error('Error updating presenter stats:', error));
+        .catch(error => console.error('Error loading stats:', error));
 }
+
+function loadRecentAbstracts() {
+    // Load recent abstracts via AJAX
+    fetch('/presenter/api/abstracts?recent=true')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateAbstractsList(data.abstracts);
+            }
+        })
+        .catch(error => console.error('Error loading abstracts:', error));
+}
+
+function loadUpcomingPresentations() {
+    // Load upcoming presentations via AJAX
+    console.log('Loading upcoming presentations...');
+}
+
+function updateStatsCards(stats) {
+    // Update statistics cards with real data
+    console.log('Updating stats cards...', stats);
+}
+
+function updateAbstractsList(abstracts) {
+    // Update abstracts list with real data
+    console.log('Updating abstracts list...', abstracts);
+}
+
+// Handle responsive sidebar
+window.addEventListener('resize', function() {
+    if (window.innerWidth <= 768) {
+        document.querySelector('.presenter-sidebar').classList.add('collapsed');
+    } else {
+        document.querySelector('.presenter-sidebar').classList.remove('collapsed');
+    }
+});
 </script>
-<?php $this->endSection(); ?>
+<?= $this->endSection() ?>

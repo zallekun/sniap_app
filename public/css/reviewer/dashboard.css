@@ -16,6 +16,25 @@
     --sidebar-active: #8b5cf6;
 }
 
+/* Body specific styles */
+body.reviewer-body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+/* Override any Bootstrap defaults for reviewer */
+body.reviewer-body .navbar {
+    display: none; /* Hide any default navbar */
+}
+
+body.reviewer-body .navbar-brand {
+    display: none; /* Hide any default navbar brand */
+}
+
 /* Layout Structure */
 .reviewer-layout {
     display: flex;

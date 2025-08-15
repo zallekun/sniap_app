@@ -47,10 +47,11 @@ class PresenterController extends BaseController
             $data = [
                 'title' => 'Presenter Dashboard - SNIA Conference',
                 'user' => $user,
-                'stats' => $this->getDashboardStats($userId)
+                'stats' => $this->getDashboardStats($userId),
+                'abstracts' => $this->getUserAbstracts($userId)
             ];
             
-            return view('roles/presenter/dashboard', $data);
+            return view('roles/presenter/dashboard_clean', $data);
         } catch (\Exception $e) {
             log_message('error', 'Presenter dashboard error: ' . $e->getMessage());
             return redirect()->to('/dashboard')->with('error', 'Failed to load presenter dashboard');

@@ -35,11 +35,26 @@ class DashboardController extends BaseController
                 return redirect()->to('/login')->with('error', 'User account not found.');
             }
 
+            // Redirect to role-specific dashboard if not audience
+            switch ($user['role']) {
+                case 'admin':
+                    return redirect()->to('/admin/dashboard');
+                case 'presenter':
+                    return redirect()->to('/presenter/dashboard');
+                case 'reviewer':
+                    return redirect()->to('/reviewer/dashboard');
+                default:
+                    // For audience/default users, show audience dashboard
+                    break;
+            }
+
             $data = [
                 'title' => 'Dashboard - SNIA Conference',
                 'user' => $user,
                 'userRole' => $userRole,
-                'userName' => trim($user['first_name'] . ' ' . $user['last_name'])
+                'userName' => trim($user['first_name'] . ' ' . $user['last_name']),
+                'stats' => $this->getAudienceStats($userId),
+                'registrations' => $this->getUserRegistrations($userId)
             ];
         } else {
             // No session, but allow access - JWT token will be handled by JavaScript
@@ -51,7 +66,7 @@ class DashboardController extends BaseController
             ];
         }
 
-        return view('roles/audience/dashboard', $data);
+        return view('roles/audience/dashboard_clean', $data);
     }
 
     /**
@@ -583,5 +598,65 @@ class DashboardController extends BaseController
                   ->where('qc.user_id', $userId)
                   ->where('qs.scan_result', 'success')
                   ->countAllResults();
+    }
+
+    /**
+     * Get audience-specific statistics
+     */
+    private function getAudienceStats($userId)
+    {
+        try {
+            $db = \Config\Database::connect();
+            
+            $stats = [
+                'total_registrations' => $db->table('registrations')->where('user_id', $userId)->countAllResults(),
+                'upcoming_events' => $db->table('registrations r')
+                    ->join('events e', 'e.id = r.event_id', 'inner')
+                    ->where('r.user_id', $userId)
+                    ->where('e.event_date >=', date('Y-m-d'))
+                    ->countAllResults(),
+                'completed_events' => $db->table('registrations r')
+                    ->join('events e', 'e.id = r.event_id', 'inner')
+                    ->where('r.user_id', $userId)
+                    ->where('e.event_date <', date('Y-m-d'))
+                    ->countAllResults(),
+                'certificates_earned' => $db->table('certificates c')
+                    ->join('registrations r', 'r.id = c.registration_id')
+                    ->where('r.user_id', $userId)
+                    ->countAllResults()
+            ];
+            
+            return $stats;
+        } catch (\Exception $e) {
+            log_message('error', 'Get audience stats error: ' . $e->getMessage());
+            return [
+                'total_registrations' => 0,
+                'upcoming_events' => 0,
+                'completed_events' => 0,
+                'certificates_earned' => 0
+            ];
+        }
+    }
+
+    /**
+     * Get user registrations with event details
+     */
+    private function getUserRegistrations($userId)
+    {
+        try {
+            $db = \Config\Database::connect();
+            
+            return $db->table('registrations r')
+                ->select('r.*, e.title as event_title, e.event_date, e.event_time, e.location')
+                ->join('events e', 'e.id = r.event_id', 'left')
+                ->where('r.user_id', $userId)
+                ->orderBy('e.event_date', 'DESC')
+                ->limit(5)
+                ->get()
+                ->getResultArray();
+        } catch (\Exception $e) {
+            log_message('error', 'Get user registrations error: ' . $e->getMessage());
+            return [];
+        }
     }
 }

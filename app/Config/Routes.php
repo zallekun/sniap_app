@@ -214,6 +214,14 @@ $routes->group('', ['namespace' => 'App\Controllers'], function($routes) {
     $routes->get('register', 'Auth\RegisterController::index');
     $routes->post('register', 'Auth\RegisterController::store');
     
+    // Alternative auth routes (for clean forms)
+    $routes->get('auth/login', 'Auth\AuthController::login');
+    $routes->post('auth/login', 'Auth\AuthController::attemptLogin');
+    $routes->get('auth/logout', 'Auth\AuthController::logout');
+    
+    $routes->get('auth/register', 'Auth\RegisterController::index');
+    $routes->post('auth/register', 'Auth\RegisterController::store');
+    
     // Email Verification (new system)
     $routes->get('auth/verify-code', 'Auth\RegisterController::verifyCodePage');
     $routes->post('auth/verify-code', 'Auth\RegisterController::verifyCode');

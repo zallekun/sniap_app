@@ -1,13 +1,6 @@
-<?php
-$this->extend('shared/layouts/main');
-$this->section('title');
-echo $title ?? 'Admin Dashboard';
-$this->endSection();
+<?= $this->extend('shared/layouts/admin_layout') ?>
 
-$this->section('additional_css');
-?>
-<link rel="stylesheet" href="<?= base_url('css/admin/dashboard.css') ?>">
-<?php $this->endSection(); ?>
+<?= $this->section('title') ?><?= $title ?? 'Admin Dashboard' ?><?= $this->endSection() ?>
 
 <?php $this->section('content'); ?>
 <div class="admin-layout">
@@ -88,6 +81,12 @@ $this->section('additional_css');
                     <a href="/dashboard" class="nav-link">
                         <i class="fas fa-arrow-left"></i>
                         Back to Dashboard
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="/logout" class="nav-link">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Logout
                     </a>
                 </div>
             </div>

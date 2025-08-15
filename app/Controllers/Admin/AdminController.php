@@ -50,7 +50,7 @@ class AdminController extends BaseController
                 'stats' => $this->getDashboardStats()
             ];
             
-            return view('roles/admin/dashboard', $data);
+            return view('roles/admin/dashboard_simple', $data);
         } catch (\Exception $e) {
             log_message('error', 'Admin dashboard error: ' . $e->getMessage());
             return redirect()->to('/dashboard')->with('error', 'Failed to load admin dashboard');
@@ -216,7 +216,7 @@ class AdminController extends BaseController
                 'total_events' => $db->table('events')->countAllResults(),
                 'total_registrations' => $db->table('registrations')->countAllResults(),
                 'total_abstracts' => $db->table('abstracts')->countAllResults(),
-                'pending_reviews' => $db->table('abstracts')->where('status', 'pending')->countAllResults(),
+                'pending_reviews' => $db->table('abstracts')->where('review_status', 'pending')->countAllResults(),
                 'total_payments' => $db->table('payments')->where('payment_status', 'success')->countAllResults(),
                 'revenue' => $db->table('payments')
                     ->where('payment_status', 'success')
