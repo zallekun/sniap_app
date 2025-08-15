@@ -63,7 +63,7 @@ class ProfileController extends BaseController
             'validation' => \Config\Services::validation()
         ];
 
-        return view('user/profile/index', $data);
+        return view('shared/profile/index', $data);
     }
 
     /**
@@ -532,7 +532,7 @@ class ProfileController extends BaseController
             'settings' => $settings
         ];
 
-        return view('user/profile/notifications', $data);
+        return view('shared/profile/notifications', $data);
     }
 
     /**
