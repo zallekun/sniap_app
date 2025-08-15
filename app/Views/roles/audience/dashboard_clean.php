@@ -81,31 +81,23 @@
                 <h5 class="card-title">Quick Actions</h5>
             </div>
             <div class="card-body">
-                <div class="row g-3">
-                    <div class="col-md-3">
-                        <a href="/my-registrations" class="btn btn-primary w-100">
-                            <i class="fas fa-calendar-plus me-2"></i>
-                            Register for Event
-                        </a>
-                    </div>
-                    <div class="col-md-3">
-                        <a href="/event-schedule" class="btn btn-outline-primary w-100">
-                            <i class="fas fa-calendar me-2"></i>
-                            View Schedule
-                        </a>
-                    </div>
-                    <div class="col-md-3">
-                        <a href="/certificates" class="btn btn-outline-primary w-100">
-                            <i class="fas fa-certificate me-2"></i>
-                            My Certificates
-                        </a>
-                    </div>
-                    <div class="col-md-3">
-                        <a href="/payment-history" class="btn btn-outline-primary w-100">
-                            <i class="fas fa-credit-card me-2"></i>
-                            Payment History
-                        </a>
-                    </div>
+                <div class="quick-actions-grid">
+                    <a href="/audience/registrations" class="btn btn-outline-primary">
+                        <i class="fas fa-calendar-plus me-2"></i>
+                        My Registrations
+                    </a>
+                    <a href="/audience/events" class="btn btn-outline-primary">
+                        <i class="fas fa-calendar me-2"></i>
+                        My Schedule
+                    </a>
+                    <a href="/audience/certificates" class="btn btn-outline-primary">
+                        <i class="fas fa-certificate me-2"></i>
+                        My Certificates
+                    </a>
+                    <a href="/audience/payments" class="btn btn-outline-primary">
+                        <i class="fas fa-credit-card me-2"></i>
+                        Payment History
+                    </a>
                 </div>
             </div>
         </div>
@@ -264,4 +256,220 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Load real-time statistics
+    loadAudienceStats();
+    
+    // Load registrations table
+    loadRegistrationsTable();
+    
+    // Load upcoming events (only if data is static)
+    loadUpcomingEvents();
+});
+
+function loadAudienceStats() {
+    fetch('/audience/api/stats')
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                const stats = data.data;
+                
+                // Update statistics cards
+                updateStatCard('total_registrations', stats.total_registrations || 0);
+                updateStatCard('upcoming_events', stats.upcoming_events || 0);
+                updateStatCard('completed_events', stats.completed_events || 0);
+                updateStatCard('certificates_earned', stats.certificates_earned || 0);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading audience stats:', error);
+        });
+}
+
+function updateStatCard(type, value) {
+    const cards = document.querySelectorAll('.stat-card');
+    
+    cards.forEach(card => {
+        const icon = card.querySelector('.stat-icon i');
+        if (!icon) return;
+        
+        let targetCard = null;
+        
+        if (type === 'total_registrations' && icon.classList.contains('fa-calendar-check')) {
+            targetCard = card;
+        } else if (type === 'upcoming_events' && icon.classList.contains('fa-clock')) {
+            targetCard = card;
+        } else if (type === 'completed_events' && icon.classList.contains('fa-check-circle')) {
+            targetCard = card;
+        } else if (type === 'certificates_earned' && icon.classList.contains('fa-certificate')) {
+            targetCard = card;
+        }
+        
+        if (targetCard) {
+            const valueElement = targetCard.querySelector('.stat-value');
+            if (valueElement) {
+                valueElement.textContent = value.toLocaleString();
+            }
+        }
+    });
+}
+
+function loadRegistrationsTable() {
+    fetch('/audience/api/registrations')
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                const registrations = data.data;
+                const tableContainer = document.querySelector('.table-responsive');
+                
+                if (registrations.length === 0) {
+                    // Show empty state (already exists in template)
+                    return;
+                }
+                
+                // Update the table with real data
+                updateRegistrationsTable(registrations.slice(0, 5));
+            }
+        })
+        .catch(error => {
+            console.error('Error loading registrations:', error);
+        });
+}
+
+function updateRegistrationsTable(registrations) {
+    const tbody = document.querySelector('.table tbody');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '';
+    
+    registrations.forEach(registration => {
+        const row = document.createElement('tr');
+        
+        // Status badge classes
+        const statusClass = getStatusBadgeClass(registration.registration_status);
+        const paymentClass = getStatusBadgeClass(registration.payment_status);
+        
+        row.innerHTML = `
+            <td>
+                <div class="fw-medium">${escapeHtml(registration.event_title || 'Event')}</div>
+                <small class="text-muted">${escapeHtml(registration.registration_type || 'Standard')}</small>
+            </td>
+            <td>
+                ${registration.event_date ? 
+                    `<div>${formatDate(registration.event_date)}</div>
+                     <small class="text-muted">${formatTime(registration.event_time)}</small>` 
+                    : '<small class="text-muted">Date TBA</small>'
+                }
+            </td>
+            <td>
+                <span class="badge ${statusClass}">
+                    ${capitalizeFirst(registration.registration_status || 'pending')}
+                </span>
+            </td>
+            <td>
+                <span class="badge ${paymentClass}">
+                    ${capitalizeFirst(registration.payment_status || 'pending')}
+                </span>
+            </td>
+            <td>
+                <a href="/registration/${registration.id}" class="btn btn-sm btn-outline-primary">
+                    Details
+                </a>
+            </td>
+        `;
+        
+        tbody.appendChild(row);
+    });
+}
+
+function loadUpcomingEvents() {
+    fetch('/audience/api/events')
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                const events = data.data;
+                updateUpcomingEventsSection(events.slice(0, 3));
+            }
+        })
+        .catch(error => {
+            console.error('Error loading upcoming events:', error);
+        });
+}
+
+function updateUpcomingEventsSection(events) {
+    const eventsContainer = document.querySelector('.col-lg-4 .card .card-body');
+    if (!eventsContainer || events.length === 0) return;
+    
+    eventsContainer.innerHTML = '';
+    
+    events.forEach((event, index) => {
+        const alertClass = index % 2 === 0 ? 'alert-info' : 'alert-success';
+        const iconClass = index % 2 === 0 ? 'fa-calendar' : 'fa-laptop';
+        
+        const eventDiv = document.createElement('div');
+        eventDiv.className = `alert ${alertClass}`;
+        eventDiv.innerHTML = `
+            <h6><i class="fas ${iconClass} me-2"></i>${escapeHtml(event.title)}</h6>
+            <p class="mb-2">${escapeHtml(event.description || 'Conference event')}</p>
+            <small class="text-muted">
+                <i class="fas fa-calendar me-1"></i>${formatDate(event.event_date)}<br>
+                <i class="fas fa-map-marker-alt me-1"></i>${escapeHtml(event.location || 'Venue TBA')}
+            </small>
+            <div class="mt-2">
+                <a href="/event-details/${event.id}" class="btn btn-sm btn-outline-primary">View Details</a>
+            </div>
+        `;
+        
+        eventsContainer.appendChild(eventDiv);
+    });
+}
+
+// Utility functions
+function getStatusBadgeClass(status) {
+    switch (status?.toLowerCase()) {
+        case 'confirmed':
+        case 'approved':
+        case 'paid':
+            return 'bg-success';
+        case 'cancelled':
+        case 'failed':
+            return 'bg-danger';
+        case 'pending':
+        default:
+            return 'bg-warning';
+    }
+}
+
+function capitalizeFirst(str) {
+    return str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function formatDate(dateStr) {
+    if (!dateStr) return 'Date TBA';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+    });
+}
+
+function formatTime(timeStr) {
+    if (!timeStr) return 'Time TBA';
+    const time = new Date(`2000-01-01 ${timeStr}`);
+    return time.toLocaleTimeString('en-US', { 
+        hour: 'numeric', 
+        minute: '2-digit' 
+    });
+}
+</script>
+
 <?= $this->endSection() ?>

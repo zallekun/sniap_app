@@ -1,11 +1,8 @@
-<?php
-$this->extend('shared/layouts/main');
-$this->section('title');
-echo $title ?? 'User Management - Admin Panel';
-$this->endSection();
+<?= $this->extend('shared/layouts/admin_simple') ?>
 
-$this->section('additional_css');
-?>
+<?= $this->section('title') ?>User Management<?= $this->endSection() ?>
+
+<?= $this->section('content') ?>
 <link rel="stylesheet" href="<?= base_url('css/admin/user-management.css') ?>">
 <style>
 /* Admin User Management Specific Styles */

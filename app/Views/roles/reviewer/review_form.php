@@ -1,12 +1,8 @@
-<?php
-$this->extend('shared/layouts/main');
-$this->section('title');
-echo $title ?? 'Review Abstract - Reviewer';
-$this->endSection();
+<?= $this->extend('shared/layouts/user_layout') ?>
 
-$this->section('additional_css');
-?>
-<link rel="stylesheet" href="<?= base_url('css/reviewer/dashboard.css') ?>">
+<?= $this->section('title') ?>Review Abstract<?= $this->endSection() ?>
+
+<?= $this->section('content') ?>
 <style>
 .review-form-container {
     max-width: 1200px;

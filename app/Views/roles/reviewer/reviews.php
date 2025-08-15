@@ -1,15 +1,8 @@
-<?php
-$this->extend('shared/layouts/main');
-$this->section('title');
-echo $title ?? 'Review History - Reviewer';
-$this->endSection();
+<?= $this->extend('shared/layouts/user_layout') ?>
 
-$this->section('additional_css');
-?>
-<link rel="stylesheet" href="<?= base_url('css/reviewer/dashboard.css') ?>">
-<?php $this->endSection(); ?>
+<?= $this->section('title') ?>My Reviews<?= $this->endSection() ?>
 
-<?php $this->section('content'); ?>
+<?= $this->section('content') ?>
 <div class="reviewer-layout">
     <!-- Sidebar -->
     <aside class="reviewer-sidebar">

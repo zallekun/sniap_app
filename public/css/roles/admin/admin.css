@@ -1,0 +1,286 @@
+/* ===========================================
+   ADMIN ROLE SPECIFIC STYLES
+   =========================================== */
+
+/* Admin Body Classes */
+.admin-dashboard {
+    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+}
+
+/* Admin Navbar */
+.admin-navbar {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%) !important;
+    border-bottom: 2px solid var(--primary);
+}
+
+.admin-navbar .navbar-brand {
+    color: white !important;
+    font-weight: 700;
+}
+
+.admin-navbar .nav-link {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-weight: 500;
+}
+
+.admin-navbar .nav-link:hover {
+    color: white !important;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.admin-navbar .nav-link.active {
+    color: white !important;
+    background: rgba(37, 99, 235, 0.3);
+}
+
+/* Admin Sidebar */
+.admin-sidebar {
+    background: var(--gray-900);
+    min-height: 100vh;
+    width: 260px;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: var(--z-fixed);
+    transition: transform var(--transition-base);
+}
+
+.admin-sidebar-header {
+    padding: var(--spacing-6);
+    border-bottom: 1px solid var(--gray-700);
+}
+
+.admin-sidebar-brand {
+    color: white;
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.admin-sidebar-nav {
+    padding: var(--spacing-4) 0;
+}
+
+.admin-sidebar-item {
+    display: block;
+    padding: var(--spacing-3) var(--spacing-6);
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: all var(--transition-base);
+    border-left: 3px solid transparent;
+}
+
+.admin-sidebar-item:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.05);
+    border-left-color: var(--primary);
+}
+
+.admin-sidebar-item.active {
+    color: white;
+    background: rgba(37, 99, 235, 0.2);
+    border-left-color: var(--primary);
+}
+
+.admin-sidebar-item i {
+    width: 1.5rem;
+    margin-right: var(--spacing-3);
+}
+
+/* Admin Main Content */
+.admin-main {
+    margin-left: 260px;
+    padding: var(--spacing-6);
+    min-height: 100vh;
+}
+
+.admin-main-header {
+    background: white;
+    padding: var(--spacing-6);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
+    margin-bottom: var(--spacing-6);
+}
+
+.admin-page-title {
+    font-size: var(--font-size-3xl);
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: var(--spacing-2);
+}
+
+.admin-page-subtitle {
+    color: var(--gray-600);
+    font-size: var(--font-size-lg);
+}
+
+/* Admin Stats Cards */
+.admin-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--spacing-6);
+    margin-bottom: var(--spacing-8);
+}
+
+.admin-stat-card {
+    background: white;
+    padding: var(--spacing-6);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--gray-200);
+    position: relative;
+    overflow: hidden;
+}
+
+.admin-stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--card-accent, var(--primary));
+}
+
+.admin-stat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-4);
+}
+
+.admin-stat-icon {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: var(--border-radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-xl);
+    color: white;
+}
+
+.admin-stat-icon.users {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+}
+
+.admin-stat-icon.events {
+    background: linear-gradient(135deg, var(--success), #34d399);
+}
+
+.admin-stat-icon.registrations {
+    background: linear-gradient(135deg, var(--warning), #fbbf24);
+}
+
+.admin-stat-icon.payments {
+    background: linear-gradient(135deg, var(--info), #22d3ee);
+}
+
+.admin-stat-content h3 {
+    font-size: var(--font-size-3xl);
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: var(--spacing-1);
+}
+
+.admin-stat-content p {
+    color: var(--gray-600);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+}
+
+/* Admin Tables */
+.admin-table-container {
+    background: white;
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+}
+
+.admin-table-header {
+    background: var(--gray-50);
+    padding: var(--spacing-6);
+    border-bottom: 1px solid var(--gray-200);
+    display: flex;
+    align-items: center;
+    justify-content: between;
+}
+
+.admin-table-title {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--gray-900);
+}
+
+.admin-table-actions {
+    display: flex;
+    gap: var(--spacing-3);
+}
+
+/* Admin Forms */
+.admin-form-container {
+    background: white;
+    padding: var(--spacing-8);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.admin-form-section {
+    margin-bottom: var(--spacing-8);
+}
+
+.admin-form-section:last-child {
+    margin-bottom: 0;
+}
+
+.admin-form-section-title {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--gray-900);
+    margin-bottom: var(--spacing-4);
+    padding-bottom: var(--spacing-2);
+    border-bottom: 2px solid var(--gray-200);
+}
+
+/* Admin Action Buttons */
+.admin-action-group {
+    display: flex;
+    gap: var(--spacing-3);
+    align-items: center;
+}
+
+.admin-btn-danger {
+    background: var(--danger);
+    color: white;
+    border-color: var(--danger);
+}
+
+.admin-btn-danger:hover {
+    background: #dc2626;
+    border-color: #dc2626;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .admin-sidebar {
+        transform: translateX(-100%);
+    }
+    
+    .admin-sidebar.open {
+        transform: translateX(0);
+    }
+    
+    .admin-main {
+        margin-left: 0;
+        padding: var(--spacing-4);
+    }
+    
+    .admin-stats-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-4);
+    }
+    
+    .admin-stat-card {
+        padding: var(--spacing-4);
+    }
+}

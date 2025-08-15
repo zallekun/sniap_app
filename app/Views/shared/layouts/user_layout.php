@@ -10,7 +10,7 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Shared User CSS -->
-    <link rel="stylesheet" href="<?= base_url('css/shared/user_dashboard.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('css/user.css') ?>">
     
     <?= $this->renderSection('head') ?>
 </head>

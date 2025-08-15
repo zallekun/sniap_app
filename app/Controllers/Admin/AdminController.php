@@ -50,7 +50,7 @@ class AdminController extends BaseController
                 'stats' => $this->getDashboardStats()
             ];
             
-            return view('roles/admin/dashboard_simple', $data);
+            return view('roles/admin/dashboard', $data);
         } catch (\Exception $e) {
             log_message('error', 'Admin dashboard error: ' . $e->getMessage());
             return redirect()->to('/dashboard')->with('error', 'Failed to load admin dashboard');

@@ -13,12 +13,13 @@
       "Bash(find:*)",
       "Bash(echo:*)",
       "Bash(git add:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
+    "defaultMode": "acceptEdits",
     "additionalDirectories": [
       "C:\\c\\laragon\\www"
-    ],
-    "defaultMode": "acceptEdits"
+    ]
   }
 }

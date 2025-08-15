@@ -1,12 +1,8 @@
-<?php
-$this->extend('shared/layouts/main');
-$this->section('title');
-echo $title ?? 'Abstract Management - Admin Panel';
-$this->endSection();
+<?= $this->extend('shared/layouts/admin_simple') ?>
 
-$this->section('additional_css');
-?>
-<link rel="stylesheet" href="<?= base_url('css/admin/dashboard.css') ?>">
+<?= $this->section('title') ?>Abstract Management<?= $this->endSection() ?>
+
+<?= $this->section('content') ?>
 <style>
 .abstract-actions {
     display: flex;

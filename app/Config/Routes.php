@@ -309,14 +309,22 @@ $routes->group('', ['namespace' => 'App\Controllers'], function($routes) {
         $routes->get('api/assigned', 'Reviewer\ReviewerController::getAssignedApi');
     });
 
-    // Audience Routes (for future audience-specific features)
+    // Audience Routes
     $routes->group('audience', ['filter' => 'auth'], function($routes) {
-        // Main pages - for now these redirect to main dashboard
+        // Main pages
         $routes->get('/', 'DashboardController::index');
         $routes->get('dashboard', 'DashboardController::index');
+        $routes->get('registrations', 'DashboardController::audienceRegistrations');
         $routes->get('events', 'DashboardController::eventSchedulePage');
         $routes->get('certificates', 'DashboardController::certificates');
-        $routes->get('payments', 'DashboardController::payments');
+        $routes->get('payments', 'DashboardController::paymentHistory');
+        
+        // API endpoints for audience
+        $routes->get('api/registrations', 'DashboardController::getAudienceRegistrationsApi');
+        $routes->get('api/stats', 'DashboardController::getAudienceStatsApi');
+        $routes->get('api/events', 'DashboardController::getUpcomingEventsApi');
+        $routes->get('api/certificates', 'DashboardController::getCertificatesApi');
+        $routes->get('api/payments', 'DashboardController::getPaymentHistoryApi');
     });
 
     // =================

@@ -10,7 +10,7 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Admin Simple CSS -->
-    <link rel="stylesheet" href="<?= base_url('css/admin/simple.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('css/admin.css') ?>">
     
     <?= $this->renderSection('head') ?>
 </head>

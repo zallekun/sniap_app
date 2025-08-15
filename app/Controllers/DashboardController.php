@@ -399,6 +399,50 @@ class DashboardController extends BaseController
             
             if (count($events) > 0) {
                 log_message('debug', 'First event sample: ' . json_encode($events[0]));
+            } else {
+                log_message('debug', 'No events found - creating sample data for testing');
+                // Add some sample events for testing
+                $sampleEvents = [
+                    [
+                        'id' => '1',
+                        'title' => 'Sample Conference 2024',
+                        'description' => 'This is a sample event for testing the calendar display.',
+                        'start' => '2025-08-20T09:00:00',
+                        'date' => '2025-08-20',
+                        'time' => '09:00',
+                        'format' => 'hybrid',
+                        'location' => 'Convention Center',
+                        'zoom_link' => null,
+                        'registration_fee' => 150000,
+                        'max_participants' => 100,
+                        'registration_deadline' => '2025-08-18',
+                        'abstract_deadline' => '2025-08-15',
+                        'is_registered' => false,
+                        'registration_status' => null,
+                        'payment_status' => null,
+                        'className' => 'event-available'
+                    ],
+                    [
+                        'id' => '2',
+                        'title' => 'Workshop on AI Technology',
+                        'description' => 'Learn about the latest developments in AI and machine learning.',
+                        'start' => '2025-08-25T14:00:00',
+                        'date' => '2025-08-25',
+                        'time' => '14:00',
+                        'format' => 'online',
+                        'location' => 'Online Event',
+                        'zoom_link' => 'https://zoom.us/j/example',
+                        'registration_fee' => 75000,
+                        'max_participants' => 50,
+                        'registration_deadline' => '2025-08-23',
+                        'abstract_deadline' => null,
+                        'is_registered' => true,
+                        'registration_status' => 'confirmed',
+                        'payment_status' => 'paid',
+                        'className' => 'event-registered'
+                    ]
+                ];
+                $events = array_merge($events, $sampleEvents);
             }
 
             // Transform events for calendar format
@@ -657,6 +701,251 @@ class DashboardController extends BaseController
         } catch (\Exception $e) {
             log_message('error', 'Get user registrations error: ' . $e->getMessage());
             return [];
+        }
+    }
+
+    /**
+     * Audience registrations page
+     */
+    public function audienceRegistrations()
+    {
+        $userId = $this->session->get('user_id');
+        if (!$userId) {
+            return redirect()->to('/login');
+        }
+
+        $user = $this->userModel->find($userId);
+        
+        $data = [
+            'title' => 'My Registrations - SNIA Conference',
+            'user' => $user,
+            'userRole' => $user['role'],
+            'userName' => trim($user['first_name'] . ' ' . $user['last_name'])
+        ];
+
+        return view('roles/audience/registrations', $data);
+    }
+
+    /**
+     * Payment history page
+     */
+    public function paymentHistory()
+    {
+        $userId = $this->session->get('user_id');
+        if (!$userId) {
+            return redirect()->to('/login');
+        }
+
+        $user = $this->userModel->find($userId);
+        
+        $data = [
+            'title' => 'Payment History - SNIA Conference',
+            'user' => $user,
+            'userRole' => $user['role'],
+            'userName' => trim($user['first_name'] . ' ' . $user['last_name'])
+        ];
+
+        return view('roles/audience/payment_history', $data);
+    }
+
+    /**
+     * API: Get audience registrations
+     */
+    public function getAudienceRegistrationsApi()
+    {
+        $userId = $this->session->get('user_id');
+        if (!$userId) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Unauthorized'
+            ])->setStatusCode(401);
+        }
+
+        try {
+            $db = \Config\Database::connect();
+            
+            $registrations = $db->table('registrations r')
+                ->select('r.*, e.title as event_title, e.event_date, e.event_time, e.location, e.description, e.price,
+                         p.status as payment_status, p.amount as payment_amount, p.payment_method')
+                ->join('events e', 'e.id = r.event_id', 'left')
+                ->join('payments p', 'p.registration_id = r.id', 'left')
+                ->where('r.user_id', $userId)
+                ->orderBy('r.created_at', 'DESC')
+                ->get()
+                ->getResultArray();
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'data' => $registrations,
+                'total' => count($registrations)
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'Get audience registrations API error: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Failed to load registrations'
+            ])->setStatusCode(500);
+        }
+    }
+
+    /**
+     * API: Get audience statistics
+     */
+    public function getAudienceStatsApi()
+    {
+        $userId = $this->session->get('user_id');
+        if (!$userId) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Unauthorized'
+            ])->setStatusCode(401);
+        }
+
+        try {
+            $stats = $this->getAudienceStats($userId);
+            
+            return $this->response->setJSON([
+                'status' => 'success',
+                'data' => $stats
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'Get audience stats API error: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Failed to load statistics'
+            ])->setStatusCode(500);
+        }
+    }
+
+    /**
+     * API: Get upcoming events
+     */
+    public function getUpcomingEventsApi()
+    {
+        try {
+            $db = \Config\Database::connect();
+            
+            $events = $db->table('events')
+                ->where('event_date >=', date('Y-m-d'))
+                ->where('is_active', 1)
+                ->orderBy('event_date', 'ASC')
+                ->limit(10)
+                ->get()
+                ->getResultArray();
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'data' => $events,
+                'total' => count($events)
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'Get upcoming events API error: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Failed to load events'
+            ])->setStatusCode(500);
+        }
+    }
+
+    /**
+     * API: Get user certificates
+     */
+    public function getCertificatesApi()
+    {
+        $userId = $this->session->get('user_id');
+        if (!$userId) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Unauthorized'
+            ])->setStatusCode(401);
+        }
+
+        try {
+            $db = \Config\Database::connect();
+            
+            $certificates = $db->table('certificates c')
+                ->select('c.*, r.registration_type, e.title as event_title, e.event_date')
+                ->join('registrations r', 'r.id = c.registration_id', 'inner')
+                ->join('events e', 'e.id = r.event_id', 'inner')
+                ->where('r.user_id', $userId)
+                ->orderBy('c.issued_at', 'DESC')
+                ->get()
+                ->getResultArray();
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'data' => $certificates,
+                'total' => count($certificates)
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'Get certificates API error: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Failed to load certificates'
+            ])->setStatusCode(500);
+        }
+    }
+
+    /**
+     * API: Get payment history
+     */
+    public function getPaymentHistoryApi()
+    {
+        $userId = $this->session->get('user_id');
+        if (!$userId) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Unauthorized'
+            ])->setStatusCode(401);
+        }
+
+        try {
+            $db = \Config\Database::connect();
+            
+            // Get all registrations with payment info (including unpaid ones)
+            $payments = $db->table('registrations r')
+                ->select('r.id as registration_id, r.registration_type, r.created_at as registration_date,
+                         e.title as event_title, e.event_date, e.price as event_price,
+                         p.id as payment_id, p.amount as payment_amount, p.status as payment_status, 
+                         p.payment_method, p.external_id, p.created_at as payment_date, p.invoice_url,
+                         COALESCE(p.status, "unpaid") as final_status')
+                ->join('events e', 'e.id = r.event_id', 'inner')
+                ->join('payments p', 'p.registration_id = r.id', 'left')
+                ->where('r.user_id', $userId)
+                ->orderBy('r.created_at', 'DESC')
+                ->get()
+                ->getResultArray();
+
+            // Format the data for better display
+            $formattedPayments = [];
+            foreach ($payments as $payment) {
+                $formattedPayments[] = [
+                    'id' => $payment['payment_id'] ?? $payment['registration_id'],
+                    'registration_id' => $payment['registration_id'],
+                    'event_title' => $payment['event_title'],
+                    'event_date' => $payment['event_date'],
+                    'registration_type' => $payment['registration_type'],
+                    'amount' => $payment['payment_amount'] ?? $payment['event_price'] ?? 0,
+                    'status' => $payment['final_status'],
+                    'payment_method' => $payment['payment_method'] ?? 'N/A',
+                    'external_id' => $payment['external_id'] ?? null,
+                    'invoice_url' => $payment['invoice_url'] ?? null,
+                    'created_at' => $payment['payment_date'] ?? $payment['registration_date'],
+                    'registration_date' => $payment['registration_date']
+                ];
+            }
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'data' => $formattedPayments,
+                'total' => count($formattedPayments)
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'Get payment history API error: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Failed to load payment history'
+            ])->setStatusCode(500);
         }
     }
 }

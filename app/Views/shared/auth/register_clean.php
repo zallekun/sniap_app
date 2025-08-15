@@ -10,7 +10,7 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Clean Auth CSS -->
-    <link rel="stylesheet" href="<?= base_url('css/shared/auth_clean.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('css/auth.css') ?>">
 </head>
 <body class="auth-clean">
     <div class="auth-wrapper">
