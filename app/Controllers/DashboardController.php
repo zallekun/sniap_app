@@ -317,8 +317,6 @@ class DashboardController extends BaseController
                 ->get()
                 ->getResultArray();
 
-            log_message('debug', 'Events loaded: ' . count($events) . ' events found');
-            log_message('debug', 'Events data: ' . json_encode($events));
 
             return $this->response->setJSON([
                 'status' => 'success',
@@ -442,7 +440,8 @@ class DashboardController extends BaseController
                         'className' => 'event-registered'
                     ]
                 ];
-                $events = array_merge($events, $sampleEvents);
+                // Removed sample events - use only database data
+                // $events = array_merge($events, $sampleEvents);
             }
 
             // Transform events for calendar format
@@ -765,8 +764,8 @@ class DashboardController extends BaseController
             $db = \Config\Database::connect();
             
             $registrations = $db->table('registrations r')
-                ->select('r.*, e.title as event_title, e.event_date, e.event_time, e.location, e.description, e.price,
-                         p.status as payment_status, p.amount as payment_amount, p.payment_method')
+                ->select('r.*, e.title as event_title, e.event_date, e.event_time, e.location, e.description, e.registration_fee as price,
+                         p.payment_status, p.amount as payment_amount, p.payment_method')
                 ->join('events e', 'e.id = r.event_id', 'left')
                 ->join('payments p', 'p.registration_id = r.id', 'left')
                 ->where('r.user_id', $userId)
@@ -827,7 +826,7 @@ class DashboardController extends BaseController
             
             $events = $db->table('events')
                 ->where('event_date >=', date('Y-m-d'))
-                ->where('is_active', 1)
+                ->where('is_active', true)
                 ->orderBy('event_date', 'ASC')
                 ->limit(10)
                 ->get()
@@ -905,10 +904,10 @@ class DashboardController extends BaseController
             // Get all registrations with payment info (including unpaid ones)
             $payments = $db->table('registrations r')
                 ->select('r.id as registration_id, r.registration_type, r.created_at as registration_date,
-                         e.title as event_title, e.event_date, e.price as event_price,
-                         p.id as payment_id, p.amount as payment_amount, p.status as payment_status, 
-                         p.payment_method, p.external_id, p.created_at as payment_date, p.invoice_url,
-                         COALESCE(p.status, "unpaid") as final_status')
+                         e.title as event_title, e.event_date, e.registration_fee as event_price,
+                         p.id as payment_id, p.amount as payment_amount, p.payment_status, 
+                         p.payment_method, p.transaction_id, p.created_at as payment_date,
+                         COALESCE(p.payment_status, \'unpaid\') as final_status')
                 ->join('events e', 'e.id = r.event_id', 'inner')
                 ->join('payments p', 'p.registration_id = r.id', 'left')
                 ->where('r.user_id', $userId)
@@ -945,6 +944,124 @@ class DashboardController extends BaseController
             return $this->response->setJSON([
                 'status' => 'error',
                 'message' => 'Failed to load payment history'
+            ])->setStatusCode(500);
+        }
+    }
+    
+    /**
+     * Get my registrations (session-based, compatible with Postman)
+     */
+    public function getMyRegistrations()
+    {
+        $userId = $this->session->get('user_id');
+        if (!$userId) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Unauthorized'
+            ])->setStatusCode(401);
+        }
+
+        try {
+            $db = \Config\Database::connect();
+            
+            $registrations = $db->table('registrations r')
+                ->select('r.*, e.title as event_title, e.event_date, e.event_time, e.location, e.description, e.registration_fee as price,
+                         p.payment_status, p.amount as payment_amount, p.payment_method')
+                ->join('events e', 'e.id = r.event_id', 'left')
+                ->join('payments p', 'p.registration_id = r.id', 'left')
+                ->where('r.user_id', $userId)
+                ->orderBy('r.created_at', 'DESC')
+                ->get()
+                ->getResultArray();
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'data' => $registrations,
+                'total' => count($registrations)
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'Get my registrations error: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Failed to load registrations'
+            ])->setStatusCode(500);
+        }
+    }
+    
+    /**
+     * Cancel user registration (both POST and DELETE support)
+     */
+    public function cancelRegistration($registrationId = null)
+    {
+        $userId = $this->session->get('user_id');
+        if (!$userId) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Unauthorized'
+            ])->setStatusCode(401);
+        }
+
+        // Support both URL parameter and POST body
+        if (!$registrationId) {
+            $registrationId = $this->request->getPost('registration_id');
+        }
+        if (!$registrationId) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Registration ID is required'
+            ]);
+        }
+
+        try {
+            $db = \Config\Database::connect();
+            
+            // Verify the registration belongs to the user and is cancelable
+            $registration = $db->table('registrations')
+                ->where('id', $registrationId)
+                ->where('user_id', $userId)
+                ->get()
+                ->getRowArray();
+
+            if (!$registration) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Registration not found'
+                ]);
+            }
+
+            // Check if registration can be cancelled (only pending registrations)
+            if ($registration['registration_status'] !== 'pending') {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Only pending registrations can be cancelled'
+                ]);
+            }
+
+            // Update registration status to cancelled
+            $updated = $db->table('registrations')
+                ->where('id', $registrationId)
+                ->update([
+                    'registration_status' => 'cancelled',
+                    'updated_at' => date('Y-m-d H:i:s')
+                ]);
+
+            if ($updated) {
+                return $this->response->setJSON([
+                    'status' => 'success',
+                    'message' => 'Registration cancelled successfully'
+                ]);
+            } else {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Failed to cancel registration'
+                ]);
+            }
+
+        } catch (\Exception $e) {
+            log_message('error', 'Cancel registration error: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Failed to cancel registration'
             ])->setStatusCode(500);
         }
     }

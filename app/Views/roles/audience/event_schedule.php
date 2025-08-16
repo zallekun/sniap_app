@@ -109,40 +109,10 @@
                     </div>
                     
                     <div id="event-calendar">
-                        <!-- Default content will be replaced by JavaScript -->
-                        <div class="calendar-grid">
-                            <div class="calendar-header">
-                                <div class="calendar-day-header">Min</div>
-                                <div class="calendar-day-header">Sen</div>
-                                <div class="calendar-day-header">Sel</div>
-                                <div class="calendar-day-header">Rab</div>
-                                <div class="calendar-day-header">Kam</div>
-                                <div class="calendar-day-header">Jum</div>
-                                <div class="calendar-day-header">Sab</div>
-                            </div>
-                            <div class="calendar-body">
-                                <div class="calendar-day">
-                                    <div class="day-number">20</div>
-                                    <div class="calendar-event event-available">
-                                        <div class="event-time">09:00</div>
-                                        <div class="event-title">SNIA Conference 2025</div>
-                                    </div>
-                                </div>
-                                <div class="calendar-day">
-                                    <div class="day-number">25</div>
-                                    <div class="calendar-event event-registered">
-                                        <div class="event-time">14:00</div>
-                                        <div class="event-title">Workshop AI & ML</div>
-                                    </div>
-                                </div>
-                                <div class="calendar-day">
-                                    <div class="day-number">30</div>
-                                    <div class="calendar-event event-available">
-                                        <div class="event-time">10:00</div>
-                                        <div class="event-title">Seminar Cybersecurity</div>
-                                    </div>
-                                </div>
-                            </div>
+                        <!-- Calendar will be loaded dynamically from database -->
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status"></div>
+                            <div class="mt-2">Memuat kalender...</div>
                         </div>
                     </div>
                 </div>
@@ -450,107 +420,11 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Event Schedule page loading...');
     
-    // Load sample data immediately for demo
-    loadSampleData();
-    
-    // Also try to load real data
+    // Load real data only - no sample data
     loadEventScheduleData();
 });
 
-// Load sample data immediately for better user experience
-function loadSampleData() {
-    console.log('Loading sample data immediately...');
-    const sampleData = [
-        {
-            id: '1',
-            title: 'SNIA Conference 2025',
-            description: 'Seminar Nasional Informatika - Konferensi tahunan untuk berbagi pengetahuan dan teknologi terbaru.',
-            start: '2025-08-20T09:00:00',
-            date: '2025-08-20',
-            time: '09:00',
-            format: 'hybrid',
-            location: 'Auditorium Universitas',
-            zoom_link: null,
-            registration_fee: 150000,
-            max_participants: 200,
-            registration_deadline: '2025-08-18',
-            abstract_deadline: '2025-08-15',
-            is_registered: false,
-            registration_status: null,
-            payment_status: null,
-            className: 'event-available'
-        },
-        {
-            id: '2',
-            title: 'Workshop AI & Machine Learning',
-            description: 'Workshop praktis mengenai penerapan AI dan Machine Learning dalam industri.',
-            start: '2025-08-25T14:00:00',
-            date: '2025-08-25',
-            time: '14:00',
-            format: 'online',
-            location: 'Online Event',
-            zoom_link: 'https://zoom.us/j/example',
-            registration_fee: 75000,
-            max_participants: 100,
-            registration_deadline: '2025-08-23',
-            abstract_deadline: null,
-            is_registered: true,
-            registration_status: 'confirmed',
-            payment_status: 'paid',
-            className: 'event-registered'
-        },
-        {
-            id: '3',
-            title: 'Seminar Cybersecurity',
-            description: 'Membahas tren dan tantangan keamanan siber di era digital.',
-            start: '2025-08-30T10:00:00',
-            date: '2025-08-30',
-            time: '10:00',
-            format: 'offline',
-            location: 'Gedung Serbaguna',
-            zoom_link: null,
-            registration_fee: 100000,
-            max_participants: 150,
-            registration_deadline: '2025-08-28',
-            abstract_deadline: '2025-08-25',
-            is_registered: false,
-            registration_status: null,
-            payment_status: null,
-            className: 'event-available'
-        }
-    ];
-    
-    // Store events globally
-    window.scheduleEvents = sampleData;
-    
-    // Update stats
-    updateEventStats(sampleData);
-    
-    // Initialize all views
-    try {
-        initializeCalendarView(sampleData);
-        console.log('Calendar view initialized with sample data');
-    } catch (e) {
-        console.error('Calendar view error:', e);
-    }
-    
-    try {
-        initializeListView(sampleData);
-        console.log('List view initialized with sample data');
-    } catch (e) {
-        console.error('List view error:', e);
-    }
-    
-    try {
-        initializeTimelineView(sampleData);
-        console.log('Timeline view initialized with sample data');
-    } catch (e) {
-        console.error('Timeline view error:', e);
-    }
-    
-    // Set up event listeners for tabs
-    setupScheduleViewListeners();
-}
+// Sample data removed - using only real database data
 
 // Load event schedule data
 async function loadEventScheduleData() {
@@ -581,110 +455,10 @@ async function loadEventScheduleData() {
                 return;
             }
             
-            // For other errors, show sample data instead of failing
-            console.log('Using sample data due to server error');
-            const sampleData = {
-                status: 'success',
-                data: [
-                    {
-                        id: '1',
-                        title: 'SNIA Conference 2025',
-                        description: 'Seminar Nasional Informatika - Konferensi tahunan untuk berbagi pengetahuan dan teknologi terbaru.',
-                        start: '2025-08-20T09:00:00',
-                        date: '2025-08-20',
-                        time: '09:00',
-                        format: 'hybrid',
-                        location: 'Auditorium Universitas',
-                        zoom_link: null,
-                        registration_fee: 150000,
-                        max_participants: 200,
-                        registration_deadline: '2025-08-18',
-                        abstract_deadline: '2025-08-15',
-                        is_registered: false,
-                        registration_status: null,
-                        payment_status: null,
-                        className: 'event-available'
-                    },
-                    {
-                        id: '2',
-                        title: 'Workshop AI & Machine Learning',
-                        description: 'Workshop praktis mengenai penerapan AI dan Machine Learning dalam industri.',
-                        start: '2025-08-25T14:00:00',
-                        date: '2025-08-25',
-                        time: '14:00',
-                        format: 'online',
-                        location: 'Online Event',
-                        zoom_link: 'https://zoom.us/j/example',
-                        registration_fee: 75000,
-                        max_participants: 100,
-                        registration_deadline: '2025-08-23',
-                        abstract_deadline: null,
-                        is_registered: true,
-                        registration_status: 'confirmed',
-                        payment_status: 'paid',
-                        className: 'event-registered'
-                    },
-                    {
-                        id: '3',
-                        title: 'Seminar Cybersecurity',
-                        description: 'Membahas tren dan tantangan keamanan siber di era digital.',
-                        start: '2025-08-30T10:00:00',
-                        date: '2025-08-30',
-                        time: '10:00',
-                        format: 'offline',
-                        location: 'Gedung Serbaguna',
-                        zoom_link: null,
-                        registration_fee: 100000,
-                        max_participants: 150,
-                        registration_deadline: '2025-08-28',
-                        abstract_deadline: '2025-08-25',
-                        is_registered: false,
-                        registration_status: null,
-                        payment_status: null,
-                        className: 'event-available'
-                    }
-                ]
-            };
-            
-            // Process sample data
-            const data = sampleData;
-            if (data.status === 'success') {
-                if (data.data && data.data.length > 0) {
-                    window.scheduleEvents = data.data;
-                    updateEventStats(data.data);
-                    console.log('Initializing views with sample data:', data.data.length, 'events');
-                    
-                    // Static HTML content already displayed - no need to regenerate
-                    console.log('Using static HTML content - skipping JavaScript initialization');
-                    /*
-                    try {
-                        initializeCalendarView(data.data);
-                        console.log('Calendar view initialized with sample data');
-                    } catch (e) {
-                        console.error('Calendar view error:', e);
-                    }
-                    
-                    try {
-                        initializeListView(data.data);
-                        console.log('List view initialized with sample data');
-                    } catch (e) {
-                        console.error('List view error:', e);
-                    }
-                    
-                    try {
-                        initializeTimelineView(data.data);
-                        console.log('Timeline view initialized with sample data');
-                    } catch (e) {
-                        console.error('Timeline view error:', e);
-                    }
-                    */
-                    
-                    setupScheduleViewListeners();
-                } else {
-                    showEmptyEventState();
-                    updateEventStats([]);
-                }
-            }
+            // For other errors, show empty state
+            console.log('Server error - showing empty state');
+            showEmptyEventState();
+            updateEventStats([]);
             return;
         }
         
@@ -701,10 +475,7 @@ async function loadEventScheduleData() {
                 
                 console.log('Initializing views with', data.data.length, 'events');
                 
-                // Static HTML content preserved - skipping dynamic initialization
-                console.log('Preserving static HTML content instead of dynamic generation');
-                /*
-                // Initialize all views
+                // Initialize all views with real data
                 try {
                     initializeCalendarView(data.data);
                     console.log('Calendar view initialized');
@@ -725,7 +496,6 @@ async function loadEventScheduleData() {
                 } catch (e) {
                     console.error('Timeline view error:', e);
                 }
-                */
                 
                 // Set up event listeners for tabs
                 setupScheduleViewListeners();
@@ -733,6 +503,7 @@ async function loadEventScheduleData() {
                 console.log('No events found, showing empty state');
                 showEmptyEventState();
                 updateEventStats([]);
+                setupScheduleViewListeners();
             }
         } else {
             console.error('API error:', data);
@@ -742,109 +513,11 @@ async function loadEventScheduleData() {
     } catch (error) {
         console.error('Error loading event schedule:', error);
         
-        // Show sample data instead of error for better user experience
-        console.log('Loading sample data due to error');
-        const sampleData = {
-            status: 'success',
-            data: [
-                {
-                    id: '1',
-                    title: 'SNIA Conference 2025',
-                    description: 'Seminar Nasional Informatika - Konferensi tahunan untuk berbagi pengetahuan dan teknologi terbaru.',
-                    start: '2025-08-20T09:00:00',
-                    date: '2025-08-20',
-                    time: '09:00',
-                    format: 'hybrid',
-                    location: 'Auditorium Universitas',
-                    zoom_link: null,
-                    registration_fee: 150000,
-                    max_participants: 200,
-                    registration_deadline: '2025-08-18',
-                    abstract_deadline: '2025-08-15',
-                    is_registered: false,
-                    registration_status: null,
-                    payment_status: null,
-                    className: 'event-available'
-                },
-                {
-                    id: '2',
-                    title: 'Workshop AI & Machine Learning',
-                    description: 'Workshop praktis mengenai penerapan AI dan Machine Learning dalam industri.',
-                    start: '2025-08-25T14:00:00',
-                    date: '2025-08-25',
-                    time: '14:00',
-                    format: 'online',
-                    location: 'Online Event',
-                    zoom_link: 'https://zoom.us/j/example',
-                    registration_fee: 75000,
-                    max_participants: 100,
-                    registration_deadline: '2025-08-23',
-                    abstract_deadline: null,
-                    is_registered: true,
-                    registration_status: 'confirmed',
-                    payment_status: 'paid',
-                    className: 'event-registered'
-                },
-                {
-                    id: '3',
-                    title: 'Seminar Cybersecurity',
-                    description: 'Membahas tren dan tantangan keamanan siber di era digital.',
-                    start: '2025-08-30T10:00:00',
-                    date: '2025-08-30',
-                    time: '10:00',
-                    format: 'offline',
-                    location: 'Gedung Serbaguna',
-                    zoom_link: null,
-                    registration_fee: 100000,
-                    max_participants: 150,
-                    registration_deadline: '2025-08-28',
-                    abstract_deadline: '2025-08-25',
-                    is_registered: false,
-                    registration_status: null,
-                    payment_status: null,
-                    className: 'event-available'
-                }
-            ]
-        };
-        
-        // Process sample data
-        const data = sampleData;
-        if (data.status === 'success') {
-            if (data.data && data.data.length > 0) {
-                window.scheduleEvents = data.data;
-                updateEventStats(data.data);
-                console.log('Initializing views with sample data (from catch):', data.data.length, 'events');
-                
-                try {
-                    initializeCalendarView(data.data);
-                    console.log('Calendar view initialized with sample data');
-                } catch (e) {
-                    console.error('Calendar view error:', e);
-                }
-                
-                try {
-                    initializeListView(data.data);
-                    console.log('List view initialized with sample data');
-                } catch (e) {
-                    console.error('List view error:', e);
-                }
-                
-                try {
-                    initializeTimelineView(data.data);
-                    console.log('Timeline view initialized with sample data');
-                } catch (e) {
-                    console.error('Timeline view error:', e);
-                }
-                
-                setupScheduleViewListeners();
-                
-                // Show info message about sample data
-                showAlert('Menampilkan data contoh - beberapa fitur mungkin terbatas', 'info', 5000);
-            } else {
-                showEmptyEventState();
-                updateEventStats([]);
-            }
-        }
+        // Show error instead of sample data
+        console.error('Error loading event schedule data');
+        showAlert('Gagal memuat jadwal acara. Silakan coba lagi.', 'danger');
+        showEmptyEventState();
+        updateEventStats([]);
     }
 }
 

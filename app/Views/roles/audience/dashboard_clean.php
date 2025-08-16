@@ -174,9 +174,53 @@
                                         </span>
                                     </td>
                                     <td>
-                                        <a href="/registration/<?= $registration['id'] ?>" class="btn btn-sm btn-outline-primary">
-                                            Details
-                                        </a>
+                                        <?php 
+                                        // Clean status values (trim whitespace and convert to lowercase for comparison)
+                                        $paymentStatus = trim(strtolower($registration['payment_status'] ?? 'pending'));
+                                        $registrationStatus = trim(strtolower($registration['registration_status'] ?? 'pending'));
+                                        
+                                        // Enhanced debug
+                                        echo '<small class="text-danger d-block">';
+                                        echo 'RAW: payment="' . ($registration['payment_status'] ?? 'NULL') . '" reg="' . ($registration['registration_status'] ?? 'NULL') . '"<br>';
+                                        echo 'CLEANED: payment="' . $paymentStatus . '" reg="' . $registrationStatus . '"<br>';
+                                        echo 'COMPARISON: pay=pending?' . ($paymentStatus === 'pending' ? 'TRUE' : 'FALSE') . ' reg=pending?' . ($registrationStatus === 'pending' ? 'TRUE' : 'FALSE');
+                                        echo '</small>';
+                                        ?>
+                                        
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <!-- Always show details button -->
+                                            <a href="/registration/<?= $registration['id'] ?>" class="btn btn-outline-primary">
+                                                <i class="fas fa-eye me-1"></i>Details
+                                            </a>
+                                            
+                                            <!-- FORCE SHOW BUTTONS FOR DEBUGGING -->
+                                            <a href="/payment/<?= $registration['id'] ?>" class="btn btn-outline-success btn-test-pay" data-status="<?= $paymentStatus ?>">
+                                                <i class="fas fa-credit-card me-1"></i>Pay (FORCE)
+                                            </a>
+                                            
+                                            <button class="btn btn-outline-danger btn-test-cancel" onclick="cancelRegistration(<?= $registration['id'] ?>)" data-status="<?= $registrationStatus ?>">
+                                                <i class="fas fa-times me-1"></i>Cancel (FORCE)
+                                            </button>
+                                            
+                                            <!-- TEST ORIGINAL BUTTONS -->
+                                            <?php if ($paymentStatus === 'pending'): ?>
+                                            <a href="/payment/<?= $registration['id'] ?>" class="btn btn-outline-success btn-original-pay">
+                                                <i class="fas fa-credit-card me-1"></i>Pay (ORIGINAL)
+                                            </a>
+                                            <span class="badge bg-success">PAY LOGIC: TRUE</span>
+                                            <?php else: ?>
+                                            <span class="badge bg-danger">PAY LOGIC: FALSE (<?= $paymentStatus ?>)</span>
+                                            <?php endif; ?>
+                                            
+                                            <?php if ($registrationStatus === 'pending'): ?>
+                                            <button class="btn btn-outline-danger btn-original-cancel" onclick="cancelRegistration(<?= $registration['id'] ?>)">
+                                                <i class="fas fa-times me-1"></i>Cancel (ORIGINAL)
+                                            </button>
+                                            <span class="badge bg-success">CANCEL LOGIC: TRUE</span>
+                                            <?php else: ?>
+                                            <span class="badge bg-danger">CANCEL LOGIC: FALSE (<?= $registrationStatus ?>)</span>
+                                            <?php endif; ?>
+                                        </div>
                                     </td>
                                 </tr>
                                 <?php endforeach; ?>
@@ -198,29 +242,22 @@
             <div class="card-header">
                 <h5 class="card-title">Upcoming Events</h5>
             </div>
-            <div class="card-body">
-                <div class="alert alert-info">
-                    <h6><i class="fas fa-calendar me-2"></i>SNIA 2024</h6>
-                    <p class="mb-2">Seminar Nasional Informatika</p>
-                    <small class="text-muted">
-                        <i class="fas fa-calendar me-1"></i>December 15, 2024<br>
-                        <i class="fas fa-map-marker-alt me-1"></i>Gedung Serbaguna
-                    </small>
-                    <div class="mt-2">
-                        <a href="/event-details/1" class="btn btn-sm btn-outline-primary">View Details</a>
+            <div class="card-body" id="upcomingEventsContainer">
+                <!-- Loading indicator -->
+                <div class="text-center py-3" id="eventsLoading">
+                    <div class="spinner-border spinner-border-sm" role="status">
+                        <span class="visually-hidden">Loading...</span>
                     </div>
+                    <div class="mt-2">Loading events...</div>
                 </div>
                 
-                <div class="alert alert-success">
-                    <h6><i class="fas fa-laptop me-2"></i>SNIA Workshop</h6>
-                    <p class="mb-2">Workshop khusus teknologi terbaru</p>
-                    <small class="text-muted">
-                        <i class="fas fa-calendar me-1"></i>December 16, 2024<br>
-                        <i class="fas fa-video me-1"></i>Online Event
-                    </small>
-                    <div class="mt-2">
-                        <a href="/event-details/2" class="btn btn-sm btn-outline-success">View Details</a>
-                    </div>
+                <!-- Removed hardcoded events - using only database data -->
+                
+                <!-- Empty state -->
+                <div style="display: none;" id="noEvents" class="text-center py-4">
+                    <i class="fas fa-calendar-plus text-muted" style="font-size: 2rem;"></i>
+                    <p class="mt-2 text-muted">No upcoming events</p>
+                    <a href="/audience/events" class="btn btn-sm btn-primary">Browse Events</a>
                 </div>
             </div>
         </div>
@@ -470,6 +507,248 @@ function formatTime(timeStr) {
         minute: '2-digit' 
     });
 }
+
+// Load upcoming events
+async function loadUpcomingEvents() {
+    try {
+        // Use existing dashboard events endpoint
+        let response = await fetch('/dashboard/events');
+        let data = await response.json();
+        
+        // If that fails, try the API v1 events endpoint
+        if (!response.ok || data.status !== 'success') {
+            console.log('Dashboard API failed, trying v1 API...');
+            response = await fetch('/api/v1/events');
+            data = await response.json();
+        }
+        
+        const loadingEl = document.getElementById('eventsLoading');
+        if (loadingEl) loadingEl.style.display = 'none';
+        
+        if (data.status === 'success' && data.data && data.data.length > 0) {
+            // Filter to only upcoming events and limit to 3
+            const upcomingEvents = data.data
+                .filter(event => new Date(event.event_date) >= new Date())
+                .slice(0, 3);
+            
+            if (upcomingEvents.length > 0) {
+                displayUpcomingEvents(upcomingEvents);
+            } else {
+                // No upcoming events
+                const noEventsEl = document.getElementById('noEvents');
+                if (noEventsEl) noEventsEl.style.display = 'block';
+            }
+        } else {
+            // Show no events message if no data
+            const noEventsEl = document.getElementById('noEvents');
+            if (noEventsEl) noEventsEl.style.display = 'block';
+        }
+        
+        return Promise.resolve();
+    } catch (error) {
+        console.error('Error loading upcoming events:', error);
+        const loadingEl = document.getElementById('eventsLoading');
+        const noEventsEl = document.getElementById('noEvents');
+        if (loadingEl) loadingEl.style.display = 'none';
+        if (noEventsEl) noEventsEl.style.display = 'block';
+        
+        return Promise.reject(error);
+    }
+}
+
+function displayUpcomingEvents(events) {
+    const container = document.getElementById('upcomingEventsContainer');
+    if (!container) {
+        console.error('upcomingEventsContainer element not found');
+        return;
+    }
+    
+    console.log('Displaying events:', events);
+    
+    let html = '';
+    
+    events.forEach(event => {
+        console.log('Processing event:', event.id, event.title);
+        
+        const alertClass = event.format === 'online' ? 'alert-success' : 'alert-info';
+        const icon = event.format === 'online' ? 'fas fa-video' : 'fas fa-map-marker-alt';
+        
+        html += `
+            <div class="alert ${alertClass}">
+                <h6><i class="fas fa-calendar me-2"></i>${event.title}</h6>
+                <p class="mb-2">${event.description || 'Event description'}</p>
+                <small class="text-muted">
+                    <i class="fas fa-calendar me-1"></i>${formatDate(event.event_date)}<br>
+                    <i class="${icon} me-1"></i>${event.location || 'Location TBA'}
+                </small>
+                <div class="mt-2">
+                    <button class="btn btn-sm btn-primary" onclick="registerForEvent('${event.id}')">
+                        <i class="fas fa-user-plus me-1"></i>Register Now
+                    </button>
+                </div>
+            </div>
+        `;
+    });
+    
+    console.log('Setting innerHTML for upcoming events');
+    container.innerHTML = html;
+    console.log('Upcoming events HTML set successfully');
+    
+    // Temporary alert to see timing
+    showAlert('Upcoming events loaded successfully (' + events.length + ' events)', 'info', 3000);
+}
+
+// Cancel registration function
+async function cancelRegistration(registrationId) {
+    if (!confirm('Are you sure you want to cancel this registration?')) {
+        return;
+    }
+    
+    try {
+        // Try standard API first, fallback to audience-specific API
+        let response;
+        try {
+            response = await fetch(`/registrations/${registrationId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            
+            // If unauthorized (JWT required), try session-based endpoint
+            if (response.status === 401) {
+                console.log('JWT API unauthorized, trying session-based...');
+                response = await fetch('/audience/cancel-registration', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: `registration_id=${registrationId}`
+                });
+            }
+        } catch (error) {
+            console.log('Standard API failed, using session-based...');
+            response = await fetch('/audience/cancel-registration', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: `registration_id=${registrationId}`
+            });
+        }
+        
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            showAlert('Registration cancelled successfully', 'success');
+            // Reload the page to update the registrations table
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } else {
+            showAlert('Failed to cancel registration: ' + (data.message || 'Unknown error'), 'danger');
+        }
+    } catch (error) {
+        console.error('Error cancelling registration:', error);
+        showAlert('Error cancelling registration', 'danger');
+    }
+}
+
+// Register for event function
+async function registerForEvent(eventId) {
+    console.log('registerForEvent called with ID:', eventId);
+    
+    if (!eventId) {
+        console.error('No event ID provided');
+        showAlert('Event ID is required', 'danger');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/dashboard/register-event', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: `event_id=${eventId}&registration_type=audience`
+        });
+        
+        console.log('Registration response status:', response.status);
+        const data = await response.json();
+        console.log('Registration response data:', data);
+        
+        if (data.status === 'success') {
+            showAlert('Successfully registered for event!', 'success');
+            setTimeout(() => {
+                console.log('Reloading page after successful registration');
+                window.location.reload();
+            }, 1500);
+        } else {
+            showAlert('Failed to register: ' + (data.message || 'Unknown error'), 'danger');
+        }
+    } catch (error) {
+        console.error('Error registering for event:', error);
+        showAlert('An error occurred while registering', 'danger');
+    }
+}
+
+// Monitor button visibility
+function monitorButtons() {
+    const payButtons = document.querySelectorAll('.btn-test-pay');
+    const cancelButtons = document.querySelectorAll('.btn-test-cancel');
+    
+    console.log('Button monitoring:', {
+        payButtons: payButtons.length,
+        cancelButtons: cancelButtons.length,
+        payVisible: Array.from(payButtons).map(btn => btn.style.display !== 'none'),
+        cancelVisible: Array.from(cancelButtons).map(btn => btn.style.display !== 'none')
+    });
+    
+    // Check if buttons are being hidden by CSS or JS
+    payButtons.forEach((btn, index) => {
+        if (btn.style.display === 'none' || getComputedStyle(btn).display === 'none') {
+            console.warn(`Pay button ${index} is hidden!`, btn);
+        }
+    });
+    
+    cancelButtons.forEach((btn, index) => {
+        if (btn.style.display === 'none' || getComputedStyle(btn).display === 'none') {
+            console.warn(`Cancel button ${index} is hidden!`, btn);
+        }
+    });
+}
+
+// Load upcoming events when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Monitor buttons initially
+    setTimeout(() => {
+        console.log('=== BEFORE UPCOMING EVENTS LOAD ===');
+        monitorButtons();
+    }, 100);
+    
+    // Only load upcoming events if the container exists
+    if (document.getElementById('upcomingEventsContainer')) {
+        loadUpcomingEvents().then(() => {
+            // Monitor buttons after upcoming events load
+            setTimeout(() => {
+                console.log('=== AFTER UPCOMING EVENTS LOAD ===');
+                monitorButtons();
+            }, 500);
+        });
+    } else {
+        console.log('Upcoming events container not found, skipping load');
+    }
+    
+    // Monitor buttons every 2 seconds
+    setInterval(() => {
+        console.log('=== PERIODIC BUTTON CHECK ===');
+        monitorButtons();
+    }, 2000);
+});
 </script>
 
 <?= $this->endSection() ?>

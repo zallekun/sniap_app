@@ -2,6 +2,25 @@
    EVENT RELATED PAGES STYLES
    =========================================== */
 
+/* Missing CSS Variables */
+:root {
+    --spacing-1: 0.25rem;
+    --spacing-2: 0.5rem;
+    --spacing-3: 0.75rem;
+    --spacing-4: 1rem;
+    --spacing-6: 1.5rem;
+    --spacing-8: 2rem;
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.875rem;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.25rem;
+    --font-size-2xl: 1.5rem;
+    --font-size-3xl: 1.875rem;
+    --gray-25: #fafafa;
+    --transition-base: all 0.15s ease-in-out;
+}
+
 /* Event Schedule Page */
 .schedule-stats {
     display: flex;
@@ -165,7 +184,7 @@
     display: block;
 }
 
-.event-title {
+.calendar-event .event-title {
     font-size: var(--font-size-xs);
     line-height: 1.2;
     margin-top: var(--spacing-1);
@@ -201,7 +220,8 @@
     flex-shrink: 0;
 }
 
-.event-title {
+.event-item .event-title,
+.timeline-title {
     color: var(--gray-900);
     font-weight: 600;
     font-size: var(--font-size-lg);

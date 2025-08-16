@@ -2,256 +2,15 @@
 
 <?= $this->section('title') ?>User Management<?= $this->endSection() ?>
 
+<?= $this->section('header_actions') ?>
+<button class="btn btn-primary" id="addUserBtn">
+    <i class="fas fa-plus"></i> Add User
+</button>
+<?= $this->endSection() ?>
+
 <?= $this->section('content') ?>
-<link rel="stylesheet" href="<?= base_url('css/admin/user-management.css') ?>">
 <style>
-/* Admin User Management Specific Styles */
-:root {
-    --sidebar-width: 280px;
-    --header-height: 70px;
-    --admin-primary: #1e40af;
-    --admin-secondary: #3b82f6;
-    --admin-success: #10b981;
-    --admin-warning: #f59e0b;
-    --admin-danger: #ef4444;
-    --admin-info: #06b6d4;
-    --sidebar-bg: #1f2937;
-    --sidebar-text: #d1d5db;
-    --sidebar-active: #3b82f6;
-}
-
-/* Layout Structure */
-.admin-layout {
-    display: flex;
-    min-height: 100vh;
-    background: #f8fafc;
-}
-
-/* Sidebar */
-.admin-sidebar {
-    width: var(--sidebar-width);
-    background: var(--sidebar-bg);
-    color: var(--sidebar-text);
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    overflow-y: auto;
-    z-index: 1000;
-    transition: transform 0.3s ease;
-}
-
-.sidebar-header {
-    padding: 1.5rem;
-    border-bottom: 1px solid #374151;
-    text-align: center;
-}
-
-.sidebar-logo {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: white;
-    text-decoration: none;
-}
-
-.sidebar-subtitle {
-    font-size: 0.875rem;
-    color: #9ca3af;
-    margin-top: 0.25rem;
-}
-
-.sidebar-nav {
-    padding: 1rem 0;
-}
-
-.nav-section {
-    margin-bottom: 2rem;
-}
-
-.nav-section-title {
-    padding: 0.5rem 1.5rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: #9ca3af;
-    margin-bottom: 0.5rem;
-}
-
-.nav-item {
-    margin-bottom: 0.25rem;
-}
-
-.nav-link {
-    display: flex;
-    align-items: center;
-    padding: 0.75rem 1.5rem;
-    color: var(--sidebar-text);
-    text-decoration: none;
-    transition: all 0.2s ease;
-    position: relative;
-}
-
-.nav-link:hover {
-    background: rgba(59, 130, 246, 0.1);
-    color: white;
-}
-
-.nav-link.active {
-    background: rgba(59, 130, 246, 0.2);
-    color: white;
-    border-right: 3px solid var(--sidebar-active);
-}
-
-.nav-link i {
-    width: 20px;
-    margin-right: 0.75rem;
-    font-size: 1rem;
-}
-
-/* Main Content Area */
-.admin-main {
-    flex: 1;
-    margin-left: var(--sidebar-width);
-    min-height: 100vh;
-}
-
-.admin-header {
-    background: white;
-    height: var(--header-height);
-    padding: 0 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid #e5e7eb;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.header-title {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: #1f2937;
-    margin: 0;
-}
-
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.user-menu {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.user-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: var(--admin-primary);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-}
-
-.admin-content {
-    padding: 2rem;
-}
-
-/* Content Cards */
-.content-card {
-    background: white;
-    border-radius: 0.75rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e5e7eb;
-    margin-bottom: 1.5rem;
-}
-
-.card-header {
-    padding: 1.5rem;
-    border-bottom: 1px solid #e5e7eb;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.card-title {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: #1f2937;
-    margin: 0;
-}
-
-.card-body {
-    padding: 1.5rem;
-}
-
-/* User Management Specific Styles */
-.user-filters {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-    flex-wrap: wrap;
-}
-
-.filter-group {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.filter-group label {
-    font-weight: 500;
-    color: #374151;
-    margin-bottom: 0;
-}
-
-.search-box {
-    flex: 1;
-    min-width: 300px;
-}
-
-.users-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 1rem;
-}
-
-.users-table th,
-.users-table td {
-    padding: 1rem;
-    text-align: left;
-    border-bottom: 1px solid #e5e7eb;
-}
-
-.users-table th {
-    background: #f9fafb;
-    font-weight: 600;
-    color: #374151;
-}
-
-.users-table tbody tr:hover {
-    background: #f9fafb;
-}
-
-.user-avatar-small {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: var(--admin-info);
-    color: white;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.875rem;
-    font-weight: 600;
-    margin-right: 0.75rem;
-}
-
+/* User specific content styles */
 .user-info {
     display: flex;
     align-items: center;
@@ -270,29 +29,6 @@
     color: #6b7280;
 }
 
-.status-badge {
-    padding: 0.25rem 0.75rem;
-    border-radius: 1rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-.status-badge.active {
-    background: #dcfce7;
-    color: #166534;
-}
-
-.status-badge.inactive {
-    background: #fee2e2;
-    color: #991b1b;
-}
-
-.status-badge.pending {
-    background: #fef3c7;
-    color: #92400e;
-}
-
 .role-badge {
     padding: 0.25rem 0.5rem;
     border-radius: 0.25rem;
@@ -302,566 +38,557 @@
 
 .role-badge.admin {
     background: #ddd6fe;
-    color: #5b21b6;
-}
-
-.role-badge.audience {
-    background: #dbeafe;
-    color: #1e40af;
+    color: #7c3aed;
 }
 
 .role-badge.presenter {
-    background: #d1fae5;
-    color: #065f46;
+    background: #dbeafe;
+    color: #1d4ed8;
 }
 
 .role-badge.reviewer {
-    background: #fed7aa;
-    color: #9a3412;
+    background: #d1fae5;
+    color: #059669;
 }
 
-.action-buttons {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.btn-action {
-    padding: 0.25rem 0.5rem;
-    border: none;
-    border-radius: 0.25rem;
-    font-size: 0.75rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.btn-action.edit {
+.role-badge.audience {
     background: #fef3c7;
-    color: #92400e;
+    color: #d97706;
 }
 
-.btn-action.edit:hover {
-    background: #fcd34d;
-}
-
-.btn-action.delete {
-    background: #fee2e2;
-    color: #991b1b;
-}
-
-.btn-action.delete:hover {
-    background: #fca5a5;
-}
-
-.pagination {
+/* User filters */
+.user-filters {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
-    gap: 0.5rem;
-    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
 }
 
-.loading-state {
-    text-align: center;
-    padding: 2rem;
-    color: #6b7280;
+.search-box {
+    flex: 1;
+    min-width: 250px;
 }
 
-.spinner {
-    width: 20px;
-    height: 20px;
-    border: 2px solid #e5e7eb;
-    border-top: 2px solid var(--admin-primary);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 1rem;
+.filter-box {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
 }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+/* Zebra striping for users table */
+.admin-table tbody tr:nth-child(even) {
+    background: #f8fafc;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-    .admin-sidebar {
-        transform: translateX(-100%);
-    }
-    
-    .admin-main {
-        margin-left: 0;
-    }
-    
-    .admin-header {
-        padding: 0 1rem;
-    }
-    
-    .admin-content {
-        padding: 1rem;
-    }
-    
-    .user-filters {
-        flex-direction: column;
-    }
-    
-    .search-box {
-        min-width: auto;
-    }
-    
-    .users-table {
-        font-size: 0.875rem;
-    }
-    
-    .users-table th,
-    .users-table td {
-        padding: 0.75rem 0.5rem;
-    }
+.admin-table tbody tr:nth-child(odd) {
+    background: #ffffff;
+}
+
+.admin-table tbody tr:hover {
+    background: #e0f2fe !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease-in-out;
+}
+
+.admin-table tbody tr.table-row-selected {
+    background: #bbf7d0 !important;
+    border-left: 4px solid var(--admin-success);
 }
 </style>
-<?php $this->endSection(); ?>
 
-<?php $this->section('content'); ?>
-<div class="admin-layout">
-    <!-- Sidebar -->
-    <aside class="admin-sidebar">
-        <div class="sidebar-header">
-            <a href="/admin/dashboard" class="sidebar-logo">SNIA Admin</a>
-            <div class="sidebar-subtitle">Conference Management</div>
+<!-- User Management Card -->
+<div class="admin-card">
+    <div class="admin-card-header">
+        <h3>
+            <i class="fas fa-users me-2"></i>
+            All Users
+        </h3>
+        <div class="admin-filters">
+            <select id="roleFilter" class="admin-select">
+                <option value="">All Roles</option>
+                <option value="admin">Admin</option>
+                <option value="presenter">Presenter</option>
+                <option value="reviewer">Reviewer</option>
+                <option value="audience">Audience</option>
+            </select>
+            <select id="statusFilter" class="admin-select">
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+                <option value="pending">Pending</option>
+            </select>
+            <input type="text" id="searchUsers" class="admin-input" placeholder="Search users...">
+            <button class="btn btn-outline-primary" onclick="applyUserFilters()">Filter</button>
+            <button class="btn btn-outline-secondary" onclick="resetUserFilters()">Reset</button>
+        </div>
+    </div>
+    <div class="admin-card-body">
+        <div class="admin-table-container">
+            <table class="admin-table" id="usersTable">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Role</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Registered</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    <!-- Users will be loaded here -->
+                </tbody>
+            </table>
         </div>
         
-        <nav class="sidebar-nav">
-            <div class="nav-section">
-                <div class="nav-section-title">Dashboard</div>
-                <div class="nav-item">
-                    <a href="/admin/dashboard" class="nav-link">
-                        <i class="fas fa-tachometer-alt"></i>
-                        Overview
-                    </a>
-                </div>
+        <!-- Pagination -->
+        <div id="usersPagination" style="margin-top: 1rem;">
+            <!-- Pagination will be loaded here -->
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit User Modal -->
+<div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="userModalLabel">Add New User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            
-            <div class="nav-section">
-                <div class="nav-section-title">Management</div>
-                <div class="nav-item">
-                    <a href="/admin/users" class="nav-link active">
-                        <i class="fas fa-users"></i>
-                        User Management
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="/admin/events" class="nav-link">
-                        <i class="fas fa-calendar"></i>
-                        Event Management
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="/admin/registrations" class="nav-link">
-                        <i class="fas fa-user-check"></i>
-                        Registrations
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="/admin/abstracts" class="nav-link">
-                        <i class="fas fa-file-alt"></i>
-                        Abstract & Reviews
-                    </a>
-                </div>
-            </div>
-            
-            <div class="nav-section">
-                <div class="nav-section-title">Reports & Analytics</div>
-                <div class="nav-item">
-                    <a href="/admin/analytics" class="nav-link">
-                        <i class="fas fa-chart-bar"></i>
-                        Analytics
-                    </a>
-                </div>
-            </div>
-            
-            <div class="nav-section">
-                <div class="nav-section-title">System</div>
-                <div class="nav-item">
-                    <a href="/admin/settings" class="nav-link">
-                        <i class="fas fa-cog"></i>
-                        System Settings
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="/dashboard" class="nav-link">
-                        <i class="fas fa-arrow-left"></i>
-                        Back to Dashboard
-                    </a>
-                </div>
-            </div>
-        </nav>
-    </aside>
-    
-    <!-- Main Content -->
-    <main class="admin-main">
-        <!-- Header -->
-        <header class="admin-header">
-            <h1 class="header-title">User Management</h1>
-            <div class="header-actions">
-                <div class="user-menu">
-                    <div class="user-avatar">
-                        <?= strtoupper(substr($user['first_name'] ?? 'A', 0, 1)) ?>
-                    </div>
-                    <div>
-                        <div style="font-weight: 600; color: #1f2937;">
-                            <?= esc($user['first_name'] ?? '') ?> <?= esc($user['last_name'] ?? '') ?>
+            <form id="userForm">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="firstName" class="form-label">First Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="firstName" name="first_name" required>
                         </div>
-                        <div style="font-size: 0.875rem; color: #6b7280;">
-                            Administrator
+                        <div class="col-md-6 mb-3">
+                            <label for="lastName" class="form-label">Last Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="lastName" name="last_name" required>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </header>
-        
-        <!-- Content -->
-        <div class="admin-content">
-            <!-- User Management Card -->
-            <div class="content-card">
-                <div class="card-header">
-                    <h3 class="card-title">
-                        <i class="fas fa-users me-2"></i>
-                        All Users
-                    </h3>
-                    <button class="btn btn-primary btn-sm" id="addUserBtn">
-                        <i class="fas fa-plus me-1"></i>
-                        Add User
-                    </button>
-                </div>
-                <div class="card-body">
-                    <!-- Filters -->
-                    <div class="user-filters">
-                        <div class="search-box">
-                            <div class="input-group">
-                                <input type="text" class="form-control" id="searchUsers" placeholder="Search users by name or email...">
-                                <button class="btn btn-outline-secondary" type="button" id="searchBtn">
-                                    <i class="fas fa-search"></i>
-                                </button>
-                            </div>
+                        <div class="col-12 mb-3">
+                            <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" id="email" name="email" required>
                         </div>
-                        
-                        <div class="filter-group">
-                            <label for="roleFilter">Role:</label>
-                            <select class="form-select" id="roleFilter">
-                                <option value="">All Roles</option>
+                        <div class="col-md-6 mb-3">
+                            <label for="role" class="form-label">Role <span class="text-danger">*</span></label>
+                            <select class="form-control" id="role" name="role" required>
+                                <option value="">Select Role</option>
                                 <option value="admin">Admin</option>
                                 <option value="presenter">Presenter</option>
                                 <option value="reviewer">Reviewer</option>
                                 <option value="audience">Audience</option>
                             </select>
                         </div>
-                        
-                        <div class="filter-group">
-                            <label for="statusFilter">Status:</label>
-                            <select class="form-select" id="statusFilter">
-                                <option value="">All Status</option>
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
-                                <option value="pending">Pending</option>
-                            </select>
+                        <div class="col-md-6 mb-3">
+                            <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" id="password" name="password" required>
                         </div>
-                        
-                        <button class="btn btn-secondary btn-sm" id="refreshUsers">
-                            <i class="fas fa-refresh"></i>
-                            Refresh
-                        </button>
+                        <div class="col-12 mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="isVerified" name="is_verified">
+                                <label class="form-check-label" for="isVerified">
+                                    Account Verified
+                                </label>
+                            </div>
+                        </div>
                     </div>
-                    
-                    <!-- Users Table -->
-                    <div class="table-responsive">
-                        <table class="users-table" id="usersTable">
-                            <thead>
-                                <tr>
-                                    <th>User</th>
-                                    <th>Role</th>
-                                    <th>Status</th>
-                                    <th>Registered</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="usersTableBody">
-                                <!-- Loading state -->
-                                <tr>
-                                    <td colspan="5" class="loading-state">
-                                        <div class="spinner"></div>
-                                        Loading users...
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <!-- Pagination -->
-                    <nav class="pagination" id="usersPagination">
-                        <!-- Pagination will be generated by JavaScript -->
-                    </nav>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="userSubmitBtn">Create User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete User Modal -->
+<div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteUserModalLabel">Delete User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this user? This action cannot be undone.</p>
+                <div class="alert alert-warning">
+                    <strong>Warning:</strong> Deleting this user will also remove all their registrations and submissions.
                 </div>
             </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteUser">Delete User</button>
+            </div>
         </div>
-    </main>
+    </div>
 </div>
-<?php $this->endSection(); ?>
 
-<?php $this->section('additional_js'); ?>
 <script>
 // User Management JavaScript
-class UserManager {
-    constructor() {
-        this.currentPage = 1;
-        this.limit = 10;
-        this.search = '';
-        this.roleFilter = '';
-        this.statusFilter = '';
-        
-        this.init();
-    }
+let currentUserPage = 1;
+let userSearchTimeout;
+let isEditingUser = false;
+let editingUserId = null;
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    loadUsers();
     
-    init() {
-        this.bindEvents();
-        this.loadUsers();
-    }
+    // Setup search with debounce
+    document.getElementById('searchUsers').addEventListener('input', function() {
+        clearTimeout(userSearchTimeout);
+        userSearchTimeout = setTimeout(() => {
+            currentUserPage = 1;
+            loadUsers();
+        }, 500);
+    });
     
-    bindEvents() {
-        // Search functionality
-        const searchInput = document.getElementById('searchUsers');
-        const searchBtn = document.getElementById('searchBtn');
-        
-        let searchTimeout;
-        searchInput.addEventListener('input', (e) => {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                this.search = e.target.value;
-                this.currentPage = 1;
-                this.loadUsers();
-            }, 500);
-        });
-        
-        searchBtn.addEventListener('click', () => {
-            this.search = searchInput.value;
-            this.currentPage = 1;
-            this.loadUsers();
-        });
-        
-        // Filter events
-        document.getElementById('roleFilter').addEventListener('change', (e) => {
-            this.roleFilter = e.target.value;
-            this.currentPage = 1;
-            this.loadUsers();
-        });
-        
-        document.getElementById('statusFilter').addEventListener('change', (e) => {
-            this.statusFilter = e.target.value;
-            this.currentPage = 1;
-            this.loadUsers();
-        });
-        
-        // Refresh button
-        document.getElementById('refreshUsers').addEventListener('click', () => {
-            this.loadUsers();
-        });
-        
-        // Add user button
-        document.getElementById('addUserBtn').addEventListener('click', () => {
-            this.showAddUserModal();
-        });
-    }
+    // Setup add user button
+    document.getElementById('addUserBtn').addEventListener('click', function() {
+        openAddUserModal();
+    });
+});
+
+// Load users with filters and pagination
+function loadUsers(page = 1) {
+    // Use real API data
+    const search = document.getElementById('searchUsers').value.trim();
+    const roleFilter = document.getElementById('roleFilter').value;
+    const statusFilter = document.getElementById('statusFilter').value;
     
-    async loadUsers() {
-        const tableBody = document.getElementById('usersTableBody');
-        
-        // Show loading state
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="5" class="loading-state">
-                    <div class="spinner"></div>
-                    Loading users...
-                </td>
-            </tr>
-        `;
-        
-        try {
-            const params = new URLSearchParams({
-                page: this.currentPage,
-                limit: this.limit,
-                search: this.search,
-                role: this.roleFilter,
-                status: this.statusFilter
-            });
-            
-            const response = await fetch(`/admin/api/users?${params}`);
-            const data = await response.json();
-            
-            if (data.status === 'success') {
-                this.renderUsers(data.data);
-                this.renderPagination(data.pagination);
+    currentUserPage = page;
+    
+    const params = new URLSearchParams({
+        page: page,
+        limit: 10,
+        search: search,
+        role: roleFilter,
+        status: statusFilter
+    });
+    
+    fetch(`/api/admin/users?${params.toString()}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Convert API response format to match expected format
+                const users = data.data.map(user => ({
+                    id: user.id,
+                    first_name: user.first_name,
+                    last_name: user.last_name,
+                    email: user.email,
+                    role: user.role,
+                    is_verified: user.is_verified === 't' || user.is_verified === true,
+                    created_at: user.created_at || user.updated_at
+                }));
+                
+                const pagination = {
+                    total_records: data.pagination.total,
+                    current_page: data.pagination.page,
+                    total_pages: data.pagination.pages,
+                    start_record: ((data.pagination.page - 1) * data.pagination.limit) + 1,
+                    end_record: Math.min(data.pagination.page * data.pagination.limit, data.pagination.total)
+                };
+                
+                renderUsersTable(users);
+                renderUsersPagination(pagination);
             } else {
-                this.showError('Failed to load users');
+                showAlert('Error loading users: ' + (data.message || 'API Error'), 'error');
+                document.getElementById('usersTableBody').innerHTML = '<tr><td colspan="6" class="text-center text-muted">Failed to load users</td></tr>';
             }
-        } catch (error) {
+        })
+        .catch(error => {
             console.error('Error loading users:', error);
-            this.showError('Error loading users');
-        }
-    }
-    
-    renderUsers(users) {
-        const tableBody = document.getElementById('usersTableBody');
-        
-        if (users.length === 0) {
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="5" class="loading-state">
-                        No users found
-                    </td>
-                </tr>
-            `;
-            return;
-        }
-        
-        tableBody.innerHTML = users.map(user => `
-            <tr>
-                <td>
-                    <div class="user-info">
-                        <div class="user-avatar-small">
-                            ${(user.first_name || 'U').charAt(0).toUpperCase()}
-                        </div>
-                        <div class="user-details">
-                            <h6>${this.escapeHtml(user.first_name || '')} ${this.escapeHtml(user.last_name || '')}</h6>
-                            <p>${this.escapeHtml(user.email || '')}</p>
-                        </div>
-                    </div>
-                </td>
-                <td>
-                    <span class="role-badge ${user.role || 'audience'}">
-                        ${this.capitalizeFirst(user.role || 'audience')}
-                    </span>
-                </td>
-                <td>
-                    <span class="status-badge ${user.is_verified ? 'active' : 'pending'}">
-                        ${user.is_verified ? 'Active' : 'Pending'}
-                    </span>
-                </td>
-                <td>
-                    ${user.created_at ? new Date(user.created_at).toLocaleDateString() : '-'}
-                </td>
-                <td>
-                    <div class="action-buttons">
-                        <button class="btn-action edit" onclick="userManager.editUser(${user.id})">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn-action delete" onclick="userManager.deleteUser(${user.id})">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        `).join('');
-    }
-    
-    renderPagination(pagination) {
-        const paginationContainer = document.getElementById('usersPagination');
-        
-        if (!pagination || pagination.pages <= 1) {
-            paginationContainer.innerHTML = '';
-            return;
-        }
-        
-        let paginationHTML = '';
-        
-        // Previous button
-        if (pagination.page > 1) {
-            paginationHTML += `
-                <button class="btn btn-outline-secondary btn-sm" onclick="userManager.goToPage(${pagination.page - 1})">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-            `;
-        }
-        
-        // Page numbers
-        for (let i = Math.max(1, pagination.page - 2); i <= Math.min(pagination.pages, pagination.page + 2); i++) {
-            paginationHTML += `
-                <button class="btn ${i === pagination.page ? 'btn-primary' : 'btn-outline-secondary'} btn-sm" 
-                        onclick="userManager.goToPage(${i})">
-                    ${i}
-                </button>
-            `;
-        }
-        
-        // Next button
-        if (pagination.page < pagination.pages) {
-            paginationHTML += `
-                <button class="btn btn-outline-secondary btn-sm" onclick="userManager.goToPage(${pagination.page + 1})">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
-            `;
-        }
-        
-        // Info
-        paginationHTML += `
-            <span style="margin-left: 1rem; color: #6b7280; font-size: 0.875rem;">
-                Showing ${((pagination.page - 1) * pagination.limit) + 1} to ${Math.min(pagination.page * pagination.limit, pagination.total)} of ${pagination.total} users
-            </span>
-        `;
-        
-        paginationContainer.innerHTML = paginationHTML;
-    }
-    
-    goToPage(page) {
-        this.currentPage = page;
-        this.loadUsers();
-    }
-    
-    editUser(userId) {
-        // TODO: Implement edit user functionality
-        alert(`Edit user ${userId} - Feature coming soon!`);
-    }
-    
-    deleteUser(userId) {
-        if (confirm('Are you sure you want to delete this user?')) {
-            // TODO: Implement delete user functionality
-            alert(`Delete user ${userId} - Feature coming soon!`);
-        }
-    }
-    
-    showAddUserModal() {
-        // TODO: Implement add user modal
-        alert('Add user feature coming soon!');
-    }
-    
-    showError(message) {
-        const tableBody = document.getElementById('usersTableBody');
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="5" class="loading-state" style="color: var(--admin-danger);">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    ${message}
-                </td>
-            </tr>
-        `;
-    }
-    
-    escapeHtml(text) {
-        const map = {
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#039;'
-        };
-        return text ? text.replace(/[&<>"']/g, m => map[m]) : '';
-    }
-    
-    capitalizeFirst(str) {
-        return str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
-    }
+            showAlert('Failed to load users', 'error');
+            document.getElementById('usersTableBody').innerHTML = '<tr><td colspan="6" class="text-center text-muted">Failed to load users</td></tr>';
+        });
 }
 
-// Initialize user manager when page loads
-let userManager;
-document.addEventListener('DOMContentLoaded', function() {
-    userManager = new UserManager();
+// Render users table
+function renderUsersTable(users) {
+    const tbody = document.getElementById('usersTableBody');
+    
+    if (users.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No users found</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = users.map(user => `
+        <tr>
+            <td>
+                <div class="user-info">
+                    <div class="user-details">
+                        <h6>${user.first_name} ${user.last_name}</h6>
+                        <p>ID: ${user.id}</p>
+                    </div>
+                </div>
+            </td>
+            <td>
+                <span class="role-badge ${user.role}">${user.role}</span>
+            </td>
+            <td>${user.email}</td>
+            <td>
+                <span class="status-badge ${user.is_verified ? 'active' : 'inactive'}">
+                    ${user.is_verified ? 'Active' : 'Inactive'}
+                </span>
+            </td>
+            <td>${formatDate(user.created_at)}</td>
+            <td>
+                <div class="action-buttons">
+                    <button class="btn-action btn-edit" onclick="editUser(${user.id})" title="Edit User">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn-action btn-toggle ${user.is_verified ? '' : 'inactive'}" 
+                            onclick="toggleUserStatus(${user.id}, ${user.is_verified})" 
+                            title="${user.is_verified ? 'Deactivate' : 'Activate'} User">
+                        <i class="fas fa-${user.is_verified ? 'pause' : 'play'}"></i>
+                    </button>
+                    <button class="btn-action btn-delete" onclick="deleteUser(${user.id})" title="Delete User">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// Render users pagination (simplified)
+function renderUsersPagination(pagination) {
+    const container = document.getElementById('usersPagination');
+    
+    if (pagination.total_pages <= 1) {
+        container.innerHTML = '';
+        return;
+    }
+    
+    let paginationHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="color: #6b7280; font-size: 0.875rem;">
+                Showing ${pagination.start_record} to ${pagination.end_record} of ${pagination.total_records} users
+            </div>
+            <div style="display: flex; gap: 0.25rem;">
+    `;
+    
+    // Previous button
+    if (pagination.current_page > 1) {
+        paginationHTML += `<button class="btn btn-outline-primary" onclick="loadUsers(${pagination.current_page - 1})">Previous</button>`;
+    }
+    
+    // Next button
+    if (pagination.current_page < pagination.total_pages) {
+        paginationHTML += `<button class="btn btn-outline-primary" onclick="loadUsers(${pagination.current_page + 1})">Next</button>`;
+    }
+    
+    paginationHTML += `</div></div>`;
+    container.innerHTML = paginationHTML;
+}
+
+// Filter functions
+function applyUserFilters() {
+    currentUserPage = 1;
+    loadUsers();
+}
+
+function resetUserFilters() {
+    document.getElementById('searchUsers').value = '';
+    document.getElementById('roleFilter').value = '';
+    document.getElementById('statusFilter').value = '';
+    currentUserPage = 1;
+    loadUsers();
+}
+
+// Modal functions
+function openAddUserModal() {
+    isEditingUser = false;
+    editingUserId = null;
+    document.getElementById('userModalLabel').textContent = 'Add New User';
+    document.getElementById('userSubmitBtn').textContent = 'Create User';
+    document.getElementById('userForm').reset();
+    new bootstrap.Modal(document.getElementById('userModal')).show();
+}
+
+function editUser(userId) {
+    isEditingUser = true;
+    editingUserId = userId;
+    document.getElementById('userModalLabel').textContent = 'Edit User';
+    document.getElementById('userSubmitBtn').textContent = 'Update User';
+    
+    // Fetch user data and populate form
+    fetch(`/api/admin/users/${userId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                populateUserForm(data.data);
+                new bootstrap.Modal(document.getElementById('userModal')).show();
+            } else {
+                showAlert('Error loading user data: ' + data.message, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error loading user:', error);
+            showAlert('Failed to load user data', 'error');
+        });
+}
+
+function populateUserForm(user) {
+    document.getElementById('firstName').value = user.first_name || '';
+    document.getElementById('lastName').value = user.last_name || '';
+    document.getElementById('email').value = user.email || '';
+    document.getElementById('role').value = user.role || '';
+    document.getElementById('isVerified').checked = user.is_verified || false;
+    // Don't populate password for editing
+    document.getElementById('password').required = false;
+}
+
+// Form submission
+document.getElementById('userForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const userData = {};
+    
+    formData.forEach((value, key) => {
+        if (key === 'is_verified') {
+            userData[key] = document.querySelector(`[name="${key}"]`).checked;
+        } else {
+            userData[key] = value;
+        }
+    });
+    
+    const url = isEditingUser ? `/api/admin/users/${editingUserId}/update` : '/api/admin/users';
+    
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert(isEditingUser ? 'User updated successfully!' : 'User created successfully!', 'success');
+            bootstrap.Modal.getInstance(document.getElementById('userModal')).hide();
+            loadUsers(currentUserPage);
+        } else {
+            console.error('User save error:', data);
+            let errorMsg = 'Error: ' + data.message;
+            
+            // Add debug information if available
+            if (data.errors) {
+                console.error('Validation errors:', data.errors);
+                errorMsg += '\nValidation errors: ' + JSON.stringify(data.errors);
+            }
+            if (data.debug_db_error) {
+                console.error('Database error:', data.debug_db_error);
+                errorMsg += '\nDB Error: ' + JSON.stringify(data.debug_db_error);
+            }
+            if (data.debug_input) {
+                console.error('Input data:', data.debug_input);
+            }
+            if (data.debug_update_data) {
+                console.error('Update data:', data.debug_update_data);
+            }
+            
+            showAlert(errorMsg, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error saving user:', error);
+        showAlert('Failed to save user', 'error');
+    });
 });
+
+// Delete user
+function deleteUser(userId) {
+    new bootstrap.Modal(document.getElementById('deleteUserModal')).show();
+    
+    document.getElementById('confirmDeleteUser').onclick = function() {
+        fetch(`/api/admin/users/${userId}/delete`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('User deleted successfully!', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('deleteUserModal')).hide();
+                loadUsers(currentUserPage);
+            } else {
+                showAlert('Error deleting user: ' + data.message, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting user:', error);
+            showAlert('Failed to delete user', 'error');
+        });
+    };
+}
+
+// Toggle user status
+function toggleUserStatus(userId, currentStatus) {
+    fetch(`/api/admin/users/${userId}/toggle-status`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert(`User ${currentStatus ? 'deactivated' : 'activated'} successfully!`, 'success');
+            loadUsers(currentUserPage);
+        } else {
+            showAlert('Error updating user status: ' + data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error updating user status:', error);
+        showAlert('Failed to update user status', 'error');
+    });
+}
+
+// Utility functions
+function formatDate(dateString) {
+    if (!dateString) return 'Not set';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+    });
+}
+
+function showAlert(message, type = 'info') {
+    // Create alert element
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show`;
+    alertDiv.style.position = 'fixed';
+    alertDiv.style.top = '20px';
+    alertDiv.style.right = '20px';
+    alertDiv.style.zIndex = '9999';
+    alertDiv.style.minWidth = '300px';
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(alertDiv);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
 </script>
-<?php $this->endSection(); ?>
+
+<?= $this->endSection() ?>

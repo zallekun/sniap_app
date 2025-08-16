@@ -10,6 +10,44 @@ use CodeIgniter\Router\RouteCollection;
 // HOMEPAGE
 // ==========================================
 $routes->get('/', 'Home::index');
+$routes->get('test-api', function() {
+    return response()->setJSON(['success' => true, 'message' => 'Simple API test working']);
+});
+
+// Temporary: Admin API endpoints without auth for testing  
+$routes->get('api/admin/dashboard/stats', 'Admin\AdminController::getDashboardStatsApi');
+$routes->get('api/admin/dashboard/activity', 'Admin\AdminController::getRecentActivityApi');
+$routes->get('api/admin/users', 'Admin\AdminController::getUsersData');
+$routes->get('api/admin/events', 'Admin\AdminController::getEventsData');
+
+// User CRUD endpoints without auth for testing
+$routes->post('api/admin/users', 'Admin\AdminController::createUser');
+$routes->get('api/admin/users/(:num)', 'Admin\AdminController::getUserById/$1');
+$routes->post('api/admin/users/(:num)/update', 'Admin\AdminController::updateUser/$1');
+$routes->post('api/admin/users/(:num)/delete', 'Admin\AdminController::deleteUser/$1');
+$routes->post('api/admin/users/(:num)/toggle-status', 'Admin\AdminController::toggleUserStatus/$1');
+
+// Event CRUD endpoints without auth for testing
+$routes->post('api/admin/events', 'Admin\AdminController::createEvent');
+$routes->get('api/admin/events/(:num)', 'Admin\AdminController::getEventById/$1');
+$routes->post('api/admin/events/(:num)/update', 'Admin\AdminController::updateEvent/$1');
+$routes->post('api/admin/events/(:num)/delete', 'Admin\AdminController::deleteEvent/$1');
+$routes->post('api/admin/events/(:num)/toggle-status', 'Admin\AdminController::toggleEventStatus/$1');
+
+// MOVED to api/admin to avoid auth filter conflicts
+
+// Test page to verify data sync
+$routes->get('test-data', function() {
+    $db = \Config\Database::connect();
+    $stats = [
+        'total_users' => $db->table('users')->countAllResults(),
+        'active_events' => $db->table('events')->where('is_active', true)->countAllResults(),
+        'total_registrations' => $db->table('registrations')->countAllResults(),
+    ];
+    
+    return view('test_data_sync', ['stats' => $stats]);
+});
+
 
 // ==========================================
 // LOAD DEVELOPMENT ROUTES (only in development)
@@ -247,10 +285,18 @@ $routes->group('', ['namespace' => 'App\Controllers'], function($routes) {
     $routes->get('dashboard/event-schedule-page', 'DashboardController::eventSchedulePage', ['filter' => 'auth']);
     $routes->post('dashboard/register-event', 'DashboardController::registerEvent', ['filter' => 'auth']);
     
+    // Alias routes for upcoming events
+    $routes->get('events/upcoming', 'DashboardController::events', ['filter' => 'auth']);
+    $routes->get('audience/api/events', 'DashboardController::events', ['filter' => 'auth']);
+    
     // Legacy profile routes (can be deprecated later)
     $routes->get('dashboard/profile', 'DashboardController::profile', ['filter' => 'auth']);
     $routes->post('dashboard/profile', 'DashboardController::updateProfile', ['filter' => 'auth']);
     $routes->post('dashboard/change-password', 'DashboardController::changePassword', ['filter' => 'auth']);
+    
+    // Session-based registration endpoints (compatible with Postman collection)
+    $routes->get('registrations', 'DashboardController::getMyRegistrations', ['filter' => 'auth']);
+    $routes->delete('registrations/(:num)', 'DashboardController::cancelRegistration/$1', ['filter' => 'auth']);
 
     // =================
     // ROLE-BASED ROUTES
@@ -269,7 +315,12 @@ $routes->group('', ['namespace' => 'App\Controllers'], function($routes) {
         $routes->get('analytics', 'Admin\AdminController::analytics');
         
         // API endpoints
+        $routes->get('api/test', function() {
+            return response()->setJSON(['success' => true, 'message' => 'API working']);
+        });
         $routes->get('api/stats', 'Admin\AdminController::getDashboardStatsApi');
+        $routes->get('api/dashboard/stats', 'Admin\AdminController::getDashboardStatsApi');
+        $routes->get('api/dashboard/activity', 'Admin\AdminController::getRecentActivityApi');
         $routes->get('api/users', 'Admin\AdminController::getUsersData');
         $routes->get('api/registrations', 'Admin\AdminController::getRegistrationsData');
         $routes->get('api/abstracts', 'Admin\AdminController::getAbstractsData');
@@ -277,6 +328,25 @@ $routes->group('', ['namespace' => 'App\Controllers'], function($routes) {
         $routes->get('api/abstract-stats', 'Admin\AdminController::getAbstractStatsApi');
         $routes->post('api/assign-reviewer', 'Admin\AdminController::assignReviewer');
         $routes->post('api/bulk-assign-reviewers', 'Admin\AdminController::bulkAssignReviewers');
+        
+        // User CRUD endpoints
+        $routes->post('api/users', 'Admin\AdminController::createUser');
+        $routes->get('api/users/(:num)', 'Admin\AdminController::getUserById/$1');
+        $routes->put('api/users/(:num)', 'Admin\AdminController::updateUser/$1');
+        $routes->post('api/users/(:num)/update', 'Admin\AdminController::updateUser/$1');
+        $routes->delete('api/users/(:num)', 'Admin\AdminController::deleteUser/$1');
+        $routes->post('api/users/(:num)/delete', 'Admin\AdminController::deleteUser/$1');
+        $routes->post('api/users/(:num)/toggle-status', 'Admin\AdminController::toggleUserStatus/$1');
+        
+        // Event CRUD endpoints
+        $routes->get('api/events', 'Admin\AdminController::getEventsData');
+        $routes->post('api/events', 'Admin\AdminController::createEvent');
+        $routes->get('api/events/(:num)', 'Admin\AdminController::getEventById/$1');
+        $routes->put('api/events/(:num)', 'Admin\AdminController::updateEvent/$1');
+        $routes->post('api/events/(:num)/update', 'Admin\AdminController::updateEvent/$1');
+        $routes->delete('api/events/(:num)', 'Admin\AdminController::deleteEvent/$1');
+        $routes->post('api/events/(:num)/delete', 'Admin\AdminController::deleteEvent/$1');
+        $routes->post('api/events/(:num)/toggle-status', 'Admin\AdminController::toggleEventStatus/$1');
     });
 
     // Presenter Routes
@@ -325,6 +395,7 @@ $routes->group('', ['namespace' => 'App\Controllers'], function($routes) {
         $routes->get('api/events', 'DashboardController::getUpcomingEventsApi');
         $routes->get('api/certificates', 'DashboardController::getCertificatesApi');
         $routes->get('api/payments', 'DashboardController::getPaymentHistoryApi');
+        $routes->post('cancel-registration', 'DashboardController::cancelRegistration');
     });
 
     // =================

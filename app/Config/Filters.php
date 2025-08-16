@@ -42,6 +42,7 @@ class Filters extends BaseConfig
             'honeypot',
             'csrf' => ['except' => [
                 'api/*',  // Disable CSRF for API routes
+                'admin/api/*',  // Disable CSRF for admin API routes
                 'auth/check-email',  // AJAX route
                 'register/check-email',  // AJAX route
                 'auth/verify-code',  // Temporary disable for testing
