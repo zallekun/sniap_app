@@ -1,4 +1,4 @@
-<?= $this->extend('shared/layouts/audience_layout') ?>
+<?= $this->extend('shared/layouts/user_layout') ?>
 
 <?= $this->section('title') ?><?= $title ?? 'Audience Dashboard' ?><?= $this->endSection() ?>
 

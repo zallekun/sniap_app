@@ -4,7 +4,7 @@
 
 <?= $this->section('head') ?>
 <meta name="csrf-token" content="<?= csrf_hash() ?>">
-<link rel="stylesheet" href="<?= base_url('css/views/events/events.css') ?>">
+<!-- Using user.css only - no additional CSS needed -->
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
@@ -139,90 +139,10 @@
                     </div>
                     
                     <div id="event-list-container">
-                        <div class="event-list">
-                            <div class="event-item card mb-3">
-                                <div class="card-body">
-                                    <div class="row align-items-center">
-                                        <div class="col-md-8">
-                                            <h6 class="event-title mb-1">SNIA Conference 2025</h6>
-                                            <div class="event-meta text-muted mb-2">
-                                                <i class="fas fa-clock me-1"></i>Selasa, 20 Agustus 2025, 09:00
-                                                <br><i class="fas fa-map-marker-alt me-1"></i>Auditorium Universitas
-                                            </div>
-                                            <p class="event-description mb-2">Seminar Nasional Informatika - Konferensi tahunan untuk berbagi pengetahuan dan teknologi terbaru.</p>
-                                            <div class="event-badges">
-                                                <span class="badge bg-primary">Tersedia</span>
-                                                <span class="badge bg-warning">Hybrid</span>
-                                                <span class="badge bg-secondary">Rp 150.000</span>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4 text-end">
-                                            <button class="btn btn-outline-primary btn-sm mb-2">
-                                                <i class="fas fa-info-circle me-1"></i>Detail
-                                            </button>
-                                            <button class="btn btn-primary btn-sm">
-                                                <i class="fas fa-user-plus me-1"></i>Daftar
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="event-item card mb-3">
-                                <div class="card-body">
-                                    <div class="row align-items-center">
-                                        <div class="col-md-8">
-                                            <h6 class="event-title mb-1">Workshop AI & Machine Learning</h6>
-                                            <div class="event-meta text-muted mb-2">
-                                                <i class="fas fa-clock me-1"></i>Senin, 25 Agustus 2025, 14:00
-                                                <br><i class="fas fa-video me-1"></i>Online Event
-                                            </div>
-                                            <p class="event-description mb-2">Workshop praktis mengenai penerapan AI dan Machine Learning dalam industri.</p>
-                                            <div class="event-badges">
-                                                <span class="badge bg-success">Terdaftar</span>
-                                                <span class="badge bg-info">Online</span>
-                                                <span class="badge bg-secondary">Rp 75.000</span>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4 text-end">
-                                            <button class="btn btn-outline-primary btn-sm mb-2">
-                                                <i class="fas fa-info-circle me-1"></i>Detail
-                                            </button>
-                                            <button class="btn btn-success btn-sm" disabled>
-                                                <i class="fas fa-check me-1"></i>Terdaftar
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="event-item card mb-3">
-                                <div class="card-body">
-                                    <div class="row align-items-center">
-                                        <div class="col-md-8">
-                                            <h6 class="event-title mb-1">Seminar Cybersecurity</h6>
-                                            <div class="event-meta text-muted mb-2">
-                                                <i class="fas fa-clock me-1"></i>Sabtu, 30 Agustus 2025, 10:00
-                                                <br><i class="fas fa-map-marker-alt me-1"></i>Gedung Serbaguna
-                                            </div>
-                                            <p class="event-description mb-2">Membahas tren dan tantangan keamanan siber di era digital.</p>
-                                            <div class="event-badges">
-                                                <span class="badge bg-primary">Tersedia</span>
-                                                <span class="badge bg-warning">Offline</span>
-                                                <span class="badge bg-secondary">Rp 100.000</span>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4 text-end">
-                                            <button class="btn btn-outline-primary btn-sm mb-2">
-                                                <i class="fas fa-info-circle me-1"></i>Detail
-                                            </button>
-                                            <button class="btn btn-primary btn-sm">
-                                                <i class="fas fa-user-plus me-1"></i>Daftar
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                        <!-- Events will be loaded dynamically from database -->
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status"></div>
+                            <div class="mt-2">Memuat events...</div>
                         </div>
                     </div>
                 </div>
@@ -248,116 +168,10 @@
                     </div>
                     
                     <div id="event-timeline-container">
-                        <div class="timeline">
-                            <div class="timeline-item">
-                                <div class="timeline-marker available">
-                                    <i class="fas fa-calendar"></i>
-                                </div>
-                                <div class="timeline-line"></div>
-                                <div class="timeline-content">
-                                    <div class="timeline-card card">
-                                        <div class="card-body">
-                                            <div class="row">
-                                                <div class="col-md-8">
-                                                    <h6 class="timeline-title">SNIA Conference 2025</h6>
-                                                    <div class="timeline-meta text-muted mb-2">
-                                                        <i class="fas fa-calendar me-1"></i>20 Agustus 2025
-                                                        <i class="fas fa-clock ms-3 me-1"></i>09:00
-                                                        <i class="fas fa-map-marker-alt ms-3 me-1"></i>Auditorium Universitas
-                                                    </div>
-                                                    <p class="timeline-description">Seminar Nasional Informatika - Konferensi tahunan untuk berbagi pengetahuan dan teknologi terbaru.</p>
-                                                    <div class="timeline-badges">
-                                                        <span class="badge bg-primary">Tersedia</span>
-                                                        <span class="badge bg-info">Hybrid</span>
-                                                        <span class="badge bg-secondary">Rp 150.000</span>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4 text-end">
-                                                    <button class="btn btn-outline-primary btn-sm mb-2">
-                                                        <i class="fas fa-info-circle me-1"></i>Detail
-                                                    </button>
-                                                    <button class="btn btn-primary btn-sm">
-                                                        <i class="fas fa-user-plus me-1"></i>Daftar
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="timeline-item">
-                                <div class="timeline-marker registered">
-                                    <i class="fas fa-check"></i>
-                                </div>
-                                <div class="timeline-line"></div>
-                                <div class="timeline-content">
-                                    <div class="timeline-card card">
-                                        <div class="card-body">
-                                            <div class="row">
-                                                <div class="col-md-8">
-                                                    <h6 class="timeline-title">Workshop AI & Machine Learning</h6>
-                                                    <div class="timeline-meta text-muted mb-2">
-                                                        <i class="fas fa-calendar me-1"></i>25 Agustus 2025
-                                                        <i class="fas fa-clock ms-3 me-1"></i>14:00
-                                                        <i class="fas fa-video ms-3 me-1"></i>Online
-                                                    </div>
-                                                    <p class="timeline-description">Workshop praktis mengenai penerapan AI dan Machine Learning dalam industri.</p>
-                                                    <div class="timeline-badges">
-                                                        <span class="badge bg-success">Terdaftar</span>
-                                                        <span class="badge bg-info">Online</span>
-                                                        <span class="badge bg-secondary">Rp 75.000</span>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4 text-end">
-                                                    <button class="btn btn-outline-primary btn-sm mb-2">
-                                                        <i class="fas fa-info-circle me-1"></i>Detail
-                                                    </button>
-                                                    <button class="btn btn-success btn-sm" disabled>
-                                                        <i class="fas fa-check me-1"></i>Terdaftar
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="timeline-item">
-                                <div class="timeline-marker available">
-                                    <i class="fas fa-calendar"></i>
-                                </div>
-                                <div class="timeline-content">
-                                    <div class="timeline-card card">
-                                        <div class="card-body">
-                                            <div class="row">
-                                                <div class="col-md-8">
-                                                    <h6 class="timeline-title">Seminar Cybersecurity</h6>
-                                                    <div class="timeline-meta text-muted mb-2">
-                                                        <i class="fas fa-calendar me-1"></i>30 Agustus 2025
-                                                        <i class="fas fa-clock ms-3 me-1"></i>10:00
-                                                        <i class="fas fa-map-marker-alt ms-3 me-1"></i>Gedung Serbaguna
-                                                    </div>
-                                                    <p class="timeline-description">Membahas tren dan tantangan keamanan siber di era digital.</p>
-                                                    <div class="timeline-badges">
-                                                        <span class="badge bg-primary">Tersedia</span>
-                                                        <span class="badge bg-info">Offline</span>
-                                                        <span class="badge bg-secondary">Rp 100.000</span>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4 text-end">
-                                                    <button class="btn btn-outline-primary btn-sm mb-2">
-                                                        <i class="fas fa-info-circle me-1"></i>Detail
-                                                    </button>
-                                                    <button class="btn btn-primary btn-sm">
-                                                        <i class="fas fa-user-plus me-1"></i>Daftar
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                        <!-- Timeline will be loaded dynamically from database -->
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status"></div>
+                            <div class="mt-2">Memuat timeline...</div>
                         </div>
                     </div>
                 </div>

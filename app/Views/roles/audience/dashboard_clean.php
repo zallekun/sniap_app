@@ -179,12 +179,6 @@
                                         $paymentStatus = trim(strtolower($registration['payment_status'] ?? 'pending'));
                                         $registrationStatus = trim(strtolower($registration['registration_status'] ?? 'pending'));
                                         
-                                        // Enhanced debug
-                                        echo '<small class="text-danger d-block">';
-                                        echo 'RAW: payment="' . ($registration['payment_status'] ?? 'NULL') . '" reg="' . ($registration['registration_status'] ?? 'NULL') . '"<br>';
-                                        echo 'CLEANED: payment="' . $paymentStatus . '" reg="' . $registrationStatus . '"<br>';
-                                        echo 'COMPARISON: pay=pending?' . ($paymentStatus === 'pending' ? 'TRUE' : 'FALSE') . ' reg=pending?' . ($registrationStatus === 'pending' ? 'TRUE' : 'FALSE');
-                                        echo '</small>';
                                         ?>
                                         
                                         <div class="btn-group btn-group-sm" role="group">
@@ -193,32 +187,18 @@
                                                 <i class="fas fa-eye me-1"></i>Details
                                             </a>
                                             
-                                            <!-- FORCE SHOW BUTTONS FOR DEBUGGING -->
-                                            <a href="/payment/<?= $registration['id'] ?>" class="btn btn-outline-success btn-test-pay" data-status="<?= $paymentStatus ?>">
-                                                <i class="fas fa-credit-card me-1"></i>Pay (FORCE)
-                                            </a>
-                                            
-                                            <button class="btn btn-outline-danger btn-test-cancel" onclick="cancelRegistration(<?= $registration['id'] ?>)" data-status="<?= $registrationStatus ?>">
-                                                <i class="fas fa-times me-1"></i>Cancel (FORCE)
-                                            </button>
-                                            
-                                            <!-- TEST ORIGINAL BUTTONS -->
+                                            <!-- Show Pay button if payment is pending -->
                                             <?php if ($paymentStatus === 'pending'): ?>
-                                            <a href="/payment/<?= $registration['id'] ?>" class="btn btn-outline-success btn-original-pay">
-                                                <i class="fas fa-credit-card me-1"></i>Pay (ORIGINAL)
+                                            <a href="/payment/<?= $registration['id'] ?>" class="btn btn-outline-success">
+                                                <i class="fas fa-credit-card me-1"></i>Pay
                                             </a>
-                                            <span class="badge bg-success">PAY LOGIC: TRUE</span>
-                                            <?php else: ?>
-                                            <span class="badge bg-danger">PAY LOGIC: FALSE (<?= $paymentStatus ?>)</span>
                                             <?php endif; ?>
                                             
+                                            <!-- Show Cancel button if registration is pending -->
                                             <?php if ($registrationStatus === 'pending'): ?>
-                                            <button class="btn btn-outline-danger btn-original-cancel" onclick="cancelRegistration(<?= $registration['id'] ?>)">
-                                                <i class="fas fa-times me-1"></i>Cancel (ORIGINAL)
+                                            <button class="btn btn-outline-danger" onclick="cancelRegistration(<?= $registration['id'] ?>)">
+                                                <i class="fas fa-times me-1"></i>Cancel
                                             </button>
-                                            <span class="badge bg-success">CANCEL LOGIC: TRUE</span>
-                                            <?php else: ?>
-                                            <span class="badge bg-danger">CANCEL LOGIC: FALSE (<?= $registrationStatus ?>)</span>
                                             <?php endif; ?>
                                         </div>
                                     </td>
@@ -563,13 +543,9 @@ function displayUpcomingEvents(events) {
         return;
     }
     
-    console.log('Displaying events:', events);
-    
     let html = '';
     
     events.forEach(event => {
-        console.log('Processing event:', event.id, event.title);
-        
         const alertClass = event.format === 'online' ? 'alert-success' : 'alert-info';
         const icon = event.format === 'online' ? 'fas fa-video' : 'fas fa-map-marker-alt';
         
@@ -590,12 +566,7 @@ function displayUpcomingEvents(events) {
         `;
     });
     
-    console.log('Setting innerHTML for upcoming events');
     container.innerHTML = html;
-    console.log('Upcoming events HTML set successfully');
-    
-    // Temporary alert to see timing
-    showAlert('Upcoming events loaded successfully (' + events.length + ' events)', 'info', 3000);
 }
 
 // Cancel registration function
@@ -659,10 +630,7 @@ async function cancelRegistration(registrationId) {
 
 // Register for event function
 async function registerForEvent(eventId) {
-    console.log('registerForEvent called with ID:', eventId);
-    
     if (!eventId) {
-        console.error('No event ID provided');
         showAlert('Event ID is required', 'danger');
         return;
     }
@@ -677,14 +645,11 @@ async function registerForEvent(eventId) {
             body: `event_id=${eventId}&registration_type=audience`
         });
         
-        console.log('Registration response status:', response.status);
         const data = await response.json();
-        console.log('Registration response data:', data);
         
         if (data.status === 'success') {
             showAlert('Successfully registered for event!', 'success');
             setTimeout(() => {
-                console.log('Reloading page after successful registration');
                 window.location.reload();
             }, 1500);
         } else {
@@ -696,58 +661,12 @@ async function registerForEvent(eventId) {
     }
 }
 
-// Monitor button visibility
-function monitorButtons() {
-    const payButtons = document.querySelectorAll('.btn-test-pay');
-    const cancelButtons = document.querySelectorAll('.btn-test-cancel');
-    
-    console.log('Button monitoring:', {
-        payButtons: payButtons.length,
-        cancelButtons: cancelButtons.length,
-        payVisible: Array.from(payButtons).map(btn => btn.style.display !== 'none'),
-        cancelVisible: Array.from(cancelButtons).map(btn => btn.style.display !== 'none')
-    });
-    
-    // Check if buttons are being hidden by CSS or JS
-    payButtons.forEach((btn, index) => {
-        if (btn.style.display === 'none' || getComputedStyle(btn).display === 'none') {
-            console.warn(`Pay button ${index} is hidden!`, btn);
-        }
-    });
-    
-    cancelButtons.forEach((btn, index) => {
-        if (btn.style.display === 'none' || getComputedStyle(btn).display === 'none') {
-            console.warn(`Cancel button ${index} is hidden!`, btn);
-        }
-    });
-}
-
 // Load upcoming events when page loads
 document.addEventListener('DOMContentLoaded', function() {
-    // Monitor buttons initially
-    setTimeout(() => {
-        console.log('=== BEFORE UPCOMING EVENTS LOAD ===');
-        monitorButtons();
-    }, 100);
-    
     // Only load upcoming events if the container exists
     if (document.getElementById('upcomingEventsContainer')) {
-        loadUpcomingEvents().then(() => {
-            // Monitor buttons after upcoming events load
-            setTimeout(() => {
-                console.log('=== AFTER UPCOMING EVENTS LOAD ===');
-                monitorButtons();
-            }, 500);
-        });
-    } else {
-        console.log('Upcoming events container not found, skipping load');
+        loadUpcomingEvents();
     }
-    
-    // Monitor buttons every 2 seconds
-    setInterval(() => {
-        console.log('=== PERIODIC BUTTON CHECK ===');
-        monitorButtons();
-    }, 2000);
 });
 </script>
 
