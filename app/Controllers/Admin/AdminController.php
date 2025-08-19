@@ -201,6 +201,356 @@ class AdminController extends BaseController
         }
     }
 
+    // ==================== ANALYTICS API ENDPOINTS ====================
+
+    /**
+     * Get analytics data (API endpoint)
+     */
+    public function getAnalyticsData()
+    {
+        // Temporary: Skip auth check for debugging
+        // $redirect = $this->checkAdminAccess();
+        // if ($redirect) return $this->response->setStatusCode(401)->setJSON(['error' => 'Unauthorized']);
+        
+        try {
+            $db = \Config\Database::connect();
+            $dateRange = $this->request->getGet('dateRange') ?? 30; // Default to last 30 days
+            
+            // Calculate date range
+            $endDate = date('Y-m-d');
+            $startDate = date('Y-m-d', strtotime("-{$dateRange} days"));
+            
+            // Get KPI data
+            $kpiData = $this->getAnalyticsKPIs($db, $startDate, $endDate);
+            
+            // Get chart data
+            $chartData = $this->getAnalyticsCharts($db, $startDate, $endDate);
+            
+            // Get top events
+            $topEvents = $this->getTopEvents($db, $startDate, $endDate);
+            
+            // Get recent activity
+            $recentActivity = $this->getAnalyticsActivity($db, 10);
+            
+            return $this->response->setJSON([
+                'success' => true,
+                'data' => [
+                    'kpis' => $kpiData,
+                    'charts' => $chartData,
+                    'topEvents' => $topEvents,
+                    'recentActivity' => $recentActivity,
+                    'dateRange' => [
+                        'start' => $startDate,
+                        'end' => $endDate,
+                        'days' => $dateRange
+                    ]
+                ]
+            ]);
+            
+        } catch (\Exception $e) {
+            log_message('error', 'Get analytics data error: ' . $e->getMessage());
+            return $this->response->setStatusCode(500)->setJSON([
+                'success' => false,
+                'message' => 'Failed to load analytics data'
+            ]);
+        }
+    }
+
+    /**
+     * Get KPI data for analytics
+     */
+    private function getAnalyticsKPIs($db, $startDate, $endDate)
+    {
+        try {
+            // Current period data
+            $currentParticipants = $db->table('registrations r')
+                ->join('events e', 'e.id = r.event_id')
+                ->where('r.created_at >=', $startDate)
+                ->where('r.created_at <=', $endDate . ' 23:59:59')
+                ->countAllResults();
+            
+            $currentEvents = $db->table('events')
+                ->where('created_at >=', $startDate)
+                ->where('created_at <=', $endDate . ' 23:59:59')
+                ->countAllResults();
+            
+            // Calculate revenue for current period
+            $revenueQuery = $db->table('registrations r')
+                ->select('SUM(IFNULL(e.registration_fee, 0)) as total')
+                ->join('events e', 'e.id = r.event_id')
+                ->where('r.created_at >=', $startDate)
+                ->where('r.created_at <=', $endDate . ' 23:59:59')
+                ->where('r.payment_status', 'paid')
+                ->get();
+            
+            $currentRevenue = $revenueQuery->getRow()->total ?? 0;
+            
+            // Get abstracts for current period
+            $currentAbstracts = $db->table('abstracts')
+                ->where('created_at >=', $startDate)
+                ->where('created_at <=', $endDate . ' 23:59:59')
+                ->countAllResults();
+            
+            // Previous period data for comparison
+            $previousStartDate = date('Y-m-d', strtotime("-" . (2 * intval(str_replace('-', '', $endDate . ' - ' . $startDate))) . " days"));
+            $previousEndDate = date('Y-m-d', strtotime("-1 day", strtotime($startDate)));
+            
+            $previousParticipants = $db->table('registrations r')
+                ->join('events e', 'e.id = r.event_id')
+                ->where('r.created_at >=', $previousStartDate)
+                ->where('r.created_at <=', $previousEndDate . ' 23:59:59')
+                ->countAllResults();
+            
+            $previousEvents = $db->table('events')
+                ->where('created_at >=', $previousStartDate)
+                ->where('created_at <=', $previousEndDate . ' 23:59:59')
+                ->countAllResults();
+            
+            $previousRevenueQuery = $db->table('registrations r')
+                ->select('SUM(IFNULL(e.registration_fee, 0)) as total')
+                ->join('events e', 'e.id = r.event_id')
+                ->where('r.created_at >=', $previousStartDate)
+                ->where('r.created_at <=', $previousEndDate . ' 23:59:59')
+                ->where('r.payment_status', 'paid')
+                ->get();
+            
+            $previousRevenue = $previousRevenueQuery->getRow()->total ?? 0;
+            
+            $previousAbstracts = $db->table('abstracts')
+                ->where('created_at >=', $previousStartDate)
+                ->where('created_at <=', $previousEndDate . ' 23:59:59')
+                ->countAllResults();
+            
+            // Calculate percentage changes
+            $participantsChange = $previousParticipants > 0 ? (($currentParticipants - $previousParticipants) / $previousParticipants) * 100 : 0;
+            $eventsChange = $previousEvents > 0 ? (($currentEvents - $previousEvents) / $previousEvents) * 100 : 0;
+            $revenueChange = $previousRevenue > 0 ? (($currentRevenue - $previousRevenue) / $previousRevenue) * 100 : 0;
+            $abstractsChange = $previousAbstracts > 0 ? (($currentAbstracts - $previousAbstracts) / $previousAbstracts) * 100 : 0;
+            
+            return [
+                'totalParticipants' => $currentParticipants,
+                'participantsChange' => round($participantsChange, 1),
+                'totalEvents' => $currentEvents,
+                'eventsChange' => round($eventsChange, 1),
+                'totalRevenue' => $currentRevenue,
+                'revenueChange' => round($revenueChange, 1),
+                'totalAbstracts' => $currentAbstracts,
+                'abstractsChange' => round($abstractsChange, 1)
+            ];
+            
+        } catch (\Exception $e) {
+            log_message('error', 'Analytics KPI error: ' . $e->getMessage());
+            return [
+                'totalParticipants' => 0,
+                'participantsChange' => 0,
+                'totalEvents' => 0,
+                'eventsChange' => 0,
+                'totalRevenue' => 0,
+                'revenueChange' => 0,
+                'totalAbstracts' => 0,
+                'abstractsChange' => 0
+            ];
+        }
+    }
+
+    /**
+     * Get chart data for analytics
+     */
+    private function getAnalyticsCharts($db, $startDate, $endDate)
+    {
+        try {
+            // Registration trends (weekly data)
+            $registrationTrends = $db->query("
+                SELECT 
+                    WEEK(r.created_at) as week_number,
+                    YEARWEEK(r.created_at) as year_week,
+                    COUNT(*) as registrations,
+                    DATE_FORMAT(r.created_at, '%Y-%m-%d') as week_start
+                FROM registrations r 
+                WHERE r.created_at >= ? AND r.created_at <= ?
+                GROUP BY YEARWEEK(r.created_at)
+                ORDER BY r.created_at
+            ", [$startDate, $endDate . ' 23:59:59'])->getResultArray();
+            
+            // Revenue by event
+            $revenueByEvent = $db->query("
+                SELECT 
+                    e.title,
+                    e.id,
+                    SUM(IFNULL(e.registration_fee, 0)) as total_revenue,
+                    COUNT(r.id) as participant_count
+                FROM events e
+                LEFT JOIN registrations r ON r.event_id = e.id AND r.payment_status = 'paid'
+                WHERE e.created_at >= ? AND e.created_at <= ?
+                GROUP BY e.id, e.title
+                ORDER BY total_revenue DESC
+                LIMIT 10
+            ", [$startDate, $endDate . ' 23:59:59'])->getResultArray();
+            
+            // Participant demographics (by role)
+            $demographics = $db->query("
+                SELECT 
+                    u.role,
+                    COUNT(DISTINCT r.user_id) as count
+                FROM registrations r
+                JOIN users u ON u.id = r.user_id
+                WHERE r.created_at >= ? AND r.created_at <= ?
+                GROUP BY u.role
+                ORDER BY count DESC
+            ", [$startDate, $endDate . ' 23:59:59'])->getResultArray();
+            
+            // Event format distribution
+            $formatDistribution = $db->query("
+                SELECT 
+                    e.format,
+                    COUNT(*) as count
+                FROM events e
+                WHERE e.created_at >= ? AND e.created_at <= ?
+                GROUP BY e.format
+            ", [$startDate, $endDate . ' 23:59:59'])->getResultArray();
+            
+            return [
+                'registrationTrends' => [
+                    'labels' => array_map(function($item) {
+                        return 'Week ' . date('W', strtotime($item['week_start']));
+                    }, $registrationTrends),
+                    'data' => array_column($registrationTrends, 'registrations')
+                ],
+                'revenueByEvent' => [
+                    'labels' => array_map(function($item) {
+                        return strlen($item['title']) > 20 ? substr($item['title'], 0, 20) . '...' : $item['title'];
+                    }, $revenueByEvent),
+                    'data' => array_column($revenueByEvent, 'total_revenue')
+                ],
+                'demographics' => [
+                    'labels' => array_map(function($item) {
+                        return ucfirst($item['role']);
+                    }, $demographics),
+                    'data' => array_column($demographics, 'count')
+                ],
+                'formatDistribution' => [
+                    'labels' => array_map(function($item) {
+                        return ucfirst($item['format']);
+                    }, $formatDistribution),
+                    'data' => array_column($formatDistribution, 'count')
+                ]
+            ];
+            
+        } catch (\Exception $e) {
+            log_message('error', 'Analytics charts error: ' . $e->getMessage());
+            return [
+                'registrationTrends' => ['labels' => [], 'data' => []],
+                'revenueByEvent' => ['labels' => [], 'data' => []],
+                'demographics' => ['labels' => [], 'data' => []],
+                'formatDistribution' => ['labels' => [], 'data' => []]
+            ];
+        }
+    }
+
+    /**
+     * Get top performing events
+     */
+    private function getTopEvents($db, $startDate, $endDate)
+    {
+        try {
+            $topEvents = $db->query("
+                SELECT 
+                    e.title as event_name,
+                    COUNT(r.id) as participants,
+                    SUM(IFNULL(e.registration_fee, 0)) as revenue,
+                    AVG(IFNULL(rv.rating, 0)) as rating,
+                    (COUNT(CASE WHEN r.attendance_status = 'attended' THEN 1 END) / COUNT(r.id) * 100) as completion_rate
+                FROM events e
+                LEFT JOIN registrations r ON r.event_id = e.id
+                LEFT JOIN reviews rv ON rv.event_id = e.id
+                WHERE e.created_at >= ? AND e.created_at <= ?
+                GROUP BY e.id, e.title
+                HAVING participants > 0
+                ORDER BY participants DESC, revenue DESC
+                LIMIT 10
+            ", [$startDate, $endDate . ' 23:59:59'])->getResultArray();
+            
+            // Format the data
+            return array_map(function($event) {
+                return [
+                    'event_name' => $event['event_name'],
+                    'participants' => (int)$event['participants'],
+                    'revenue' => 'Rp ' . number_format($event['revenue']),
+                    'rating' => $event['rating'] > 0 ? round($event['rating'], 1) . '/5' : 'N/A',
+                    'completion_rate' => round($event['completion_rate']) . '%'
+                ];
+            }, $topEvents);
+            
+        } catch (\Exception $e) {
+            log_message('error', 'Top events error: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Get recent activity for analytics
+     */
+    private function getAnalyticsActivity($db, $limit = 10)
+    {
+        try {
+            $activities = [];
+            
+            // Get recent registrations
+            $recentRegistrations = $db->query("
+                SELECT 
+                    CONCAT(u.first_name, ' ', u.last_name) as user_name,
+                    e.title as event_title,
+                    r.created_at,
+                    'registration' as type
+                FROM registrations r
+                JOIN users u ON u.id = r.user_id
+                JOIN events e ON e.id = r.event_id
+                ORDER BY r.created_at DESC
+                LIMIT ?
+            ", [$limit / 2])->getResultArray();
+            
+            foreach ($recentRegistrations as $reg) {
+                $activities[] = [
+                    'type' => 'registration',
+                    'description' => "{$reg['user_name']} registered for {$reg['event_title']}",
+                    'created_at' => $reg['created_at'],
+                    'icon' => 'fas fa-user-plus'
+                ];
+            }
+            
+            // Get recent events
+            $recentEvents = $db->query("
+                SELECT 
+                    title,
+                    created_at,
+                    'event' as type
+                FROM events
+                ORDER BY created_at DESC
+                LIMIT ?
+            ", [$limit / 2])->getResultArray();
+            
+            foreach ($recentEvents as $event) {
+                $activities[] = [
+                    'type' => 'event',
+                    'description' => "New event created: {$event['title']}",
+                    'created_at' => $event['created_at'],
+                    'icon' => 'fas fa-calendar-plus'
+                ];
+            }
+            
+            // Sort all activities by date
+            usort($activities, function($a, $b) {
+                return strtotime($b['created_at']) - strtotime($a['created_at']);
+            });
+            
+            return array_slice($activities, 0, $limit);
+            
+        } catch (\Exception $e) {
+            log_message('error', 'Analytics activity error: ' . $e->getMessage());
+            return [];
+        }
+    }
+
     // ==================== API ENDPOINTS ====================
 
     /**

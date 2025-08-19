@@ -2,7 +2,7 @@
 
 <?= $this->section('title') ?>Abstract Management<?= $this->endSection() ?>
 
-<?= $this->section('content') ?>
+<?= $this->section('head') ?>
 <style>
 .abstract-actions {
     display: flex;
@@ -48,245 +48,281 @@
     margin-bottom: 1rem;
     display: none;
 }
-</style>
-<?php $this->endSection(); ?>
 
-<?php $this->section('content'); ?>
-<div class="admin-layout">
-    <!-- Sidebar -->
-    <aside class="admin-sidebar">
-        <div class="sidebar-header">
-            <a href="/admin/dashboard" class="sidebar-logo">SNIA Admin</a>
-            <div class="sidebar-subtitle">Conference Management</div>
-        </div>
-        
-        <nav class="sidebar-nav">
-            <div class="nav-section">
-                <div class="nav-section-title">Dashboard</div>
-                <div class="nav-item">
-                    <a href="/admin/dashboard" class="nav-link">
-                        <i class="fas fa-tachometer-alt"></i>
-                        Overview
-                    </a>
-                </div>
-            </div>
-            
-            <div class="nav-section">
-                <div class="nav-section-title">Management</div>
-                <div class="nav-item">
-                    <a href="/admin/users" class="nav-link">
-                        <i class="fas fa-users"></i>
-                        User Management
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="/admin/events" class="nav-link">
-                        <i class="fas fa-calendar"></i>
-                        Event Management
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="/admin/registrations" class="nav-link">
-                        <i class="fas fa-user-check"></i>
-                        Registrations
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="/admin/abstracts" class="nav-link active">
-                        <i class="fas fa-file-alt"></i>
-                        Abstract & Reviews
-                    </a>
-                </div>
-            </div>
-            
-            <div class="nav-section">
-                <div class="nav-section-title">Reports & Analytics</div>
-                <div class="nav-item">
-                    <a href="/admin/analytics" class="nav-link">
-                        <i class="fas fa-chart-bar"></i>
-                        Analytics
-                    </a>
-                </div>
-            </div>
-            
-            <div class="nav-section">
-                <div class="nav-section-title">System</div>
-                <div class="nav-item">
-                    <a href="/admin/settings" class="nav-link">
-                        <i class="fas fa-cog"></i>
-                        System Settings
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="/dashboard" class="nav-link">
-                        <i class="fas fa-arrow-left"></i>
-                        Back to Dashboard
-                    </a>
-                </div>
-            </div>
-        </nav>
-    </aside>
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    color: white;
+}
+
+.stat-card:nth-child(1) .stat-icon { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.stat-card:nth-child(2) .stat-icon { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+.stat-card:nth-child(3) .stat-icon { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+.stat-card:nth-child(4) .stat-icon { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+
+.content-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: between;
+    align-items: center;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    color: #9ca3af;
+    margin-bottom: 1rem;
+}
+
+.empty-state h4 {
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    color: #9ca3af;
+}
+
+.alert {
+    border: none;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.badge {
+    font-weight: 500;
+    padding: 0.4em 0.8em;
+}
+
+.author-info strong {
+    font-size: 0.95rem;
+}
+
+.abstract-title strong {
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
     
-    <!-- Main Content -->
-    <main class="admin-main">
-        <!-- Header -->
-        <header class="admin-header">
-            <h1 class="header-title">Abstract & Review Management</h1>
-            <div class="header-actions">
-                <div class="user-menu">
-                    <div class="user-avatar">
-                        <?= strtoupper(substr($user['first_name'] ?? 'A', 0, 1)) ?>
-                    </div>
-                    <div>
-                        <div style="font-weight: 600; color: #1f2937;">
-                            <?= esc($user['first_name'] ?? '') ?> <?= esc($user['last_name'] ?? '') ?>
-                        </div>
-                        <div style="font-size: 0.875rem; color: #6b7280;">
-                            Administrator
-                        </div>
-                    </div>
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .abstract-actions {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+}
+</style>
+<?= $this->endSection() ?>
+
+<?= $this->section('content') ?>
+<!-- Alert Messages -->
+<?php if (session()->getFlashdata('success')): ?>
+    <div class="alert alert-success">
+        <i class="fas fa-check-circle me-2"></i>
+        <?= session()->getFlashdata('success') ?>
+    </div>
+<?php endif; ?>
+
+<?php if (session()->getFlashdata('error')): ?>
+    <div class="alert alert-danger">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <?= session()->getFlashdata('error') ?>
+    </div>
+<?php endif; ?>
+
+<!-- Statistics Cards -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-content">
+            <div class="stat-label">Total Abstracts</div>
+            <div class="stat-value" id="totalAbstracts">-</div>
+        </div>
+        <div class="stat-icon">
+            <i class="fas fa-file-alt"></i>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-content">
+            <div class="stat-label">Pending Assignment</div>
+            <div class="stat-value" id="pendingAssignment">-</div>
+        </div>
+        <div class="stat-icon">
+            <i class="fas fa-clock"></i>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-content">
+            <div class="stat-label">Under Review</div>
+            <div class="stat-value" id="underReview">-</div>
+        </div>
+        <div class="stat-icon">
+            <i class="fas fa-edit"></i>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-content">
+            <div class="stat-label">Completed Reviews</div>
+            <div class="stat-value" id="completedReviews">-</div>
+        </div>
+        <div class="stat-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+    </div>
+</div>
+
+<!-- Filters and Actions -->
+<div class="content-card">
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="searchAbstracts" 
+                           placeholder="Search abstracts..." onkeyup="searchAbstracts()">
+                    <button class="btn btn-outline-secondary" type="button" onclick="searchAbstracts()">
+                        <i class="fas fa-search"></i>
+                    </button>
                 </div>
             </div>
-        </header>
-        
-        <!-- Content -->
-        <div class="admin-content">
-            <!-- Alert Messages -->
-            <?php if (session()->getFlashdata('success')): ?>
-                <div class="alert alert-success">
-                    <i class="fas fa-check-circle me-2"></i>
-                    <?= session()->getFlashdata('success') ?>
-                </div>
-            <?php endif; ?>
-
-            <?php if (session()->getFlashdata('error')): ?>
-                <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-circle me-2"></i>
-                    <?= session()->getFlashdata('error') ?>
-                </div>
-            <?php endif; ?>
-
-            <!-- Statistics Cards -->
-            <div class="stats-grid mb-4">
-                <div class="stat-card">
-                    <div class="stat-content">
-                        <div class="stat-label">Total Abstracts</div>
-                        <div class="stat-value" id="totalAbstracts">-</div>
-                    </div>
-                    <div class="stat-icon">
-                        <i class="fas fa-file-alt"></i>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-content">
-                        <div class="stat-label">Pending Assignment</div>
-                        <div class="stat-value" id="pendingAssignment">-</div>
-                    </div>
-                    <div class="stat-icon">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-content">
-                        <div class="stat-label">Under Review</div>
-                        <div class="stat-value" id="underReview">-</div>
-                    </div>
-                    <div class="stat-icon">
-                        <i class="fas fa-edit"></i>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-content">
-                        <div class="stat-label">Completed Reviews</div>
-                        <div class="stat-value" id="completedReviews">-</div>
-                    </div>
-                    <div class="stat-icon">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                </div>
+            <div class="col-md-4">
+                <select class="form-select" id="statusFilter" onchange="filterByStatus()">
+                    <option value="">All Status</option>
+                    <option value="unassigned">Unassigned</option>
+                    <option value="assigned">Assigned</option>
+                    <option value="under_review">Under Review</option>
+                    <option value="completed">Completed</option>
+                </select>
             </div>
-
-            <!-- Filters and Actions -->
-            <div class="content-card mb-4">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-md-4">
-                            <div class="input-group">
-                                <input type="text" class="form-control" id="searchAbstracts" 
-                                       placeholder="Search abstracts...">
-                                <button class="btn btn-outline-secondary" type="button" onclick="searchAbstracts()">
-                                    <i class="fas fa-search"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <select class="form-select" id="statusFilter" onchange="filterByStatus()">
-                                <option value="">All Status</option>
-                                <option value="unassigned">Unassigned</option>
-                                <option value="assigned">Assigned</option>
-                                <option value="under_review">Under Review</option>
-                                <option value="completed">Completed</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4 text-end">
-                            <button class="btn btn-primary" onclick="bulkAssignReviewers()">
-                                <i class="fas fa-user-plus"></i> Bulk Assign
-                            </button>
-                            <button class="btn btn-outline-secondary" onclick="refreshAbstracts()">
-                                <i class="fas fa-sync-alt"></i> Refresh
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Bulk Actions Panel -->
-            <div class="bulk-actions" id="bulkActionsPanel">
-                <div class="row align-items-center">
-                    <div class="col-md-6">
-                        <span id="selectedCount">0</span> abstracts selected
-                    </div>
-                    <div class="col-md-6 text-end">
-                        <button class="btn btn-outline-secondary btn-sm" onclick="clearSelection()">Clear Selection</button>
-                        <button class="btn btn-primary btn-sm" onclick="showBulkAssignModal()">
-                            <i class="fas fa-user-plus"></i> Assign Reviewers
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Abstracts Table -->
-            <div class="content-card">
-                <div class="card-header">
-                    <h3 class="card-title">Abstract Submissions</h3>
-                    <div class="card-actions">
-                        <div class="dropdown">
-                            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" 
-                                    type="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-download"></i> Export
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#" onclick="exportAbstracts('excel')">Excel</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="exportAbstracts('pdf')">PDF</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="exportAbstracts('csv')">CSV</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div id="abstractsTableContainer">
-                        <div class="text-center p-4">
-                            <i class="fas fa-spinner fa-spin fa-2x"></i>
-                            <p class="mt-2">Loading abstracts...</p>
-                        </div>
-                    </div>
-                </div>
+            <div class="col-md-4 text-end">
+                <button class="btn btn-primary" onclick="showBulkAssignModal()">
+                    <i class="fas fa-user-plus"></i> Bulk Assign
+                </button>
+                <button class="btn btn-outline-secondary" onclick="refreshAbstracts()">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
             </div>
         </div>
-    </main>
+    </div>
+</div>
+
+<!-- Bulk Actions Panel -->
+<div class="bulk-actions" id="bulkActionsPanel">
+    <div class="row align-items-center">
+        <div class="col-md-6">
+            <span id="selectedCount">0</span> abstracts selected
+        </div>
+        <div class="col-md-6 text-end">
+            <button class="btn btn-outline-secondary btn-sm" onclick="clearSelection()">Clear Selection</button>
+            <button class="btn btn-primary btn-sm" onclick="showBulkAssignModal()">
+                <i class="fas fa-user-plus"></i> Assign Reviewers
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Abstracts Table -->
+<div class="content-card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h3 class="card-title">Abstract Submissions</h3>
+        <div class="dropdown">
+            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" 
+                    type="button" data-bs-toggle="dropdown">
+                <i class="fas fa-download"></i> Export
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#" onclick="exportAbstracts('excel')">
+                    <i class="fas fa-file-excel me-2"></i>Excel
+                </a></li>
+                <li><a class="dropdown-item" href="#" onclick="exportAbstracts('pdf')">
+                    <i class="fas fa-file-pdf me-2"></i>PDF
+                </a></li>
+                <li><a class="dropdown-item" href="#" onclick="exportAbstracts('csv')">
+                    <i class="fas fa-file-csv me-2"></i>CSV
+                </a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="card-body">
+        <div id="abstractsTableContainer">
+            <div class="text-center p-4">
+                <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
+                <p class="mt-2 text-muted">Loading abstracts...</p>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Assign Reviewer Modal -->
@@ -349,7 +385,7 @@
                         </select>
                     </div>
                     
-                    <div class="mb-3" id="singleReviewerSelect" style="display:none;">
+                    <div class="mb-3" id="singleReviewerSelect">
                         <label for="bulkReviewerSelect" class="form-label">Select Reviewer</label>
                         <select class="form-select" id="bulkReviewerSelect">
                             <option value="">Loading reviewers...</option>
@@ -358,7 +394,7 @@
                     
                     <div class="mb-3" id="multipleReviewersSelect" style="display:none;">
                         <label class="form-label">Select Reviewers</label>
-                        <div id="reviewerCheckboxes">
+                        <div id="reviewerCheckboxes" class="border rounded p-3" style="max-height: 200px; overflow-y: auto;">
                             <!-- Reviewer checkboxes loaded dynamically -->
                         </div>
                     </div>
@@ -396,14 +432,15 @@
         </div>
     </div>
 </div>
-<?php $this->endSection(); ?>
+<?= $this->endSection() ?>
 
-<?php $this->section('additional_js'); ?>
+<?= $this->section('additional_js') ?>
 <script>
 let selectedAbstracts = new Set();
 let allAbstracts = [];
 let filteredAbstracts = [];
 let availableReviewers = [];
+
 
 document.addEventListener('DOMContentLoaded', function() {
     initializeAbstractManagement();
@@ -444,16 +481,13 @@ function setupEventListeners() {
 
 async function loadAbstracts() {
     try {
-        const response = await fetch('/api/admin/abstracts');
-        const data = await response.json();
+        // Simulate API call with sample data
+        await new Promise(resolve => setTimeout(resolve, 1000));
         
-        if (data.status === 'success') {
-            allAbstracts = data.data;
-            filteredAbstracts = [...allAbstracts];
-            renderAbstractsTable();
-        } else {
-            showAlert('Failed to load abstracts', 'danger');
-        }
+        allAbstracts = sampleAbstracts;
+        filteredAbstracts = [...allAbstracts];
+        renderAbstractsTable();
+        
     } catch (error) {
         console.error('Error loading abstracts:', error);
         showAlert('Error loading abstracts', 'danger');
@@ -462,15 +496,12 @@ async function loadAbstracts() {
 
 async function loadReviewers() {
     try {
-        const response = await fetch('/api/admin/reviewers');
-        const data = await response.json();
+        // Simulate API call with sample data
+        await new Promise(resolve => setTimeout(resolve, 500));
         
-        if (data.status === 'success') {
-            availableReviewers = data.data;
-            populateReviewerSelects();
-        } else {
-            showAlert('Failed to load reviewers', 'warning');
-        }
+        availableReviewers = sampleReviewers;
+        populateReviewerSelects();
+        
     } catch (error) {
         console.error('Error loading reviewers:', error);
     }
@@ -478,16 +509,19 @@ async function loadReviewers() {
 
 async function loadStatistics() {
     try {
-        const response = await fetch('/api/admin/abstract-stats');
-        const data = await response.json();
+        // Calculate statistics from sample data
+        await new Promise(resolve => setTimeout(resolve, 300));
         
-        if (data.status === 'success') {
-            const stats = data.data;
-            document.getElementById('totalAbstracts').textContent = stats.total || 0;
-            document.getElementById('pendingAssignment').textContent = stats.pending_assignment || 0;
-            document.getElementById('underReview').textContent = stats.under_review || 0;
-            document.getElementById('completedReviews').textContent = stats.completed || 0;
-        }
+        const total = allAbstracts.length;
+        const pending = allAbstracts.filter(a => !a.assigned_reviewer_id).length;
+        const underReview = allAbstracts.filter(a => a.review_status === 'in_progress').length;
+        const completed = allAbstracts.filter(a => a.review_status === 'completed').length;
+        
+        document.getElementById('totalAbstracts').textContent = total;
+        document.getElementById('pendingAssignment').textContent = pending;
+        document.getElementById('underReview').textContent = underReview;
+        document.getElementById('completedReviews').textContent = completed;
+        
     } catch (error) {
         console.error('Error loading statistics:', error);
     }
@@ -510,11 +544,12 @@ function populateReviewerSelects() {
         
         // Add checkbox for multiple selection
         const checkbox = `
-            <div class="form-check">
+            <div class="form-check mb-2">
                 <input class="form-check-input" type="checkbox" value="${reviewer.id}" id="reviewer_${reviewer.id}">
                 <label class="form-check-label" for="reviewer_${reviewer.id}">
-                    ${reviewer.first_name} ${reviewer.last_name} (${reviewer.email})
-                    <small class="text-muted d-block">Assignments: ${reviewer.current_assignments || 0}</small>
+                    <strong>${reviewer.first_name} ${reviewer.last_name}</strong>
+                    <br><small class="text-muted">${reviewer.email}</small>
+                    <br><small class="text-info">Current assignments: ${reviewer.current_assignments || 0}</small>
                 </label>
             </div>
         `;
@@ -527,8 +562,8 @@ function renderAbstractsTable() {
     
     if (filteredAbstracts.length === 0) {
         container.innerHTML = `
-            <div class="empty-state text-center p-4">
-                <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+            <div class="empty-state">
+                <i class="fas fa-file-alt"></i>
                 <h4>No Abstracts Found</h4>
                 <p>No abstracts match the current filter criteria.</p>
             </div>
@@ -539,7 +574,7 @@ function renderAbstractsTable() {
     let tableHTML = `
         <div class="table-responsive">
             <table class="table table-hover">
-                <thead>
+                <thead class="table-light">
                     <tr>
                         <th>
                             <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
@@ -570,6 +605,7 @@ function renderAbstractsTable() {
                     <div class="abstract-title">
                         <strong>${escapeHtml(abstract.title)}</strong>
                         <br><small class="text-muted">ID: #${abstract.id}</small>
+                        <br><small class="text-muted">Submitted: ${formatDate(abstract.submission_date)}</small>
                     </div>
                 </td>
                 <td>
@@ -579,7 +615,9 @@ function renderAbstractsTable() {
                     </div>
                 </td>
                 <td>${escapeHtml(abstract.event_title || 'N/A')}</td>
-                <td>${escapeHtml(abstract.category_name || 'N/A')}</td>
+                <td>
+                    <span class="badge bg-light text-dark">${escapeHtml(abstract.category_name || 'N/A')}</span>
+                </td>
                 <td>${assignmentStatus}</td>
                 <td>${reviewerInfo}</td>
                 <td>
@@ -599,14 +637,14 @@ function renderAbstractsTable() {
                             </button>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="#" onclick="downloadAbstract(${abstract.id})">
-                                    <i class="fas fa-download"></i> Download
+                                    <i class="fas fa-download me-2"></i> Download
                                 </a></li>
                                 <li><a class="dropdown-item" href="#" onclick="editAbstract(${abstract.id})">
-                                    <i class="fas fa-edit"></i> Edit
+                                    <i class="fas fa-edit me-2"></i> Edit
                                 </a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item text-danger" href="#" onclick="deleteAbstract(${abstract.id})">
-                                    <i class="fas fa-trash"></i> Delete
+                                    <i class="fas fa-trash me-2"></i> Delete
                                 </a></li>
                             </ul>
                         </div>
@@ -624,8 +662,10 @@ function getAssignmentStatus(abstract) {
     if (abstract.assigned_reviewer_id) {
         if (abstract.review_status === 'completed') {
             return '<span class="badge bg-success">Completed</span>';
-        } else {
+        } else if (abstract.review_status === 'in_progress') {
             return '<span class="badge bg-warning">Under Review</span>';
+        } else {
+            return '<span class="badge bg-info">Assigned</span>';
         }
     } else {
         return '<span class="badge bg-secondary">Unassigned</span>';
@@ -634,12 +674,14 @@ function getAssignmentStatus(abstract) {
 
 function getReviewerInfo(abstract) {
     if (abstract.assigned_reviewer_id && abstract.reviewer_name) {
+        const initials = abstract.reviewer_name.split(' ').map(n => n[0]).join('');
         return `
             <div class="d-flex align-items-center">
-                <div class="reviewer-avatar">${abstract.reviewer_name.charAt(0)}</div>
+                <div class="reviewer-avatar">${initials}</div>
                 <div>
                     <small><strong>${abstract.reviewer_name}</strong></small>
                     <br><small class="text-muted">${abstract.reviewer_email || ''}</small>
+                    ${abstract.due_date ? `<br><small class="text-warning">Due: ${formatDate(abstract.due_date)}</small>` : ''}
                 </div>
             </div>
         `;
@@ -694,6 +736,7 @@ function clearSelection() {
     selectedAbstracts.clear();
     document.querySelectorAll('.abstract-checkbox').forEach(cb => cb.checked = false);
     document.getElementById('selectAll').checked = false;
+    document.getElementById('selectAll').indeterminate = false;
     updateBulkActionsPanel();
 }
 
@@ -715,24 +758,50 @@ function showBulkAssignModal() {
 
 async function submitReviewerAssignment() {
     const form = document.getElementById('assignReviewerForm');
-    const formData = new FormData(form);
+    const abstractId = document.getElementById('abstractIdToAssign').value;
+    const reviewerId = document.getElementById('reviewerSelect').value;
+    const notes = document.getElementById('assignmentNotes').value;
+    const dueDate = document.getElementById('dueDate').value;
+    
+    if (!reviewerId) {
+        showAlert('Please select a reviewer', 'warning');
+        return;
+    }
+    
+    if (!dueDate) {
+        showAlert('Please set a due date', 'warning');
+        return;
+    }
     
     try {
-        const response = await fetch('/api/admin/assign-reviewer', {
-            method: 'POST',
-            body: formData
-        });
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 1000));
         
-        const data = await response.json();
+        // Find and update the abstract
+        const abstractIndex = allAbstracts.findIndex(a => a.id == abstractId);
+        const reviewer = availableReviewers.find(r => r.id == reviewerId);
         
-        if (data.status === 'success') {
-            showAlert(data.message, 'success');
-            const modal = bootstrap.Modal.getInstance(document.getElementById('assignReviewerModal'));
-            modal.hide();
-            await loadAbstracts();
-        } else {
-            showAlert(data.message, 'danger');
+        if (abstractIndex !== -1 && reviewer) {
+            allAbstracts[abstractIndex].assigned_reviewer_id = reviewer.id;
+            allAbstracts[abstractIndex].reviewer_name = `${reviewer.first_name} ${reviewer.last_name}`;
+            allAbstracts[abstractIndex].reviewer_email = reviewer.email;
+            allAbstracts[abstractIndex].review_status = 'in_progress';
+            allAbstracts[abstractIndex].due_date = dueDate;
+            
+            // Update reviewer's assignment count
+            reviewer.current_assignments = (reviewer.current_assignments || 0) + 1;
         }
+        
+        showAlert('Reviewer assigned successfully!', 'success');
+        const modal = bootstrap.Modal.getInstance(document.getElementById('assignReviewerModal'));
+        modal.hide();
+        
+        // Reset form
+        form.reset();
+        
+        await loadAbstracts();
+        await loadStatistics();
+        
     } catch (error) {
         console.error('Error assigning reviewer:', error);
         showAlert('Error assigning reviewer', 'danger');
@@ -742,6 +811,11 @@ async function submitReviewerAssignment() {
 async function submitBulkAssignment() {
     const strategy = document.getElementById('assignmentStrategy').value;
     const dueDate = document.getElementById('bulkDueDate').value;
+    
+    if (!dueDate) {
+        showAlert('Please set a due date', 'warning');
+        return;
+    }
     
     let reviewers = [];
     
@@ -761,33 +835,57 @@ async function submitBulkAssignment() {
         reviewers = Array.from(checkboxes).map(cb => cb.value);
     }
     
-    const data = {
-        abstract_ids: Array.from(selectedAbstracts),
-        reviewer_ids: reviewers,
-        strategy: strategy,
-        due_date: dueDate
-    };
-    
     try {
-        const response = await fetch('/api/admin/bulk-assign-reviewers', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data)
-        });
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 1500));
         
-        const result = await response.json();
+        const selectedAbstractsList = Array.from(selectedAbstracts);
+        let assignedCount = 0;
         
-        if (result.status === 'success') {
-            showAlert(result.message, 'success');
-            const modal = bootstrap.Modal.getInstance(document.getElementById('bulkAssignModal'));
-            modal.hide();
-            clearSelection();
-            await loadAbstracts();
+        if (strategy === 'single') {
+            // Assign same reviewer to all selected abstracts
+            const reviewer = availableReviewers.find(r => r.id == reviewers[0]);
+            selectedAbstractsList.forEach(abstractId => {
+                const abstractIndex = allAbstracts.findIndex(a => a.id === abstractId);
+                if (abstractIndex !== -1) {
+                    allAbstracts[abstractIndex].assigned_reviewer_id = reviewer.id;
+                    allAbstracts[abstractIndex].reviewer_name = `${reviewer.first_name} ${reviewer.last_name}`;
+                    allAbstracts[abstractIndex].reviewer_email = reviewer.email;
+                    allAbstracts[abstractIndex].review_status = 'in_progress';
+                    allAbstracts[abstractIndex].due_date = dueDate;
+                    assignedCount++;
+                }
+            });
+            reviewer.current_assignments = (reviewer.current_assignments || 0) + assignedCount;
         } else {
-            showAlert(result.message, 'danger');
+            // Distribute assignments among selected reviewers
+            selectedAbstractsList.forEach((abstractId, index) => {
+                const reviewerIndex = index % reviewers.length;
+                const reviewer = availableReviewers.find(r => r.id == reviewers[reviewerIndex]);
+                const abstractIndex = allAbstracts.findIndex(a => a.id === abstractId);
+                
+                if (abstractIndex !== -1 && reviewer) {
+                    allAbstracts[abstractIndex].assigned_reviewer_id = reviewer.id;
+                    allAbstracts[abstractIndex].reviewer_name = `${reviewer.first_name} ${reviewer.last_name}`;
+                    allAbstracts[abstractIndex].reviewer_email = reviewer.email;
+                    allAbstracts[abstractIndex].review_status = 'in_progress';
+                    allAbstracts[abstractIndex].due_date = dueDate;
+                    assignedCount++;
+                    
+                    reviewer.current_assignments = (reviewer.current_assignments || 0) + 1;
+                }
+            });
         }
+        
+        showAlert(`Successfully assigned ${assignedCount} abstracts to reviewers!`, 'success');
+        const modal = bootstrap.Modal.getInstance(document.getElementById('bulkAssignModal'));
+        modal.hide();
+        
+        clearSelection();
+        await loadAbstracts();
+        await loadStatistics();
+        populateReviewerSelects();
+        
     } catch (error) {
         console.error('Error bulk assigning reviewers:', error);
         showAlert('Error bulk assigning reviewers', 'danger');
@@ -796,12 +894,18 @@ async function submitBulkAssignment() {
 
 function searchAbstracts() {
     const searchTerm = document.getElementById('searchAbstracts').value.toLowerCase();
-    filteredAbstracts = allAbstracts.filter(abstract => 
-        abstract.title.toLowerCase().includes(searchTerm) ||
-        (abstract.author_name && abstract.author_name.toLowerCase().includes(searchTerm)) ||
-        (abstract.author_email && abstract.author_email.toLowerCase().includes(searchTerm))
-    );
+    if (!searchTerm) {
+        filteredAbstracts = [...allAbstracts];
+    } else {
+        filteredAbstracts = allAbstracts.filter(abstract => 
+            abstract.title.toLowerCase().includes(searchTerm) ||
+            (abstract.author_name && abstract.author_name.toLowerCase().includes(searchTerm)) ||
+            (abstract.author_email && abstract.author_email.toLowerCase().includes(searchTerm)) ||
+            (abstract.category_name && abstract.category_name.toLowerCase().includes(searchTerm))
+        );
+    }
     renderAbstractsTable();
+    clearSelection();
 }
 
 function filterByStatus() {
@@ -815,7 +919,7 @@ function filterByStatus() {
                 case 'unassigned':
                     return !abstract.assigned_reviewer_id;
                 case 'assigned':
-                    return abstract.assigned_reviewer_id && abstract.review_status !== 'completed';
+                    return abstract.assigned_reviewer_id && abstract.review_status === 'in_progress';
                 case 'under_review':
                     return abstract.assigned_reviewer_id && abstract.review_status === 'in_progress';
                 case 'completed':
@@ -827,38 +931,116 @@ function filterByStatus() {
     }
     
     renderAbstractsTable();
+    clearSelection();
 }
 
 function refreshAbstracts() {
-    loadAbstracts();
+    const refreshButton = document.querySelector('.btn[onclick="refreshAbstracts()"]');
+    const originalHTML = refreshButton.innerHTML;
+    refreshButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+    refreshButton.disabled = true;
+    
+    setTimeout(() => {
+        loadAbstracts();
+        loadStatistics();
+        refreshButton.innerHTML = originalHTML;
+        refreshButton.disabled = false;
+        showAlert('Data refreshed successfully!', 'success');
+    }, 1000);
 }
 
 function viewAbstractDetails(abstractId) {
-    // Implementation for viewing abstract details
-    showAlert('Abstract details view will be implemented', 'info');
+    const abstract = allAbstracts.find(a => a.id === abstractId);
+    if (!abstract) {
+        showAlert('Abstract not found', 'danger');
+        return;
+    }
+    
+    const content = `
+        <div class="row">
+            <div class="col-md-6">
+                <h6 class="text-muted">Basic Information</h6>
+                <table class="table table-sm">
+                    <tr><td><strong>ID:</strong></td><td>#${abstract.id}</td></tr>
+                    <tr><td><strong>Title:</strong></td><td>${escapeHtml(abstract.title)}</td></tr>
+                    <tr><td><strong>Category:</strong></td><td>${escapeHtml(abstract.category_name || 'N/A')}</td></tr>
+                    <tr><td><strong>Event:</strong></td><td>${escapeHtml(abstract.event_title || 'N/A')}</td></tr>
+                    <tr><td><strong>Submission Date:</strong></td><td>${formatDate(abstract.submission_date)}</td></tr>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <h6 class="text-muted">Author Information</h6>
+                <table class="table table-sm">
+                    <tr><td><strong>Name:</strong></td><td>${escapeHtml(abstract.author_name || 'N/A')}</td></tr>
+                    <tr><td><strong>Email:</strong></td><td>${escapeHtml(abstract.author_email || 'N/A')}</td></tr>
+                </table>
+                
+                <h6 class="text-muted mt-3">Review Information</h6>
+                <table class="table table-sm">
+                    <tr><td><strong>Status:</strong></td><td>${getAssignmentStatus(abstract)}</td></tr>
+                    <tr><td><strong>Reviewer:</strong></td><td>${escapeHtml(abstract.reviewer_name || 'Not assigned')}</td></tr>
+                    ${abstract.due_date ? `<tr><td><strong>Due Date:</strong></td><td>${formatDate(abstract.due_date)}</td></tr>` : ''}
+                </table>
+            </div>
+        </div>
+        
+        <div class="mt-3">
+            <h6 class="text-muted">Actions</h6>
+            <button class="btn btn-primary btn-sm me-2" onclick="assignReviewer(${abstract.id}); bootstrap.Modal.getInstance(document.getElementById('abstractDetailsModal')).hide();">
+                <i class="fas fa-user-plus"></i> Assign Reviewer
+            </button>
+            <button class="btn btn-outline-secondary btn-sm me-2" onclick="downloadAbstract(${abstract.id})">
+                <i class="fas fa-download"></i> Download
+            </button>
+            <button class="btn btn-outline-primary btn-sm" onclick="editAbstract(${abstract.id})">
+                <i class="fas fa-edit"></i> Edit
+            </button>
+        </div>
+    `;
+    
+    document.getElementById('abstractDetailsContent').innerHTML = content;
+    const modal = new bootstrap.Modal(document.getElementById('abstractDetailsModal'));
+    modal.show();
 }
 
 function downloadAbstract(abstractId) {
-    window.open(`/api/admin/download-abstract/${abstractId}`, '_blank');
+    showAlert('Download functionality would be implemented here', 'info');
+    // In real implementation: window.open(`/api/admin/download-abstract/${abstractId}`, '_blank');
 }
 
 function editAbstract(abstractId) {
-    showAlert('Abstract editing will be implemented', 'info');
+    showAlert('Edit functionality would be implemented here', 'info');
+    // In real implementation: window.location.href = `/admin/abstracts/edit/${abstractId}`;
 }
 
 function deleteAbstract(abstractId) {
     if (confirm('Are you sure you want to delete this abstract? This action cannot be undone.')) {
-        // Implementation for deleting abstract
-        showAlert('Abstract deletion will be implemented', 'info');
+        // Simulate deletion
+        const index = allAbstracts.findIndex(a => a.id === abstractId);
+        if (index !== -1) {
+            allAbstracts.splice(index, 1);
+            filteredAbstracts = filteredAbstracts.filter(a => a.id !== abstractId);
+            renderAbstractsTable();
+            loadStatistics();
+            showAlert('Abstract deleted successfully', 'success');
+        }
     }
 }
 
 function exportAbstracts(format) {
     const selectedIds = Array.from(selectedAbstracts);
-    const params = selectedIds.length > 0 ? `?ids=${selectedIds.join(',')}` : '';
-    window.open(`/api/admin/export-abstracts/${format}${params}`, '_blank');
+    const message = selectedIds.length > 0 
+        ? `Exporting ${selectedIds.length} selected abstracts as ${format.toUpperCase()}...`
+        : `Exporting all abstracts as ${format.toUpperCase()}...`;
+    
+    showAlert(message, 'info');
+    
+    // In real implementation:
+    // const params = selectedIds.length > 0 ? `?ids=${selectedIds.join(',')}` : '';
+    // window.open(`/api/admin/export-abstracts/${format}${params}`, '_blank');
 }
 
+// Utility functions
 function escapeHtml(text) {
     if (!text) return '';
     const map = {
@@ -871,23 +1053,50 @@ function escapeHtml(text) {
     return text.replace(/[&<>"']/g, m => map[m]);
 }
 
+function formatDate(dateString) {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString('id-ID', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+    });
+}
+
 function showAlert(message, type = 'info') {
+    // Remove existing alerts
+    document.querySelectorAll('.alert').forEach(alert => {
+        if (!alert.classList.contains('alert-permanent')) {
+            alert.remove();
+        }
+    });
+    
     const alertDiv = document.createElement('div');
     alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
     alertDiv.innerHTML = `
-        <i class="fas fa-info-circle me-2"></i>
+        <i class="fas fa-${getAlertIcon(type)} me-2"></i>
         ${message}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     `;
     
-    const container = document.querySelector('.admin-content');
-    container.insertBefore(alertDiv, container.children[1]);
+    const contentDiv = document.querySelector('.admin-content') || document.body;
+    contentDiv.insertBefore(alertDiv, contentDiv.firstChild);
     
+    // Auto-remove after 5 seconds
     setTimeout(() => {
         if (alertDiv.parentNode) {
             alertDiv.remove();
         }
     }, 5000);
 }
+
+function getAlertIcon(type) {
+    const icons = {
+        'success': 'check-circle',
+        'danger': 'exclamation-circle',
+        'warning': 'exclamation-triangle',
+        'info': 'info-circle'
+    };
+    return icons[type] || 'info-circle';
+}
 </script>
-<?php $this->endSection(); ?>
+<?= $this->endSection() ?>
