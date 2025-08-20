@@ -391,9 +391,24 @@ function updateRegistrationsTable(registrations) {
                 </span>
             </td>
             <td>
-                <a href="/registration/${registration.id}" class="btn btn-sm btn-outline-primary">
-                    Details
-                </a>
+                <div class="btn-group btn-group-sm" role="group">
+                    <!-- Always show details button -->
+                    <a href="/registration/${registration.id}" class="btn btn-outline-primary">
+                        <i class="fas fa-eye me-1"></i>Details
+                    </a>
+                    
+                    ${(registration.payment_status || 'pending').toLowerCase().trim() === 'pending' ? 
+                        `<a href="/payment/${registration.id}" class="btn btn-outline-success">
+                            <i class="fas fa-credit-card me-1"></i>Pay
+                        </a>` : ''
+                    }
+                    
+                    ${(registration.registration_status || 'pending').toLowerCase().trim() === 'pending' ? 
+                        `<button class="btn btn-outline-danger" onclick="cancelRegistration(${registration.id})">
+                            <i class="fas fa-times me-1"></i>Cancel
+                        </button>` : ''
+                    }
+                </div>
             </td>
         `;
         

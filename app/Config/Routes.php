@@ -299,6 +299,14 @@ $routes->group('', ['namespace' => 'App\Controllers'], function($routes) {
     $routes->delete('registrations/(:num)', 'DashboardController::cancelRegistration/$1', ['filter' => 'auth']);
 
     // =================
+    // PAYMENT GATEWAY
+    // =================
+    $routes->get('payment/(:num)', 'PaymentController::gateway/$1', ['filter' => 'auth']);
+    $routes->post('payment/process', 'PaymentController::process', ['filter' => 'auth']);
+    $routes->get('payment/simulate/(:num)', 'PaymentController::simulate/$1', ['filter' => 'auth']);
+    $routes->post('payment/complete/(:num)', 'PaymentController::complete/$1', ['filter' => 'auth']);
+
+    // =================
     // ROLE-BASED ROUTES
     // =================
     

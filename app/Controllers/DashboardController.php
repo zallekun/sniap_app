@@ -907,7 +907,7 @@ class DashboardController extends BaseController
                          e.title as event_title, e.event_date, e.registration_fee as event_price,
                          p.id as payment_id, p.amount as payment_amount, p.payment_status, 
                          p.payment_method, p.transaction_id, p.created_at as payment_date,
-                         COALESCE(p.payment_status, \'unpaid\') as final_status')
+                         COALESCE(p.payment_status, \'pending\') as final_status')
                 ->join('events e', 'e.id = r.event_id', 'inner')
                 ->join('payments p', 'p.registration_id = r.id', 'left')
                 ->where('r.user_id', $userId)
