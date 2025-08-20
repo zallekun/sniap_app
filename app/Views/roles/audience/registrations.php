@@ -2,6 +2,20 @@
 
 <?= $this->section('title') ?>My Registrations<?= $this->endSection() ?>
 
+<?= $this->section('head') ?>
+<style>
+.highlight-registration {
+    transition: background-color 0.5s ease;
+    box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+}
+
+.table-warning {
+    --bs-table-bg: #fff3cd;
+    --bs-table-color: #664d03;
+}
+</style>
+<?= $this->endSection() ?>
+
 <?= $this->section('content') ?>
 <!-- Page Header -->
 <div class="row mb-4">
@@ -171,6 +185,14 @@ let filteredRegistrations = [];
 document.addEventListener('DOMContentLoaded', function() {
     loadRegistrations();
     
+    // Check for highlight parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const highlightId = urlParams.get('highlight');
+    if (highlightId) {
+        // Store highlight ID for later use after data loads
+        window.highlightRegistrationId = highlightId;
+    }
+    
     // Setup search and filter
     document.getElementById('searchInput').addEventListener('input', filterRegistrations);
     document.getElementById('statusFilter').addEventListener('change', filterRegistrations);
@@ -297,6 +319,21 @@ function updateRegistrationsTable(registrations) {
                 </div>
             </td>
         `;
+        
+        // Add highlight if this registration should be highlighted
+        if (window.highlightRegistrationId && registration.id == window.highlightRegistrationId) {
+            row.classList.add('table-warning', 'highlight-registration');
+            // Scroll to highlighted row after a short delay
+            setTimeout(() => {
+                row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Clear the highlight after a few seconds
+                setTimeout(() => {
+                    row.classList.remove('table-warning');
+                    // Clear the highlight ID so it doesn't repeat
+                    window.highlightRegistrationId = null;
+                }, 3000);
+            }, 500);
+        }
         
         tbody.appendChild(row);
     });

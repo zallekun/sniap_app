@@ -11,11 +11,10 @@ class CSSLoader {
     }
 
     init() {
-        // Auto-load CSS based on body classes
-        this.autoLoadCSS();
-        
-        // Watch for dynamic class changes
-        this.watchClassChanges();
+        // DISABLE DYNAMIC CSS LOADING TO PREVENT FOUC
+        console.log('CSS Loader: Dynamic loading disabled to prevent FOUC');
+        // this.autoLoadCSS();
+        // this.watchClassChanges();
     }
 
     autoLoadCSS() {

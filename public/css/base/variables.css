@@ -61,10 +61,10 @@
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
     --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
     
-    /* Transitions */
-    --transition-fast: 0.15s ease;
-    --transition-base: 0.2s ease;
-    --transition-slow: 0.3s ease;
+    /* Transitions - DISABLED TO PREVENT FOUC */
+    --transition-fast: none;
+    --transition-base: none;
+    --transition-slow: none;
     
     /* Z-index layers */
     --z-dropdown: 1000;

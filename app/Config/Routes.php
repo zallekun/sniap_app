@@ -285,6 +285,9 @@ $routes->group('', ['namespace' => 'App\Controllers'], function($routes) {
     $routes->get('dashboard/event-schedule-page', 'DashboardController::eventSchedulePage', ['filter' => 'auth']);
     $routes->post('dashboard/register-event', 'DashboardController::registerEvent', ['filter' => 'auth']);
     
+    // Alternative endpoint for audience registration without CSRF conflicts
+    $routes->post('audience/register-event', 'DashboardController::registerEventNoCsrf', ['filter' => 'auth']);
+    
     // Alias routes for upcoming events
     $routes->get('events/upcoming', 'DashboardController::events', ['filter' => 'auth']);
     $routes->get('audience/api/events', 'DashboardController::events', ['filter' => 'auth']);

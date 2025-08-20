@@ -161,11 +161,22 @@
 .event-item {
     border-left: 4px solid #007bff;
     transition: all 0.2s;
+    background-color: white !important; /* Fix hover white issue */
 }
 
 .event-item:hover {
     transform: translateY(-2px);
     box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
+    background-color: #f8f9fa !important; /* Proper hover color */
+}
+
+/* Specific fix untuk card bootstrap collision */
+.event-item.card {
+    background-color: white !important;
+}
+
+.event-item.card:hover {
+    background-color: #f8f9fa !important;
 }
 
 .event-icon {
@@ -218,6 +229,45 @@
     text-align: center;
     padding: 3rem 0;
     color: #6c757d;
+}
+
+/* Nav Tabs Fix untuk button putih */
+.card-header-tabs .nav-link {
+    color: white !important;
+    background-color: transparent !important;
+    border: none !important;
+    opacity: 0.8;
+}
+
+.card-header-tabs .nav-link:hover {
+    color: white !important;
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    opacity: 1;
+}
+
+.card-header-tabs .nav-link.active {
+    color: white !important;
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    border: none !important;
+    opacity: 1;
+    font-weight: 600;
+}
+
+.card-header-tabs .nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 3px;
+    background-color: white;
+    border-radius: 2px;
+}
+
+.card-header-tabs .nav-link {
+    position: relative;
+    transition: all 0.2s ease;
 }
 
 /* Responsive */
@@ -1391,7 +1441,6 @@ async function registerForEvent(eventId) {
         
         // Show loading state
         const confirmBtn = document.getElementById('confirmRegistrationBtn');
-        const originalText = confirmBtn.innerHTML;
         confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Mendaftar...';
         confirmBtn.disabled = true;
         
@@ -1420,21 +1469,21 @@ async function registerForEvent(eventId) {
         
         // Try registration with form submission approach (most compatible with CodeIgniter)
         const registrationEndpoints = [
-            // Method 1: Standard CodeIgniter form submission with CSRF
-            {
-                url: baseUrl + 'dashboard/register-event',
-                method: 'POST',
-                useFormData: true
-            },
-            // Method 2: Direct form submission to index.php
-            {
-                url: baseUrl + 'index.php/dashboard/register-event',
-                method: 'POST',
-                useFormData: true
-            },
-            // Method 3: Audience API endpoint
+            // Method 1: Audience API endpoint (preferred)
             {
                 url: baseUrl + 'audience/register-event',
+                method: 'POST',
+                useFormData: true
+            },
+            // Method 2: Direct form submission to index.php with audience route
+            {
+                url: baseUrl + 'index.php/audience/register-event',
+                method: 'POST',
+                useFormData: true
+            },
+            // Method 3: Standard CodeIgniter form submission with CSRF (fallback)
+            {
+                url: baseUrl + 'dashboard/register-event',
                 method: 'POST',
                 useFormData: true
             },
@@ -1628,7 +1677,7 @@ async function registerForEvent(eventId) {
         // Reset button state
         const confirmBtn = document.getElementById('confirmRegistrationBtn');
         if (confirmBtn) {
-            confirmBtn.innerHTML = originalText;
+            confirmBtn.innerHTML = '<i class="fas fa-check me-1"></i>Konfirmasi Pendaftaran';
             confirmBtn.disabled = false;
         }
     }

@@ -2,11 +2,19 @@
    CSS RESET & BASE STYLES
    =========================================== */
 
-/* Modern CSS Reset */
+/* Modern CSS Reset + ANIMATION KILLER */
 *, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    /* KILL ALL ANIMATIONS TO PREVENT FOUC */
+    animation: none !important;
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+    transition: none !important;
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+    transform: none !important;
 }
 
 html {

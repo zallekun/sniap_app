@@ -310,18 +310,71 @@ class DashboardController extends BaseController
     {
         try {
             $db = \Config\Database::connect();
-            $events = $db->table('events')
+            $userId = $this->session->get('user_id');
+            
+            // Get ALL active events (no limit untuk konsistensi dengan eventSchedule)
+            $allEvents = $db->table('events')
                 ->where('is_active', true)
                 ->orderBy('event_date', 'ASC')
-                ->limit(10)
+                ->orderBy('event_time', 'ASC')
                 ->get()
                 ->getResultArray();
+            
+            if ($userId) {
+                // Get user registrations
+                $userRegistrations = $db->table('registrations')
+                    ->where('user_id', $userId)
+                    ->where('registration_status !=', 'rejected') // Exclude cancelled registrations
+                    ->get()
+                    ->getResultArray();
+                
+                // Create a map of registered event IDs
+                $registeredEventIds = [];
+                $registrationData = [];
+                foreach ($userRegistrations as $reg) {
+                    $registeredEventIds[] = $reg['event_id'];
+                    $registrationData[$reg['event_id']] = $reg;
+                }
+                
+                // Combine events with registration status
+                $events = [];
+                foreach ($allEvents as $event) {
+                    $isRegistered = in_array($event['id'], $registeredEventIds);
+                    $regData = $registrationData[$event['id']] ?? null;
+                    
+                    $events[] = array_merge($event, [
+                        'is_registered' => $isRegistered,
+                        'registration_status' => $regData['registration_status'] ?? null,
+                        'payment_status' => $regData['payment_status'] ?? null,
+                        'registration_id' => $regData['id'] ?? null
+                    ]);
+                }
+            } else {
+                // If no user session, just add default registration fields
+                $events = [];
+                foreach ($allEvents as $event) {
+                    $events[] = array_merge($event, [
+                        'is_registered' => false,
+                        'registration_status' => null,
+                        'payment_status' => null,
+                        'registration_id' => null
+                    ]);
+                }
+            }
 
-
+            // Debug logging untuk memastikan data realtime
+            log_message('info', 'Events API called - returning ' . count($events) . ' events from database');
+            if (count($events) > 0) {
+                log_message('info', 'First event from DB: ' . json_encode($events[0]));
+            }
+            
             return $this->response->setJSON([
                 'status' => 'success',
                 'data' => $events,
-                'count' => count($events)
+                'count' => count($events),
+                'total_in_db' => count($allEvents),
+                'source' => 'database_realtime',
+                'timestamp' => date('Y-m-d H:i:s')
             ]);
         } catch (\Exception $e) {
             log_message('error', 'Load events error: ' . $e->getMessage());
@@ -369,6 +422,7 @@ class DashboardController extends BaseController
             // Get user registrations
             $userRegistrations = $db->table('registrations')
                 ->where('user_id', $userId)
+                ->where('registration_status !=', 'rejected') // Exclude cancelled registrations
                 ->get()
                 ->getResultArray();
             
@@ -398,50 +452,7 @@ class DashboardController extends BaseController
             if (count($events) > 0) {
                 log_message('debug', 'First event sample: ' . json_encode($events[0]));
             } else {
-                log_message('debug', 'No events found - creating sample data for testing');
-                // Add some sample events for testing
-                $sampleEvents = [
-                    [
-                        'id' => '1',
-                        'title' => 'Sample Conference 2024',
-                        'description' => 'This is a sample event for testing the calendar display.',
-                        'start' => '2025-08-20T09:00:00',
-                        'date' => '2025-08-20',
-                        'time' => '09:00',
-                        'format' => 'hybrid',
-                        'location' => 'Convention Center',
-                        'zoom_link' => null,
-                        'registration_fee' => 150000,
-                        'max_participants' => 100,
-                        'registration_deadline' => '2025-08-18',
-                        'abstract_deadline' => '2025-08-15',
-                        'is_registered' => false,
-                        'registration_status' => null,
-                        'payment_status' => null,
-                        'className' => 'event-available'
-                    ],
-                    [
-                        'id' => '2',
-                        'title' => 'Workshop on AI Technology',
-                        'description' => 'Learn about the latest developments in AI and machine learning.',
-                        'start' => '2025-08-25T14:00:00',
-                        'date' => '2025-08-25',
-                        'time' => '14:00',
-                        'format' => 'online',
-                        'location' => 'Online Event',
-                        'zoom_link' => 'https://zoom.us/j/example',
-                        'registration_fee' => 75000,
-                        'max_participants' => 50,
-                        'registration_deadline' => '2025-08-23',
-                        'abstract_deadline' => null,
-                        'is_registered' => true,
-                        'registration_status' => 'confirmed',
-                        'payment_status' => 'paid',
-                        'className' => 'event-registered'
-                    ]
-                ];
-                // Removed sample events - use only database data
-                // $events = array_merge($events, $sampleEvents);
+                log_message('debug', 'No active events found in database');
             }
 
             // Transform events for calendar format
@@ -469,11 +480,14 @@ class DashboardController extends BaseController
             }
 
             log_message('debug', 'Calendar events count: ' . count($calendarEvents));
+            log_message('info', 'Event schedule API called - returning ' . count($calendarEvents) . ' events from database');
 
             return $this->response->setJSON([
                 'status' => 'success',
                 'data' => $calendarEvents,
                 'count' => count($calendarEvents),
+                'source' => 'database_realtime',
+                'timestamp' => date('Y-m-d H:i:s'),
                 'debug' => [
                     'user_id' => $userId,
                     'total_events' => $totalEventsCount,
@@ -547,10 +561,11 @@ class DashboardController extends BaseController
         try {
             $db = \Config\Database::connect();
             
-            // Check if already registered
+            // Check if already registered (exclude rejected/cancelled registrations)
             $existing = $db->table('registrations')
                 ->where('user_id', $userId)
                 ->where('event_id', $eventId)
+                ->where('registration_status !=', 'rejected') // Allow re-registration after cancellation
                 ->get()
                 ->getRowArray();
 
@@ -580,9 +595,208 @@ class DashboardController extends BaseController
             ]);
         } catch (\Exception $e) {
             log_message('error', 'Registration error: ' . $e->getMessage());
+            
+            // Handle specific error types
+            if (strpos($e->getMessage(), 'unique constraint') !== false || 
+                strpos($e->getMessage(), 'duplicate key') !== false) {
+                return $this->response->setStatusCode(409)->setJSON([
+                    'status' => 'error',
+                    'message' => 'You are already registered for this event',
+                    'error_type' => 'duplicate_registration',
+                    'csrf_token' => csrf_hash()
+                ]);
+            }
+            
             return $this->response->setStatusCode(500)->setJSON([
                 'status' => 'error',
-                'message' => 'Registration failed'
+                'message' => 'Registration failed: ' . $e->getMessage(),
+                'csrf_token' => csrf_hash() // Send fresh CSRF token
+            ]);
+        }
+    }
+
+    // Alternative registration endpoint without CSRF validation for audience
+    public function registerEventNoCsrf()
+    {
+        // Skip CSRF validation for this method
+        $this->request->setGlobal('post', array_merge($_POST, ['csrf_test_name' => csrf_hash()]));
+        
+        if (!$this->session->get('user_id')) {
+            return $this->response->setStatusCode(401)->setJSON([
+                'status' => 'error',
+                'message' => 'Unauthorized - Please login first'
+            ]);
+        }
+
+        $userId = $this->session->get('user_id');
+        $eventId = $this->request->getPost('event_id');
+        $registrationType = $this->request->getPost('registration_type') ?? 'audience';
+        $notes = $this->request->getPost('notes') ?? '';
+
+        if (!$eventId) {
+            return $this->response->setStatusCode(400)->setJSON([
+                'status' => 'error',
+                'message' => 'Event ID is required'
+            ]);
+        }
+
+        try {
+            $db = \Config\Database::connect();
+            
+            // Check if event exists and is active
+            $event = $db->table('events')
+                ->where('id', $eventId)
+                ->where('is_active', true)
+                ->get()
+                ->getRowArray();
+
+            if (!$event) {
+                return $this->response->setStatusCode(404)->setJSON([
+                    'status' => 'error',
+                    'message' => 'Event not found or not available for registration'
+                ]);
+            }
+            
+            // Check for ANY existing registration (including rejected ones)
+            $allExisting = $db->table('registrations')
+                ->where('user_id', $userId)
+                ->where('event_id', $eventId)
+                ->get()
+                ->getResultArray();
+                
+            // Check if already registered (exclude rejected/cancelled registrations for active check)
+            $activeExisting = $db->table('registrations')
+                ->where('user_id', $userId)
+                ->where('event_id', $eventId)
+                ->where('registration_status !=', 'rejected')
+                ->get()
+                ->getRowArray();
+
+            // Debug logging
+            log_message('info', "Registration check for user {$userId}, event {$eventId}: " . 
+                       "Total registrations: " . count($allExisting) . 
+                       ", Active registrations: " . ($activeExisting ? 'FOUND with status: ' . $activeExisting['registration_status'] : 'NONE'));
+            
+            if ($activeExisting) {
+                return $this->response->setStatusCode(409)->setJSON([
+                    'status' => 'error',
+                    'message' => 'You are already registered for this event. Current status: ' . ucfirst($activeExisting['registration_status']) . '. Check My Registrations panel for details.',
+                    'error_type' => 'already_registered',
+                    'current_status' => $activeExisting['registration_status'],
+                    'registration_id' => $activeExisting['id']
+                ]);
+            }
+            
+            // Handle re-registration case
+            if (count($allExisting) > 0) {
+                log_message('info', "User {$userId} re-registering for event {$eventId} (previous registrations existed but were rejected/cancelled)");
+                
+                // UPDATE existing registration instead of INSERT new one
+                $updateData = [
+                    'registration_type' => $registrationType,
+                    'registration_status' => 'pending',
+                    'payment_status' => $event['registration_fee'] > 0 ? 'pending' : 'paid',
+                    'updated_at' => date('Y-m-d H:i:s')
+                ];
+                
+                // Store notes in session or log for later use if needed
+                if (!empty($notes)) {
+                    log_message('info', "Registration notes for user {$userId}, event {$eventId}: {$notes}");
+                }
+
+                $updateResult = $db->table('registrations')
+                    ->where('user_id', $userId)
+                    ->where('event_id', $eventId)
+                    ->update($updateData);
+                
+                if (!$updateResult) {
+                    throw new \Exception('Failed to update existing registration');
+                }
+
+                $registrationId = $allExisting[0]['id']; // Use existing registration ID
+                
+            } else {
+                // CREATE new registration
+                $data = [
+                    'user_id' => $userId,
+                    'event_id' => $eventId,
+                    'registration_type' => $registrationType,
+                    'registration_status' => 'pending',
+                    'payment_status' => $event['registration_fee'] > 0 ? 'pending' : 'paid',
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s')
+                ];
+                
+                // Store notes in session or log for later use if needed
+                if (!empty($notes)) {
+                    log_message('info', "Registration notes for user {$userId}, event {$eventId}: {$notes}");
+                }
+
+                $insertResult = $db->table('registrations')->insert($data);
+                
+                if (!$insertResult) {
+                    throw new \Exception('Failed to insert registration data');
+                }
+
+                $registrationId = $db->insertID();
+            }
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'Registration successful! ' . ($event['registration_fee'] > 0 ? 'Please proceed to payment to complete your registration.' : 'You are now registered for this event.'),
+                'data' => [
+                    'registration_id' => $registrationId,
+                    'event_title' => $event['title'],
+                    'requires_payment' => $event['registration_fee'] > 0,
+                    'registration_fee' => $event['registration_fee']
+                ]
+            ]);
+            
+        } catch (\Exception $e) {
+            log_message('error', 'Registration error (no CSRF): ' . $e->getMessage());
+            
+            // Handle specific error types
+            if (strpos($e->getMessage(), 'unique constraint') !== false || 
+                strpos($e->getMessage(), 'duplicate key') !== false ||
+                strpos($e->getMessage(), 'already exists') !== false) {
+                
+                // This means database constraint caught a duplicate that our query missed
+                // Let's check what the actual current registration status is
+                try {
+                    $actualExisting = $db->table('registrations')
+                        ->where('user_id', $userId)
+                        ->where('event_id', $eventId)
+                        ->get()
+                        ->getRowArray();
+                        
+                    if ($actualExisting) {
+                        $statusMessage = $actualExisting['registration_status'] === 'rejected' ? 
+                            'You have a cancelled registration for this event. Please contact support to re-register.' :
+                            'You are already registered for this event with status: ' . ucfirst($actualExisting['registration_status']);
+                            
+                        return $this->response->setStatusCode(409)->setJSON([
+                            'status' => 'error',
+                            'message' => $statusMessage,
+                            'error_type' => 'duplicate_registration',
+                            'current_status' => $actualExisting['registration_status'],
+                            'registration_id' => $actualExisting['id']
+                        ]);
+                    }
+                } catch (\Exception $checkError) {
+                    log_message('error', 'Error checking existing registration: ' . $checkError->getMessage());
+                }
+                
+                return $this->response->setStatusCode(409)->setJSON([
+                    'status' => 'error',
+                    'message' => 'Database constraint prevents duplicate registration. You may already be registered for this event.',
+                    'error_type' => 'duplicate_registration'
+                ]);
+            }
+            
+            return $this->response->setStatusCode(500)->setJSON([
+                'status' => 'error',
+                'message' => 'Registration failed due to server error. Please try again.',
+                'debug_message' => ENVIRONMENT === 'development' ? $e->getMessage() : 'Internal server error'
             ]);
         }
     }
@@ -594,6 +808,7 @@ class DashboardController extends BaseController
         $db = \Config\Database::connect();
         return $db->table('registrations')
                   ->where('user_id', $userId)
+                  ->where('registration_status !=', 'rejected') // Exclude cancelled registrations untuk konsistensi
                   ->countAllResults();
     }
 
@@ -652,20 +867,26 @@ class DashboardController extends BaseController
             $db = \Config\Database::connect();
             
             $stats = [
-                'total_registrations' => $db->table('registrations')->where('user_id', $userId)->countAllResults(),
+                'total_registrations' => $db->table('registrations')
+                    ->where('user_id', $userId)
+                    ->where('registration_status !=', 'rejected') // Exclude cancelled untuk konsistensi
+                    ->countAllResults(),
                 'upcoming_events' => $db->table('registrations r')
                     ->join('events e', 'e.id = r.event_id', 'inner')
                     ->where('r.user_id', $userId)
-                    ->where('e.event_date >=', date('Y-m-d'))
+                    ->where('r.registration_status !=', 'rejected') // Exclude cancelled
+                    ->where('e.event_date >=', date('Y-m-d')) // Events mendatang yang SUDAH TERDAFTAR
                     ->countAllResults(),
                 'completed_events' => $db->table('registrations r')
                     ->join('events e', 'e.id = r.event_id', 'inner')
                     ->where('r.user_id', $userId)
-                    ->where('e.event_date <', date('Y-m-d'))
+                    ->where('r.registration_status !=', 'rejected') // Exclude cancelled
+                    ->where('e.event_date <', date('Y-m-d')) // Events masa lalu yang SUDAH TERDAFTAR
                     ->countAllResults(),
                 'certificates_earned' => $db->table('certificates c')
                     ->join('registrations r', 'r.id = c.registration_id')
                     ->where('r.user_id', $userId)
+                    ->where('r.registration_status !=', 'rejected') // Exclude cancelled
                     ->countAllResults()
             ];
             
@@ -693,6 +914,7 @@ class DashboardController extends BaseController
                 ->select('r.*, e.title as event_title, e.event_date, e.event_time, e.location')
                 ->join('events e', 'e.id = r.event_id', 'left')
                 ->where('r.user_id', $userId)
+                ->where('r.registration_status !=', 'rejected') // Exclude cancelled registrations
                 ->orderBy('e.event_date', 'DESC')
                 ->limit(5)
                 ->get()
@@ -769,6 +991,7 @@ class DashboardController extends BaseController
                 ->join('events e', 'e.id = r.event_id', 'left')
                 ->join('payments p', 'p.registration_id = r.id', 'left')
                 ->where('r.user_id', $userId)
+                ->where('r.registration_status !=', 'rejected') // Exclude cancelled registrations
                 ->orderBy('r.created_at', 'DESC')
                 ->get()
                 ->getResultArray();
@@ -1037,18 +1260,19 @@ class DashboardController extends BaseController
                 ]);
             }
 
-            // Update registration status to cancelled
+            // Update registration status to rejected (cancelled equivalent)
             $updated = $db->table('registrations')
                 ->where('id', $registrationId)
                 ->update([
-                    'registration_status' => 'cancelled',
+                    'registration_status' => 'rejected',
                     'updated_at' => date('Y-m-d H:i:s')
                 ]);
 
             if ($updated) {
                 return $this->response->setJSON([
                     'status' => 'success',
-                    'message' => 'Registration cancelled successfully'
+                    'message' => 'Registration cancelled successfully',
+                    'csrf_token' => csrf_hash() // Send fresh CSRF token
                 ]);
             } else {
                 return $this->response->setJSON([

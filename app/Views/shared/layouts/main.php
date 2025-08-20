@@ -5,165 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $title ?? 'SNIA Conference Management System' ?></title>
     
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
+    <!-- Font Awesome ONLY -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Global Colors -->
-    <link rel="stylesheet" href="<?= base_url('css/colors.css') ?>">
-    <!-- Custom CSS -->
-    <style>
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%);
-            min-height: 100vh;
-            line-height: 1.6;
-            color: var(--text-primary);
-            /* Reduce eye strain with subtle text smoothing */
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-
-        .navbar-brand {
-            font-weight: bold;
-            font-size: 1.5rem;
-        }
-
-        .card {
-            border: none;
-            border-radius: var(--radius-2xl);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .btn-primary {
-            background: var(--primary-gradient);
-            border: none;
-            border-radius: 25px;
-            padding: 12px 30px;
-            font-weight: 600;
-        }
-
-        .btn-outline-primary {
-            border: 2px solid var(--primary-color);
-            color: var(--primary-color);
-            border-radius: 25px;
-            padding: 12px 30px;
-            font-weight: 600;
-        }
-
-        .btn-outline-primary:hover {
-            background: var(--primary-color);
-        }
-
-        .form-control {
-            border-radius: var(--radius-lg);
-            border: 2px solid var(--border-light);
-            padding: 12px 15px;
-        }
-
-        .form-control:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
-        }
-        
-        /* HCI Principle: Clear Focus States for Accessibility */
-        *:focus {
-            outline: 2px solid var(--primary-color);
-            outline-offset: 2px;
-            transition: outline-color var(--transition-fast);
-        }
-        
-        /* Soft hover states to reduce jarring interactions */
-        .btn:hover {
-            transform: translateY(-1px);
-            transition: var(--transition-normal);
-        }
-
-        .auth-container {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .auth-card {
-            max-width: 450px;
-            width: 100%;
-        }
-
-        .logo-section {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .logo-section h1 {
-            color: var(--primary-color);
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .logo-section p {
-            color: #7f8c8d;
-            margin-bottom: 0;
-        }
-
-        .alert {
-            border-radius: 10px;
-            border: none;
-        }
-
-        .role-selection {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .role-option {
-            border: 2px solid #e9ecef;
-            border-radius: 10px;
-            padding: 20px;
-            text-align: center;
-            cursor: pointer;
-            background: white;
-        }
-
-        .role-option:hover {
-            border-color: var(--secondary-color);
-            background: #f8f9fa;
-        }
-
-        .role-option.selected {
-            border-color: var(--secondary-color);
-            background: rgba(52, 152, 219, 0.1);
-        }
-
-        .role-option i {
-            font-size: 2rem;
-            margin-bottom: 10px;
-            color: var(--secondary-color);
-        }
-
-        .footer {
-            background: var(--primary-color);
-            color: white;
-            text-align: center;
-            padding: 20px 0;
-            margin-top: auto;
-        }
-
-        .loading {
-            display: none;
-        }
-
-        .loading.show {
-            display: inline-block;
-        }
-    </style>
     
+    <!-- Page Specific Styles -->
     <?= $this->renderSection('styles') ?>
+    
+    <!-- Page-specific head content -->
     <?= $this->renderSection('head') ?>
 </head>
 <body>
@@ -302,6 +150,9 @@
             
             return { response, data };
         }
+
+        // Simple console log for debugging
+        console.log('✅ Login page loaded');
     </script>
     
     <?= $this->renderSection('scripts') ?>
