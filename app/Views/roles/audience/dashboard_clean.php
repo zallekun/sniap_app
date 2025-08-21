@@ -119,7 +119,7 @@
                         <i class="fas fa-calendar-plus me-2"></i>
                         My Registrations
                     </a>
-                    <a href="/audience/events" class="btn btn-outline-primary">
+                    <a href="/events" class="btn btn-outline-primary">
                         <i class="fas fa-calendar me-2"></i>
                         My Schedule
                     </a>
@@ -148,7 +148,7 @@
                     <div class="col-md-8">
                         <h4 class="mb-2">Welcome to SNIA Conference!</h4>
                         <p class="mb-3 opacity-75">Discover amazing events and start your journey with us. Join our vibrant community of researchers and practitioners.</p>
-                        <a href="/audience/events" class="btn btn-light">
+                        <a href="/events" class="btn btn-light">
                             <i class="fas fa-calendar-check me-2"></i>Browse All Events
                         </a>
                     </div>
@@ -303,7 +303,7 @@
                 <div style="display: none;" id="noEvents" class="text-center py-4">
                     <i class="fas fa-calendar-plus text-muted" style="font-size: 2rem;"></i>
                     <p class="mt-2 text-muted">No upcoming events</p>
-                    <a href="/audience/events" class="btn btn-sm btn-primary">Browse Events</a>
+                    <a href="/events" class="btn btn-sm btn-primary">Browse Events</a>
                 </div>
             </div>
         </div>

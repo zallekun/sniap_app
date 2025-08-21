@@ -163,7 +163,7 @@
                 <div class="dashboard-card">
                     <div class="card-header">
                         <h3>Recent Abstract Submissions</h3>
-                        <a href="/presenter/abstracts" class="btn btn-primary btn-sm">
+                        <a href="/presenter/abstracts" class="btn btn-success btn-sm">
                             <i class="fas fa-plus"></i> Submit New Abstract
                         </a>
                     </div>

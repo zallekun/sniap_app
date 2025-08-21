@@ -285,6 +285,12 @@ $routes->group('', ['namespace' => 'App\Controllers'], function($routes) {
     $routes->get('dashboard/event-schedule-page', 'DashboardController::eventSchedulePage', ['filter' => 'auth']);
     $routes->post('dashboard/register-event', 'DashboardController::registerEvent', ['filter' => 'auth']);
     
+    // =================
+    // MAIN DASHBOARD REDIRECT
+    // =================
+    // Main dashboard entry point - redirects based on user role (must be AFTER specific dashboard routes)
+    $routes->get('dashboard', 'DashboardController::index', ['filter' => 'auth']);
+    
     // Alternative endpoint for audience registration without CSRF conflicts
     $routes->post('audience/register-event', 'DashboardController::registerEventNoCsrf', ['filter' => 'auth']);
     
@@ -373,6 +379,37 @@ $routes->group('', ['namespace' => 'App\Controllers'], function($routes) {
         // API endpoints
         $routes->get('api/stats', 'Presenter\PresenterController::getStatsApi');
         $routes->get('api/abstracts', 'Presenter\PresenterController::getAbstractsApi');
+        $routes->post('api/abstracts/submit', 'Presenter\PresenterController::submitAbstract');
+        $routes->get('api/abstracts/(:num)', 'Presenter\PresenterController::getAbstractDetails/$1');
+        $routes->put('api/abstracts/(:num)', 'Presenter\PresenterController::updateAbstract/$1');
+        $routes->get('abstracts/(:num)/download', 'Presenter\PresenterController::downloadAbstract/$1');
+        
+        // Revision workflow endpoints
+        $routes->post('api/abstracts/(:num)/revise', 'Presenter\PresenterController::submitRevision/$1');
+        $routes->get('api/abstracts/(:num)/revision-status', 'Presenter\PresenterController::checkRevisionStatus/$1');
+        $routes->get('api/revisions/required', 'Presenter\PresenterController::getRevisionRequired');
+        
+        // Payment system endpoints
+        $routes->post('api/payments/create', 'Presenter\PresenterController::createPayment');
+        $routes->post('api/payments/(:num)/process', 'Presenter\PresenterController::processPayment/$1');
+        $routes->get('api/payments/status/(:num)', 'Presenter\PresenterController::getPaymentStatus/$1');
+        $routes->get('api/payments/history', 'Presenter\PresenterController::getPaymentHistory');
+        
+        // LOA generation endpoints
+        $routes->post('api/loa/(:num)/generate', 'Presenter\PresenterController::generateLoa/$1');
+        $routes->get('api/loa/(:num)/status', 'Presenter\PresenterController::getLoaStatus/$1');
+        $routes->get('loa/(:num)/download', 'Presenter\PresenterController::downloadLoa/$1');
+        
+        // QR code generation endpoints
+        $routes->post('api/qr/(:num)/generate', 'Presenter\PresenterController::generateQRCode/$1');
+        $routes->get('api/qr/(:num)/status', 'Presenter\PresenterController::getQRCodeStatus/$1');
+        $routes->get('qr/(:num)/download', 'Presenter\PresenterController::downloadQRCode/$1');
+        
+        // Certificate generation endpoints
+        $routes->post('api/certificate/(:num)/generate', 'Presenter\PresenterController::generateCertificate/$1');
+        $routes->get('api/certificate/(:num)/status', 'Presenter\PresenterController::getCertificateStatus/$1');
+        $routes->get('certificate/(:num)/download', 'Presenter\PresenterController::downloadCertificate/$1');
+        $routes->get('api/certificates', 'Presenter\PresenterController::getCertificatesApi');
     });
 
     // Reviewer Routes
@@ -388,14 +425,20 @@ $routes->group('', ['namespace' => 'App\Controllers'], function($routes) {
         $routes->post('submit-review', 'Reviewer\ReviewerController::submitReview');
         $routes->get('api/stats', 'Reviewer\ReviewerController::getStatsApi');
         $routes->get('api/assigned', 'Reviewer\ReviewerController::getAssignedApi');
+        $routes->get('api/abstract-details/(:num)', 'Reviewer\ReviewerController::getAbstractDetailsApi/$1');
+        $routes->get('api/review-details/(:num)', 'Reviewer\ReviewerController::getReviewDetailsApi/$1');
     });
+
+    // Common Routes (accessible to all authenticated users)
+    $routes->get('events', 'DashboardController::eventSchedulePage', ['filter' => 'auth']);
+    $routes->get('event-schedule', 'DashboardController::eventSchedulePage', ['filter' => 'auth']);
 
     // Audience Routes
     $routes->group('audience', ['filter' => 'auth'], function($routes) {
         // Main dashboard - single entry point
         $routes->get('dashboard', 'DashboardController::index');
         $routes->get('registrations', 'DashboardController::audienceRegistrations');
-        $routes->get('events', 'DashboardController::eventSchedulePage');
+        $routes->get('events', 'DashboardController::eventSchedulePage'); // Legacy route
         $routes->get('certificates', 'DashboardController::certificates');
         $routes->get('payments', 'DashboardController::paymentHistory');
         
@@ -419,5 +462,6 @@ $routes->group('', ['namespace' => 'App\Controllers'], function($routes) {
         $routes->get('test/qr-scan/(:any)', 'TestController::testQRScan/$1');
         $routes->get('test/qr-data/(:num)', 'TestController::testQRData/$1');
         $routes->get('test/qr-data', 'TestController::testQRData');
+        
     }
 });

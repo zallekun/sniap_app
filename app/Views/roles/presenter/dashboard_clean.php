@@ -1,97 +1,121 @@
-<?= $this->extend('shared/layouts/user_layout') ?>
+<?= $this->extend('shared/layouts/presenter_layout') ?>
 
 <?= $this->section('title') ?>Presenter Dashboard<?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
-<!-- Statistics Cards -->
-<div class="stats-grid">
-    <div class="stat-card">
-        <div class="stat-header">
-            <div class="stat-icon primary">
-                <i class="fas fa-file-alt"></i>
-            </div>
-            <div class="stat-content">
-                <div class="stat-label">Total Abstracts</div>
-                <div class="stat-value"><?= number_format($stats['total_abstracts'] ?? 0) ?></div>
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1">
+                <i class="fas fa-microphone me-2"></i>
+                Presenter Dashboard
+            </h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="/presenter/dashboard">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Overview</li>
+                </ol>
+            </nav>
+        </div>
+        <button class="btn btn-outline-secondary" onclick="location.reload()">
+            <i class="fas fa-sync-alt me-1"></i> Refresh
+        </button>
+    </div>
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="presenter-stat-card">
+                <div class="presenter-stat-icon abstracts">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <div class="presenter-stat-content">
+                    <h3><?= number_format($stats['total_abstracts'] ?? 0) ?></h3>
+                    <p>Total Abstracts</p>
+                </div>
             </div>
         </div>
-    </div>
-    
-    <div class="stat-card">
-        <div class="stat-header">
-            <div class="stat-icon success">
-                <i class="fas fa-check-circle"></i>
-            </div>
-            <div class="stat-content">
-                <div class="stat-label">Accepted</div>
-                <div class="stat-value"><?= number_format($stats['accepted_abstracts'] ?? 0) ?></div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="stat-card">
-        <div class="stat-header">
-            <div class="stat-icon warning">
-                <i class="fas fa-clock"></i>
-            </div>
-            <div class="stat-content">
-                <div class="stat-label">Pending Review</div>
-                <div class="stat-value"><?= number_format($stats['pending_abstracts'] ?? 0) ?></div>
+        
+        <div class="col-md-3">
+            <div class="presenter-stat-card">
+                <div class="presenter-stat-icon presentations">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="presenter-stat-content">
+                    <h3><?= number_format($stats['accepted_abstracts'] ?? 0) ?></h3>
+                    <p>Accepted Abstracts</p>
+                </div>
             </div>
         </div>
-    </div>
-    
-    <div class="stat-card">
-        <div class="stat-header">
-            <div class="stat-icon info">
-                <i class="fas fa-presentation"></i>
-            </div>
-            <div class="stat-content">
-                <div class="stat-label">Upcoming Presentations</div>
-                <div class="stat-value"><?= number_format($stats['upcoming_presentations'] ?? 0) ?></div>
+        
+        <div class="col-md-3">
+            <div class="presenter-stat-card">
+                <div class="presenter-stat-icon events">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="presenter-stat-content">
+                    <h3><?= number_format($stats['pending_abstracts'] ?? 0) ?></h3>
+                    <p>Pending Review</p>
+                </div>
             </div>
         </div>
-    </div>
-</div>
-
-<!-- Quick Actions -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title">Quick Actions</h5>
-            </div>
-            <div class="card-body">
-                <div class="row g-3">
-                    <div class="col-md-3">
-                        <a href="/presenter/abstracts" class="btn btn-primary w-100">
-                            <i class="fas fa-plus me-2"></i>
-                            Submit Abstract
-                        </a>
-                    </div>
-                    <div class="col-md-3">
-                        <a href="/presenter/presentations" class="btn btn-outline-primary w-100">
-                            <i class="fas fa-eye me-2"></i>
-                            View Presentations
-                        </a>
-                    </div>
-                    <div class="col-md-3">
-                        <a href="/presenter/registrations" class="btn btn-outline-primary w-100">
-                            <i class="fas fa-calendar-check me-2"></i>
-                            My Registrations
-                        </a>
-                    </div>
-                    <div class="col-md-3">
-                        <a href="/event-schedule" class="btn btn-outline-primary w-100">
-                            <i class="fas fa-calendar me-2"></i>
-                            Event Schedule
-                        </a>
-                    </div>
+        
+        <div class="col-md-3">
+            <div class="presenter-stat-card">
+                <div class="presenter-stat-icon certificates">
+                    <i class="fas fa-presentation"></i>
+                </div>
+                <div class="presenter-stat-content">
+                    <h3><?= number_format($stats['upcoming_presentations'] ?? 0) ?></h3>
+                    <p>Upcoming Presentations</p>
                 </div>
             </div>
         </div>
     </div>
-</div>
+
+    <!-- Quick Actions -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-bolt me-2"></i>Quick Actions
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="presenter-quick-actions-grid">
+                <a href="/presenter/abstracts" class="presenter-action-card">
+                    <div class="presenter-action-icon">
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <div class="presenter-action-title">Submit Abstract</div>
+                    <div class="presenter-action-description">Create new</div>
+                </a>
+                
+                <a href="/presenter/presentations" class="presenter-action-card">
+                    <div class="presenter-action-icon">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                    </div>
+                    <div class="presenter-action-title">My Presentations</div>
+                    <div class="presenter-action-description">View all</div>
+                </a>
+                
+                <a href="/presenter/registrations" class="presenter-action-card">
+                    <div class="presenter-action-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="presenter-action-title">My Events</div>
+                    <div class="presenter-action-description">Registrations</div>
+                </a>
+                
+                <a href="/events" class="presenter-action-card">
+                    <div class="presenter-action-icon">
+                        <i class="fas fa-calendar"></i>
+                    </div>
+                    <div class="presenter-action-title">Event Schedule</div>
+                    <div class="presenter-action-description">Browse events</div>
+                </a>
+            </div>
+        </div>
+    </div>
 
 <!-- Recent Activity -->
 <div class="row">
@@ -106,7 +130,7 @@
                         <i class="fas fa-file-alt text-muted" style="font-size: 3rem;"></i>
                         <h6 class="mt-3 text-muted">No abstracts submitted yet</h6>
                         <p class="text-muted">Submit your first abstract to get started</p>
-                        <a href="/presenter/abstracts" class="btn btn-primary">
+                        <a href="/presenter/abstracts" class="btn btn-success">
                             <i class="fas fa-plus me-2"></i>Submit Abstract
                         </a>
                     </div>
@@ -212,5 +236,6 @@
             </div>
         </div>
     </div>
+</div>
 </div>
 <?= $this->endSection() ?>

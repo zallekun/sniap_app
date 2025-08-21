@@ -1,106 +1,95 @@
-<?= $this->extend('shared/layouts/user_layout') ?>
+<?= $this->extend('shared/layouts/reviewer_layout') ?>
 
 <?= $this->section('title') ?>Reviewer Dashboard<?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
-<!-- Statistics Cards -->
-<div class="stats-grid">
-    <div class="stat-card">
-        <div class="stat-header">
-            <div class="stat-icon primary">
+<div class="container-fluid py-4">
+    <!-- Statistics Cards -->
+    <div class="reviewer-stats-grid">
+        <div class="reviewer-stat-card">
+            <div class="reviewer-stat-icon assigned">
                 <i class="fas fa-tasks"></i>
             </div>
-            <div class="stat-content">
-                <div class="stat-label">Assigned Reviews</div>
-                <div class="stat-value"><?= number_format($stats['total_assigned'] ?? 0) ?></div>
+            <div class="reviewer-stat-content">
+                <h3><?= number_format($stats['total_assigned'] ?? 0) ?></h3>
+                <p>Total Assigned</p>
             </div>
         </div>
-    </div>
     
-    <div class="stat-card">
-        <div class="stat-header">
-            <div class="stat-icon success">
+        <div class="reviewer-stat-card">
+            <div class="reviewer-stat-icon completed">
                 <i class="fas fa-check-circle"></i>
             </div>
-            <div class="stat-content">
-                <div class="stat-label">Completed</div>
-                <div class="stat-value"><?= number_format($stats['completed_reviews'] ?? 0) ?></div>
+            <div class="reviewer-stat-content">
+                <h3><?= number_format($stats['completed_reviews'] ?? 0) ?></h3>
+                <p>Completed</p>
             </div>
         </div>
-    </div>
-    
-    <div class="stat-card">
-        <div class="stat-header">
-            <div class="stat-icon warning">
+        
+        <div class="reviewer-stat-card">
+            <div class="reviewer-stat-icon pending">
                 <i class="fas fa-clock"></i>
             </div>
-            <div class="stat-content">
-                <div class="stat-label">Pending</div>
-                <div class="stat-value"><?= number_format($stats['pending_reviews'] ?? 0) ?></div>
+            <div class="reviewer-stat-content">
+                <h3><?= number_format($stats['pending_reviews'] ?? 0) ?></h3>
+                <p>Pending Reviews</p>
             </div>
         </div>
-    </div>
-    
-    <div class="stat-card">
-        <div class="stat-header">
-            <div class="stat-icon info">
+        
+        <div class="reviewer-stat-card">
+            <div class="reviewer-stat-icon assigned">
                 <i class="fas fa-star"></i>
             </div>
-            <div class="stat-content">
-                <div class="stat-label">Average Score</div>
-                <div class="stat-value"><?= number_format($stats['average_score'] ?? 0, 1) ?></div>
+            <div class="reviewer-stat-content">
+                <h3><?= number_format($stats['average_score'] ?? 0, 1) ?></h3>
+                <p>Average Score</p>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Quick Actions -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title">Quick Actions</h5>
-            </div>
-            <div class="card-body">
-                <div class="row g-3">
-                    <div class="col-md-3">
-                        <a href="/reviewer/assigned" class="btn btn-primary w-100">
-                            <i class="fas fa-tasks me-2"></i>
-                            View Assigned
-                        </a>
-                    </div>
-                    <div class="col-md-3">
-                        <a href="/reviewer/reviews" class="btn btn-outline-primary w-100">
-                            <i class="fas fa-star me-2"></i>
-                            My Reviews
-                        </a>
-                    </div>
-                    <div class="col-md-3">
-                        <a href="/event-schedule" class="btn btn-outline-primary w-100">
-                            <i class="fas fa-calendar me-2"></i>
-                            Event Schedule
-                        </a>
-                    </div>
-                    <div class="col-md-3">
-                        <a href="/profile/edit" class="btn btn-outline-primary w-100">
-                            <i class="fas fa-user-edit me-2"></i>
-                            Update Profile
-                        </a>
-                    </div>
+    <!-- Quick Actions -->
+    <div class="reviewer-quick-actions mb-4">
+        <h5 class="mb-3">Quick Actions</h5>
+        <div class="reviewer-quick-actions-grid">
+            <a href="/reviewer/assigned" class="reviewer-action-card">
+                <div class="reviewer-action-icon">
+                    <i class="fas fa-tasks"></i>
                 </div>
-            </div>
+                <div class="reviewer-action-title">View Assigned</div>
+                <div class="reviewer-action-description">Review abstracts</div>
+            </a>
+            <a href="/reviewer/reviews" class="reviewer-action-card">
+                <div class="reviewer-action-icon">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="reviewer-action-title">My Reviews</div>
+                <div class="reviewer-action-description">View completed</div>
+            </a>
+            <a href="/events" class="reviewer-action-card">
+                <div class="reviewer-action-icon">
+                    <i class="fas fa-calendar"></i>
+                </div>
+                <div class="reviewer-action-title">Event Schedule</div>
+                <div class="reviewer-action-description">Conference timeline</div>
+            </a>
+            <a href="/profile/edit" class="reviewer-action-card">
+                <div class="reviewer-action-icon">
+                    <i class="fas fa-user-edit"></i>
+                </div>
+                <div class="reviewer-action-title">Update Profile</div>
+                <div class="reviewer-action-description">Edit information</div>
+            </a>
         </div>
     </div>
-</div>
 
-<!-- Recent Activity -->
-<div class="row">
-    <div class="col-lg-8">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title">Recent Assignments</h5>
-            </div>
-            <div class="card-body">
+    <!-- Recent Activity -->
+    <div class="row mt-4">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Recent Assignments</h5>
+                </div>
+                <div class="card-body">
                 <?php if (empty($assigned_abstracts ?? [])): ?>
                     <div class="text-center py-4">
                         <i class="fas fa-clipboard-list text-muted" style="font-size: 3rem;"></i>

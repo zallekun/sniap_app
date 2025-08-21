@@ -39,6 +39,294 @@ class TestController extends BaseController
     }
 
     /**
+     * Test profile edit page styling
+     */
+    public function testProfileEdit()
+    {
+        try {
+            // Create mock user data
+            $user = [
+                'id' => 999,
+                'first_name' => 'Test',
+                'last_name' => 'User',
+                'email' => 'test.user@example.com',
+                'role' => 'audience',
+                'phone' => '+6281234567890',
+                'institution' => 'Test University',
+                'profile_photo' => null,
+                'created_at' => '2024-01-15 10:30:00'
+            ];
+
+            // Create mock stats
+            $stats = [
+                'total_registrations' => 5,
+                'upcoming_events' => 2
+            ];
+
+            $data = [
+                'title' => 'Edit Profile - SNIA Conference',
+                'user' => $user,
+                'stats' => $stats,
+                'validation' => \Config\Services::validation()
+            ];
+
+            return view('shared/edit_profile', $data);
+        } catch (\Exception $e) {
+            return $this->response->setJSON([
+                'error' => 'Failed to load profile edit test',
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+        }
+    }
+
+    /**
+     * Test reviewer assigned page styling
+     */
+    public function testReviewerAssigned()
+    {
+        try {
+            // Create mock user data
+            $user = [
+                'id' => 999,
+                'first_name' => 'Test',
+                'last_name' => 'Reviewer',
+                'email' => 'test.reviewer@example.com',
+                'role' => 'reviewer'
+            ];
+
+            // Create mock assigned abstracts
+            $assigned_abstracts = [
+                [
+                    'id' => 1,
+                    'title' => 'AI Applications in Medical Diagnostics: A Comprehensive Review',
+                    'first_name' => 'Dr. Sarah',
+                    'last_name' => 'Johnson',
+                    'email' => 'sarah.johnson@university.edu',
+                    'institution' => 'Stanford Medical School',
+                    'event_title' => 'SNIA Annual Conference 2025',
+                    'category_name' => 'Artificial Intelligence',
+                    'keywords' => 'AI, Machine Learning, Medical Diagnostics, Healthcare',
+                    'abstract_text' => 'This paper presents a comprehensive review of artificial intelligence applications in medical diagnostics. We analyze various ML algorithms and their effectiveness in diagnosing different medical conditions.',
+                    'reviewed_at' => null,
+                    'assigned_at' => date('Y-m-d H:i:s', strtotime('-2 days')),
+                    'created_at' => date('Y-m-d H:i:s', strtotime('-5 days'))
+                ],
+                [
+                    'id' => 2,
+                    'title' => 'Machine Learning in Data Storage Optimization',
+                    'first_name' => 'Prof. Michael',
+                    'last_name' => 'Chen',
+                    'email' => 'michael.chen@tech.edu',
+                    'institution' => 'MIT Computer Science',
+                    'event_title' => 'SNIA Annual Conference 2025',
+                    'category_name' => 'Storage Technology',
+                    'keywords' => 'Machine Learning, Data Storage, Optimization, Performance',
+                    'abstract_text' => 'This research explores the application of machine learning techniques to optimize data storage systems. We propose novel algorithms that can predict storage patterns and improve system performance.',
+                    'reviewed_at' => date('Y-m-d H:i:s', strtotime('-1 day')),
+                    'score' => 8,
+                    'assigned_at' => date('Y-m-d H:i:s', strtotime('-4 days')),
+                    'created_at' => date('Y-m-d H:i:s', strtotime('-7 days'))
+                ],
+                [
+                    'id' => 3,
+                    'title' => 'Blockchain Technology in Healthcare Data Management',
+                    'first_name' => 'Dr. Emily',
+                    'last_name' => 'Rodriguez',
+                    'email' => 'emily.r@healthcare.org',
+                    'institution' => 'Johns Hopkins University',
+                    'event_title' => 'SNIA Annual Conference 2025',
+                    'category_name' => 'Blockchain & Security',
+                    'keywords' => 'Blockchain, Healthcare, Data Security, Privacy',
+                    'abstract_text' => 'This paper investigates the potential of blockchain technology for secure healthcare data management. We present a framework for implementing blockchain-based solutions in medical institutions.',
+                    'reviewed_at' => null,
+                    'assigned_at' => date('Y-m-d H:i:s', strtotime('-1 day')),
+                    'created_at' => date('Y-m-d H:i:s', strtotime('-3 days'))
+                ]
+            ];
+
+            $data = [
+                'title' => 'Assigned Abstracts - SNIA Conference',
+                'user' => $user,
+                'assigned_abstracts' => $assigned_abstracts
+            ];
+
+            return view('roles/reviewer/assigned', $data);
+        } catch (\Exception $e) {
+            return $this->response->setJSON([
+                'error' => 'Failed to load reviewer assigned test',
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+        }
+    }
+
+    /**
+     * Test reviewer reviews page styling
+     */
+    public function testReviewerReviews()
+    {
+        try {
+            // Create mock user data
+            $user = [
+                'id' => 999,
+                'first_name' => 'Test',
+                'last_name' => 'Reviewer',
+                'email' => 'test.reviewer@example.com',
+                'role' => 'reviewer'
+            ];
+
+            // Create mock completed reviews
+            $completed_reviews = [
+                [
+                    'id' => 1,
+                    'title' => 'AI Applications in Medical Diagnostics: A Comprehensive Review',
+                    'first_name' => 'Dr. Sarah',
+                    'last_name' => 'Johnson',
+                    'email' => 'sarah.johnson@university.edu',
+                    'event_title' => 'SNIA Annual Conference 2025',
+                    'score' => 9,
+                    'recommendation' => 'accept',
+                    'comments' => 'This is an excellent paper with comprehensive research methodology and clear presentation of results. The AI applications in medical diagnostics are well-documented and the conclusions are supported by strong evidence.',
+                    'reviewed_at' => date('Y-m-d H:i:s', strtotime('-3 days')),
+                ],
+                [
+                    'id' => 2,
+                    'title' => 'Machine Learning in Data Storage Optimization',
+                    'first_name' => 'Prof. Michael',
+                    'last_name' => 'Chen',
+                    'email' => 'michael.chen@tech.edu',
+                    'event_title' => 'SNIA Annual Conference 2025',
+                    'score' => 7,
+                    'recommendation' => 'minor_revision',
+                    'comments' => 'Good research with solid methodology. However, some minor issues need to be addressed: 1) The literature review could be more comprehensive, 2) Statistical analysis needs more detail, 3) Some figures need better labeling.',
+                    'reviewed_at' => date('Y-m-d H:i:s', strtotime('-7 days')),
+                ],
+                [
+                    'id' => 3,
+                    'title' => 'Blockchain Technology in Healthcare Data Management',
+                    'first_name' => 'Dr. Emily',
+                    'last_name' => 'Rodriguez',
+                    'email' => 'emily.r@healthcare.org',
+                    'event_title' => 'SNIA Annual Conference 2025',
+                    'score' => 5,
+                    'recommendation' => 'major_revision',
+                    'comments' => 'The topic is relevant and interesting, but the paper requires major revisions: 1) Methodology section is unclear, 2) Results presentation needs improvement, 3) Discussion lacks depth, 4) Several references are outdated.',
+                    'reviewed_at' => date('Y-m-d H:i:s', strtotime('-10 days')),
+                ],
+                [
+                    'id' => 4,
+                    'title' => 'Legacy System Integration Challenges',
+                    'first_name' => 'John',
+                    'last_name' => 'Smith',
+                    'email' => 'j.smith@enterprise.com',
+                    'event_title' => 'SNIA Annual Conference 2025',
+                    'score' => 3,
+                    'recommendation' => 'reject',
+                    'comments' => 'Unfortunately, this paper does not meet the standards for publication. Major issues include: 1) Lack of novelty, 2) Insufficient literature review, 3) Weak methodology, 4) Poor writing quality, 5) Conclusions not supported by evidence.',
+                    'reviewed_at' => date('Y-m-d H:i:s', strtotime('-2 weeks')),
+                ],
+                [
+                    'id' => 5,
+                    'title' => 'Cloud Security Best Practices for Enterprise',
+                    'first_name' => 'Maria',
+                    'last_name' => 'Garcia',
+                    'email' => 'maria.garcia@cloudsec.com',
+                    'event_title' => 'SNIA Annual Conference 2025',
+                    'score' => 8,
+                    'recommendation' => 'accept',
+                    'comments' => 'Very good paper with practical insights into cloud security. The best practices are well-researched and applicable to real-world scenarios. Minor suggestion: add more case studies to strengthen the recommendations.',
+                    'reviewed_at' => date('Y-m-d H:i:s', strtotime('-5 days')),
+                ]
+            ];
+
+            $data = [
+                'title' => 'Review History - SNIA Conference',
+                'user' => $user,
+                'completed_reviews' => $completed_reviews
+            ];
+
+            return view('roles/reviewer/reviews', $data);
+        } catch (\Exception $e) {
+            return $this->response->setJSON([
+                'error' => 'Failed to load reviewer reviews test',
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+        }
+    }
+
+    /**
+     * Test reviewer dashboard without authentication
+     */
+    public function testReviewerDashboard()
+    {
+        try {
+            // Create mock user data
+            $user = [
+                'id' => 999,
+                'first_name' => 'Test',
+                'last_name' => 'Reviewer',
+                'email' => 'test.reviewer@example.com',
+                'role' => 'reviewer'
+            ];
+
+            // Create mock stats
+            $stats = [
+                'total_assigned' => 8,
+                'completed_reviews' => 5,
+                'pending_reviews' => 3,
+                'monthly_reviews' => 2,
+                'average_score' => 85.5,
+                'completion_rate' => 62.5
+            ];
+
+            // Create mock assigned abstracts
+            $assigned_abstracts = [
+                [
+                    'id' => 1,
+                    'title' => 'AI Applications in Medical Diagnostics',
+                    'first_name' => 'Dr. Sarah',
+                    'last_name' => 'Johnson',
+                    'email' => 'sarah.johnson@example.com',
+                    'event_title' => 'SNIA Annual Conference 2025',
+                    'reviewed_at' => null,
+                    'assigned_at' => date('Y-m-d H:i:s', strtotime('-3 days'))
+                ],
+                [
+                    'id' => 2,
+                    'title' => 'Machine Learning in Data Storage Optimization',
+                    'first_name' => 'Prof. Michael',
+                    'last_name' => 'Chen',
+                    'email' => 'michael.chen@example.com',
+                    'event_title' => 'SNIA Annual Conference 2025',
+                    'reviewed_at' => date('Y-m-d H:i:s', strtotime('-1 day')),
+                    'assigned_at' => date('Y-m-d H:i:s', strtotime('-5 days'))
+                ]
+            ];
+
+            $data = [
+                'title' => 'Reviewer Dashboard - SNIA Conference',
+                'user' => $user,
+                'stats' => $stats,
+                'assigned_abstracts' => $assigned_abstracts
+            ];
+
+            return view('roles/reviewer/dashboard_clean', $data);
+        } catch (\Exception $e) {
+            return $this->response->setJSON([
+                'error' => 'Failed to load reviewer dashboard test',
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+        }
+    }
+
+    /**
      * Test all models
      */
     public function testAllModels()

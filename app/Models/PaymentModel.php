@@ -85,4 +85,87 @@ class PaymentModel extends Model
             'voucher_code' => $voucherCode
         ];
     }
+
+    // ==================== PRESENTER PAYMENT METHODS ====================
+
+    /**
+     * Create payment for accepted abstract
+     */
+    public function createPresenterPayment($registrationId, $amount, $voucherCode = null)
+    {
+        // Calculate final amount with voucher if provided
+        $calculation = $this->calculateAmount($amount, $voucherCode);
+        
+        $data = [
+            'registration_id' => $registrationId,
+            'amount' => $calculation['amount'],
+            'discount_amount' => $calculation['discount_amount'],
+            'final_amount' => $calculation['final_amount'],
+            'voucher_code' => $calculation['voucher_code'],
+            'payment_status' => 'pending',
+            'payment_method' => 'online',
+            'created_at' => date('Y-m-d H:i:s')
+        ];
+
+        return $this->insert($data);
+    }
+
+    /**
+     * Get payment status for presenter registration
+     */
+    public function getPresenterPaymentStatus($registrationId)
+    {
+        return $this->select('payment_status, final_amount, payment_method, paid_at, transaction_id')
+                   ->where('registration_id', $registrationId)
+                   ->orderBy('created_at', 'DESC')
+                   ->first();
+    }
+
+    /**
+     * Process payment via gateway (simulation for now)
+     */
+    public function processPaymentGateway($paymentId, $paymentData)
+    {
+        // Simulate payment gateway processing
+        // In real implementation, this would integrate with actual payment gateway
+        
+        $updateData = [
+            'payment_gateway' => $paymentData['gateway'] ?? 'midtrans',
+            'transaction_id' => $paymentData['transaction_id'] ?? 'TXN' . time(),
+            'payment_status' => $paymentData['status'] ?? 'success',
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+
+        if ($paymentData['status'] === 'success') {
+            $updateData['paid_at'] = date('Y-m-d H:i:s');
+        }
+
+        return $this->update($paymentId, $updateData);
+    }
+
+    /**
+     * Check if presenter has completed payment for event
+     */
+    public function hasCompletedPayment($registrationId)
+    {
+        $payment = $this->where('registration_id', $registrationId)
+                       ->where('payment_status', 'success')
+                       ->first();
+        
+        return !empty($payment);
+    }
+
+    /**
+     * Get payment history for presenter
+     */
+    public function getPresenterPaymentHistory($userId)
+    {
+        return $this->db->table('payments p')
+                       ->select('p.*, r.registration_type, e.title as event_title, e.start_date')
+                       ->join('registrations r', 'r.id = p.registration_id', 'inner')
+                       ->join('events e', 'e.id = r.event_id', 'inner')
+                       ->where('r.user_id', $userId)
+                       ->orderBy('p.created_at', 'DESC')
+                       ->get()->getResultArray();
+    }
 }

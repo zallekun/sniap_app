@@ -493,11 +493,23 @@ class ReviewerController extends BaseController
         
         try {
             $userId = $this->session->get('user_id');
+            $status = $this->request->getGet('status'); // Filter by status if provided
             $abstracts = $this->getAssignedAbstracts($userId);
+            
+            // Filter by status if requested
+            if ($status === 'pending') {
+                $abstracts = array_filter($abstracts, function($abstract) {
+                    return empty($abstract['reviewed_at']);
+                });
+            } elseif ($status === 'completed') {
+                $abstracts = array_filter($abstracts, function($abstract) {
+                    return !empty($abstract['reviewed_at']);
+                });
+            }
             
             return $this->response->setJSON([
                 'status' => 'success',
-                'data' => $abstracts
+                'data' => array_values($abstracts) // Reindex array after filtering
             ]);
             
         } catch (\Exception $e) {
@@ -505,6 +517,92 @@ class ReviewerController extends BaseController
             return $this->response->setStatusCode(500)->setJSON([
                 'status' => 'error',
                 'message' => 'Failed to load assigned abstracts'
+            ]);
+        }
+    }
+
+    /**
+     * Get abstract details (API endpoint)
+     */
+    public function getAbstractDetailsApi($abstractId)
+    {
+        $redirect = $this->checkReviewerAccess();
+        if ($redirect) return $this->response->setStatusCode(401)->setJSON(['error' => 'Unauthorized']);
+        
+        try {
+            $userId = $this->session->get('user_id');
+            
+            // Check if reviewer is assigned to this abstract
+            if (!$this->checkAbstractAssignment($abstractId, $userId)) {
+                return $this->response->setStatusCode(403)->setJSON([
+                    'status' => 'error',
+                    'message' => 'You are not assigned to review this abstract'
+                ]);
+            }
+            
+            $abstract = $this->getAbstractDetails($abstractId);
+            
+            if (!$abstract) {
+                return $this->response->setStatusCode(404)->setJSON([
+                    'status' => 'error',
+                    'message' => 'Abstract not found'
+                ]);
+            }
+            
+            return $this->response->setJSON([
+                'status' => 'success',
+                'abstract' => $abstract
+            ]);
+            
+        } catch (\Exception $e) {
+            log_message('error', 'Get abstract details API error: ' . $e->getMessage());
+            return $this->response->setStatusCode(500)->setJSON([
+                'status' => 'error',
+                'message' => 'Failed to load abstract details'
+            ]);
+        }
+    }
+
+    /**
+     * Get review details (API endpoint)
+     */
+    public function getReviewDetailsApi($reviewId)
+    {
+        $redirect = $this->checkReviewerAccess();
+        if ($redirect) return $this->response->setStatusCode(401)->setJSON(['error' => 'Unauthorized']);
+        
+        try {
+            $userId = $this->session->get('user_id');
+            $db = \Config\Database::connect();
+            
+            // Get review with abstract details, ensuring the reviewer owns this review
+            $review = $db->table('reviews r')
+                ->select('r.*, a.title, a.abstract_text, u.first_name, u.last_name, e.title as event_title')
+                ->join('abstracts a', 'a.id = r.abstract_id', 'inner')
+                ->join('users u', 'u.id = a.user_id', 'left')
+                ->join('events e', 'e.id = a.event_id', 'left')
+                ->where('r.id', $reviewId)
+                ->where('r.reviewer_id', $userId)
+                ->get()
+                ->getRowArray();
+                
+            if (!$review) {
+                return $this->response->setStatusCode(404)->setJSON([
+                    'status' => 'error',
+                    'message' => 'Review not found or access denied'
+                ]);
+            }
+            
+            return $this->response->setJSON([
+                'status' => 'success',
+                'review' => $review
+            ]);
+            
+        } catch (\Exception $e) {
+            log_message('error', 'Get review details API error: ' . $e->getMessage());
+            return $this->response->setStatusCode(500)->setJSON([
+                'status' => 'error',
+                'message' => 'Failed to load review details'
             ]);
         }
     }

@@ -98,7 +98,7 @@
                     </div>
                     <h5 class="text-muted">No Certificates Yet</h5>
                     <p class="text-muted mb-4">You haven't received any certificates yet. Attend events to earn certificates!</p>
-                    <a href="<?= base_url('audience/events') ?>" class="btn btn-primary">
+                    <a href="<?= base_url('events') ?>" class="btn btn-primary">
                         <i class="fas fa-calendar-plus me-2"></i>Browse Events
                     </a>
                 </div>

@@ -110,7 +110,7 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="card-title mb-0">Registration History</h5>
-                <button class="btn btn-primary" onclick="window.location.href='/audience/events'">
+                <button class="btn btn-primary" onclick="window.location.href='/events'">
                     <i class="fas fa-plus me-2"></i>Register for New Event
                 </button>
             </div>
@@ -126,7 +126,7 @@
                     <i class="fas fa-calendar-plus text-muted" style="font-size: 3rem;"></i>
                     <h6 class="mt-3 text-muted">No registrations found</h6>
                     <p class="text-muted">You haven't registered for any events yet</p>
-                    <a href="/audience/events" class="btn btn-primary">
+                    <a href="/events" class="btn btn-primary">
                         <i class="fas fa-plus me-2"></i>Register for Event
                     </a>
                 </div>

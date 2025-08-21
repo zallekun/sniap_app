@@ -36,15 +36,21 @@ class DashboardController extends BaseController
             }
 
             // Redirect to role-specific dashboard if not audience
+            log_message('info', "Dashboard redirect - UserID: {$userId}, Role: {$user['role']}");
+            
             switch ($user['role']) {
                 case 'admin':
+                    log_message('info', 'Redirecting to admin dashboard');
                     return redirect()->to('/admin/dashboard');
                 case 'presenter':
+                    log_message('info', 'Redirecting to presenter dashboard');
                     return redirect()->to('/presenter/dashboard');
                 case 'reviewer':
+                    log_message('info', 'Redirecting to reviewer dashboard');
                     return redirect()->to('/reviewer/dashboard');
                 default:
                     // For audience/default users, show audience dashboard
+                    log_message('info', 'Showing audience dashboard');
                     break;
             }
 
@@ -528,7 +534,18 @@ class DashboardController extends BaseController
                 'validation' => \Config\Services::validation()
             ];
 
-            return view('roles/audience/event_schedule', $data);
+            // Route to appropriate view based on user role
+            switch ($user['role']) {
+                case 'presenter':
+                    return view('roles/presenter/event_schedule', $data);
+                case 'reviewer':
+                    return view('roles/reviewer/event_schedule', $data);
+                case 'admin':
+                    return view('roles/admin/event_schedule', $data);
+                case 'audience':
+                default:
+                    return view('roles/audience/event_schedule', $data);
+            }
         } catch (\Exception $e) {
             log_message('error', 'Event schedule page error: ' . $e->getMessage());
             return redirect()->to('/dashboard')->with('error', 'Failed to load event schedule page');

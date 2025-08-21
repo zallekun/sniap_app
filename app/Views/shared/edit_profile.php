@@ -14,7 +14,15 @@
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
-                <a href="/dashboard" class="text-decoration-none">
+                <?php 
+                $dashboardRoute = match($user['role'] ?? 'audience') {
+                    'admin' => '/admin/dashboard',
+                    'presenter' => '/presenter/dashboard', 
+                    'reviewer' => '/reviewer/dashboard',
+                    default => '/audience/dashboard'
+                };
+                ?>
+                <a href="<?= $dashboardRoute ?>" class="text-decoration-none">
                     <i class="fas fa-tachometer-alt me-1"></i>Dashboard
                 </a>
             </li>
@@ -173,7 +181,7 @@
                 <!-- Action Buttons -->
                 <div class="form-section">
                     <div class="d-flex justify-content-between">
-                        <a href="/dashboard" class="btn btn-secondary">
+                        <a href="<?= $dashboardRoute ?>" class="btn btn-secondary">
                             <i class="fas fa-arrow-left me-2"></i>Kembali ke Dashboard
                         </a>
                         <button type="submit" class="btn btn-primary">
@@ -225,15 +233,42 @@
                 </h4>
                 
                 <div class="d-grid gap-2">
-                    <a href="/dashboard" class="btn btn-outline-primary">
+                    <a href="<?= $dashboardRoute ?>" class="btn btn-outline-primary">
                         <i class="fas fa-tachometer-alt me-2"></i>Dashboard
                     </a>
+                    <?php if($user['role'] === 'audience'): ?>
+                    <a href="/audience/certificates" class="btn btn-outline-warning">
+                        <i class="fas fa-certificate me-2"></i>Sertifikat Saya
+                    </a>
+                    <a href="/audience/payments" class="btn btn-outline-info">
+                        <i class="fas fa-credit-card me-2"></i>Riwayat Pembayaran
+                    </a>
+                    <?php elseif($user['role'] === 'presenter'): ?>
+                    <a href="/presenter/abstracts" class="btn btn-outline-success">
+                        <i class="fas fa-file-alt me-2"></i>Abstract Saya
+                    </a>
+                    <a href="/presenter/events" class="btn btn-outline-info">
+                        <i class="fas fa-calendar me-2"></i>Events Saya
+                    </a>
+                    <?php elseif($user['role'] === 'reviewer'): ?>
+                    <a href="/reviewer/assigned" class="btn btn-outline-success">
+                        <i class="fas fa-tasks me-2"></i>Review Tasks
+                    </a>
+                    <a href="/reviewer/reviews" class="btn btn-outline-info">
+                        <i class="fas fa-star me-2"></i>My Reviews
+                    </a>
+                    <?php elseif($user['role'] === 'admin'): ?>
+                    <a href="/admin/users" class="btn btn-outline-success">
+                        <i class="fas fa-users me-2"></i>Manage Users
+                    </a>
+                    <a href="/admin/events" class="btn btn-outline-info">
+                        <i class="fas fa-calendar-alt me-2"></i>Manage Events
+                    </a>
+                    <?php else: ?>
                     <a href="#" class="btn btn-outline-success" onclick="showAlert('Fitur akan segera tersedia', 'info')">
                         <i class="fas fa-download me-2"></i>Download Data
                     </a>
-                    <a href="#" class="btn btn-outline-warning" onclick="showAlert('Fitur akan segera tersedia', 'info')">
-                        <i class="fas fa-certificate me-2"></i>Sertifikat Saya
-                    </a>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

@@ -1,14 +1,10 @@
-<?= $this->extend('shared/layouts/base_layout') ?>
+<?= $this->extend('shared/layouts/presenter_layout') ?>
 
-<?= $this->section('title') ?>Event Schedule<?= $this->endSection() ?>
+<?= $this->section('title') ?>Event Schedule - Presenter<?= $this->endSection() ?>
 
 <?= $this->section('head') ?>
-<!-- Role-based styles -->
-<?php if (isset($user['role']) && $user['role'] === 'reviewer'): ?>
-<link href="<?= base_url('css/roles/reviewer/reviewer.css') ?>" rel="stylesheet">
-<?php else: ?>
-<link href="<?= base_url('css/roles/audience/audience.css') ?>" rel="stylesheet">
-<?php endif; ?>
+<!-- Presenter-specific styles -->
+<link href="<?= base_url('css/roles/presenter/presenter.css') ?>" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 <meta name="csrf-token" content="<?= csrf_hash() ?>">
 <style>
@@ -304,108 +300,6 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
-<?php 
-// Dynamic navigation based on user role
-$role = $user['role'] ?? 'audience';
-$navbarClass = $role === 'reviewer' ? 'reviewer-navbar' : 'audience-navbar';
-$avatarClass = $role === 'reviewer' ? 'reviewer-user-avatar' : 'audience-user-avatar';
-$roleClass = $role === 'reviewer' ? 'reviewer-role-badge' : 'audience-role-badge';
-$portalName = $role === 'reviewer' ? 'SNIA Reviewer Portal' : 'SNIA Audience Portal';
-$portalIcon = $role === 'reviewer' ? 'star-half-alt' : 'users';
-$dashboardUrl = $role === 'reviewer' ? '/reviewer/dashboard' : '/audience/dashboard';
-?>
-
-<!-- Role-based Navigation -->
-<nav class="navbar navbar-expand-lg <?= $navbarClass ?>">
-    <div class="container-fluid">
-        <a class="navbar-brand fw-bold" href="<?= $dashboardUrl ?>">
-            <i class="fas fa-<?= $portalIcon ?> me-2"></i>
-            <?= $portalName ?>
-        </a>
-        
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav me-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="<?= $dashboardUrl ?>">
-                        <i class="fas fa-tachometer-alt me-1"></i> Dashboard
-                    </a>
-                </li>
-                
-                <?php if ($role === 'reviewer'): ?>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/reviewer/assigned">
-                            <i class="fas fa-tasks me-1"></i> Assigned Abstracts
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/reviewer/reviews">
-                            <i class="fas fa-star me-1"></i> My Reviews
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/events">
-                            <i class="fas fa-calendar me-1"></i> Events Schedule
-                        </a>
-                    </li>
-                <?php else: ?>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/events">
-                            <i class="fas fa-calendar me-1"></i> Events Schedule
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/audience/registrations">
-                            <i class="fas fa-calendar-check me-1"></i> My Registrations
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/audience/certificates">
-                            <i class="fas fa-certificate me-1"></i> My Certificates
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/audience/payments">
-                            <i class="fas fa-credit-card me-1"></i> Payment History
-                        </a>
-                    </li>
-                <?php endif; ?>
-            </ul>
-            
-            <ul class="navbar-nav">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
-                        <div class="<?= $avatarClass ?> me-2">
-                            <?= strtoupper(substr($user['first_name'] ?? substr($role, 0, 1), 0, 1)) ?>
-                        </div>
-                        <div class="d-none d-md-block">
-                            <div class="fw-semibold"><?= esc($user['first_name'] ?? '') ?> <?= esc($user['last_name'] ?? '') ?></div>
-                            <small class="text-muted">
-                                <span class="<?= $roleClass ?>"><?= strtoupper($role) ?></span>
-                            </small>
-                        </div>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li>
-                            <a class="dropdown-item" href="/profile/edit">
-                                <i class="fas fa-user me-2"></i> Edit Profile
-                            </a>
-                        </li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <a class="dropdown-item text-danger" href="/logout">
-                                <i class="fas fa-sign-out-alt me-2"></i> Logout
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
-        </div>
-    </div>
-</nav>
 
 <!-- Main Content -->
 <main class="main-content">
@@ -419,7 +313,7 @@ $dashboardUrl = $role === 'reviewer' ? '/reviewer/dashboard' : '/audience/dashbo
             </h1>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="<?= $dashboardUrl ?>">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="/presenter/dashboard">Dashboard</a></li>
                     <li class="breadcrumb-item active">Events Schedule</li>
                 </ol>
             </nav>
@@ -428,10 +322,10 @@ $dashboardUrl = $role === 'reviewer' ? '/reviewer/dashboard' : '/audience/dashbo
             <div class="d-flex gap-4 align-items-center">
                 <div class="text-center">
                     <span class="d-block small text-muted">Available Events</span>
-                    <span class="fw-bold h5 mb-0 text-primary" id="totalEventsCount">-</span>
+                    <span class="fw-bold h5 mb-0 text-success" id="totalEventsCount">-</span>
                 </div>
                 <div class="text-center">
-                    <span class="d-block small text-muted">Registered</span>
+                    <span class="d-block small text-muted">My Presentations</span>
                     <span class="fw-bold h5 mb-0 text-success" id="registeredEventsCount">-</span>
                 </div>
                 <button class="btn btn-outline-secondary" onclick="refreshSchedule()">
@@ -446,7 +340,7 @@ $dashboardUrl = $role === 'reviewer' ? '/reviewer/dashboard' : '/audience/dashbo
 
     <!-- View Mode Tabs -->
     <div class="card border-0 shadow-sm">
-        <div class="card-header bg-primary text-white">
+        <div class="card-header bg-success text-white">
             <nav class="nav nav-tabs card-header-tabs" id="scheduleViewTabs" role="tablist">
                 <button class="nav-link active text-white" id="calendar-view-tab" data-bs-toggle="tab" data-bs-target="#calendar-view" type="button" role="tab">
                     <i class="fas fa-calendar-alt me-2"></i>Kalender
@@ -469,21 +363,21 @@ $dashboardUrl = $role === 'reviewer' ? '/reviewer/dashboard' : '/audience/dashbo
                         <div class="row align-items-center">
                             <div class="col-md-6">
                                 <h5 class="mb-0">
-                                    <i class="fas fa-calendar me-2 text-primary"></i>
+                                    <i class="fas fa-calendar me-2 text-success"></i>
                                     <span id="current-month-year">Loading...</span>
                                 </h5>
                             </div>
                             <div class="col-md-6 text-end">
                                 <div class="btn-group" role="group">
-                                    <button type="button" class="btn btn-outline-primary" id="prev-month">
+                                    <button type="button" class="btn btn-outline-success" id="prev-month">
                                         <i class="fas fa-chevron-left"></i>
                                     </button>
-                                    <button type="button" class="btn btn-outline-primary" id="today-btn">Hari Ini</button>
-                                    <button type="button" class="btn btn-outline-primary" id="next-month">
+                                    <button type="button" class="btn btn-outline-success" id="today-btn">Hari Ini</button>
+                                    <button type="button" class="btn btn-outline-success" id="next-month">
                                         <i class="fas fa-chevron-right"></i>
                                     </button>
                                 </div>
-                                <button type="button" class="btn btn-primary ms-2" onclick="refreshSchedule()">
+                                <button type="button" class="btn btn-success ms-2" onclick="refreshSchedule()">
                                     <i class="fas fa-sync-alt"></i>
                                 </button>
                             </div>
@@ -492,7 +386,7 @@ $dashboardUrl = $role === 'reviewer' ? '/reviewer/dashboard' : '/audience/dashbo
                     
                     <div id="event-calendar">
                         <div class="loading-spinner">
-                            <div class="spinner-border text-primary" role="status"></div>
+                            <div class="spinner-border text-success" role="status"></div>
                             <div class="ms-3">Memuat kalender...</div>
                         </div>
                     </div>
@@ -524,7 +418,7 @@ $dashboardUrl = $role === 'reviewer' ? '/reviewer/dashboard' : '/audience/dashbo
                     
                     <div id="event-list-container">
                         <div class="loading-spinner">
-                            <div class="spinner-border text-primary" role="status"></div>
+                            <div class="spinner-border text-success" role="status"></div>
                             <div class="ms-3">Memuat events...</div>
                         </div>
                     </div>
@@ -563,7 +457,7 @@ $dashboardUrl = $role === 'reviewer' ? '/reviewer/dashboard' : '/audience/dashbo
                     
                     <div id="event-timeline-container">
                         <div class="loading-spinner">
-                            <div class="spinner-border text-primary" role="status"></div>
+                            <div class="spinner-border text-success" role="status"></div>
                             <div class="ms-3">Memuat timeline...</div>
                         </div>
                     </div>
@@ -576,17 +470,17 @@ $dashboardUrl = $role === 'reviewer' ? '/reviewer/dashboard' : '/audience/dashbo
                 <div class="col-md-8">
                     <small class="text-muted">
                         <i class="fas fa-info-circle me-1"></i>
-                        <span class="badge bg-success me-2">Terdaftar</span>
-                        <span class="badge bg-primary me-2">Tersedia</span>
-                        <span class="badge bg-secondary me-2">Berakhir</span>
-                        Klik event untuk melihat detail dan mendaftar
+                        <span class="badge bg-success me-2">My Presentations</span>
+                        <span class="badge bg-info me-2">Available for Registration</span>
+                        <span class="badge bg-secondary me-2">Event Ended</span>
+                        Klik event untuk melihat detail dan mendaftar sebagai presenter
                     </small>
                 </div>
                 <div class="col-md-4 text-end">
-                    <a href="<?= $dashboardUrl ?>" class="btn btn-outline-secondary me-2">
+                    <a href="/presenter/dashboard" class="btn btn-outline-secondary me-2">
                         <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
                     </a>
-                    <button class="btn btn-primary" onclick="refreshSchedule()">
+                    <button class="btn btn-success" onclick="refreshSchedule()">
                         <i class="fas fa-sync-alt me-1"></i>Refresh
                     </button>
                 </div>
@@ -596,29 +490,11 @@ $dashboardUrl = $role === 'reviewer' ? '/reviewer/dashboard' : '/audience/dashbo
 </div>
 </main>
 
-<!-- Footer -->
-<footer class="footer bg-light mt-5">
-    <div class="container-fluid py-3">
-        <div class="row align-items-center">
-            <div class="col-md-6">
-                <small class="text-muted">
-                    © <?= date('Y') ?> SNIA Conference Management System - Audience Portal
-                </small>
-            </div>
-            <div class="col-md-6 text-end">
-                <small class="text-muted">
-                    <i class="fas fa-users text-primary"></i> Academic Excellence Together
-                </small>
-            </div>
-        </div>
-    </div>
-</footer>
-
 <!-- Event Detail Modal -->
 <div class="modal fade" id="eventDetailModal" tabindex="-1">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
+            <div class="modal-header bg-success text-white">
                 <h5 class="modal-title" id="eventDetailModalLabel">
                     <i class="fas fa-calendar-check me-2"></i>Detail Event
                 </h5>
@@ -626,7 +502,7 @@ $dashboardUrl = $role === 'reviewer' ? '/reviewer/dashboard' : '/audience/dashbo
             </div>
             <div class="modal-body" id="eventDetailContent">
                 <div class="loading-spinner">
-                    <div class="spinner-border text-primary" role="status"></div>
+                    <div class="spinner-border text-success" role="status"></div>
                     <div class="ms-3">Memuat detail event...</div>
                 </div>
             </div>
@@ -634,8 +510,8 @@ $dashboardUrl = $role === 'reviewer' ? '/reviewer/dashboard' : '/audience/dashbo
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     <i class="fas fa-times me-1"></i>Tutup
                 </button>
-                <button type="button" class="btn btn-primary" id="registerEventBtn" style="display: none;">
-                    <i class="fas fa-user-plus me-1"></i>Daftar Event
+                <button type="button" class="btn btn-success" id="registerEventBtn" style="display: none;">
+                    <i class="fas fa-user-plus me-1"></i>Daftar sebagai Presenter
                 </button>
             </div>
         </div>
@@ -648,7 +524,7 @@ $dashboardUrl = $role === 'reviewer' ? '/reviewer/dashboard' : '/audience/dashbo
         <div class="modal-content">
             <div class="modal-header bg-success text-white">
                 <h5 class="modal-title">
-                    <i class="fas fa-user-plus me-2"></i>Konfirmasi Pendaftaran
+                    <i class="fas fa-user-plus me-2"></i>Konfirmasi Pendaftaran Presenter
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
@@ -672,6 +548,7 @@ let currentView = 'calendar';
 let currentMonth = new Date().getMonth();
 let currentYear = new Date().getFullYear();
 let filteredEvents = [];
+const userRole = 'presenter';
 
 // Get CSRF token from meta tag or form
 function getCsrfToken() {
@@ -716,7 +593,7 @@ function getBaseUrl() {
 
 // Initialize when document is ready
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Event Schedule page initializing...');
+    console.log('Presenter Event Schedule page initializing...');
     loadEventScheduleData();
     setupEventListeners();
 });
@@ -801,12 +678,12 @@ function setupEventListeners() {
 // Load event schedule data from API
 async function loadEventScheduleData() {
     try {
-        console.log('Loading event schedule data...');
+        console.log('Loading presenter event schedule data...');
         showLoading();
         
         const baseUrl = getBaseUrl();
         
-        // Try multiple endpoints with different approaches
+        // Try multiple endpoints with different approaches for presenter data
         const endpoints = [
             {
                 url: baseUrl + 'dashboard/event-schedule',
@@ -818,7 +695,7 @@ async function loadEventScheduleData() {
                 }
             },
             {
-                url: baseUrl + 'audience/api/events',
+                url: baseUrl + 'presenter/api/events',
                 method: 'GET',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
@@ -880,7 +757,7 @@ async function loadEventScheduleData() {
             allEvents = data.data || [];
             filteredEvents = [...allEvents];
             
-            console.log('Loaded', allEvents.length, 'events');
+            console.log('Loaded', allEvents.length, 'events for presenter');
             updateEventStats(allEvents);
             renderCurrentView();
             
@@ -901,7 +778,7 @@ async function loadEventScheduleData() {
 function showLoading() {
     const loadingHTML = `
         <div class="loading-spinner">
-            <div class="spinner-border text-primary" role="status"></div>
+            <div class="spinner-border text-success" role="status"></div>
             <div class="ms-3">Memuat data...</div>
         </div>
     `;
@@ -916,15 +793,15 @@ function hideLoading() {
     console.log('Loading hidden, content will be rendered');
 }
 
-// Update event statistics
+// Update event statistics for presenter view
 function updateEventStats(events) {
     const totalCount = events.length;
-    const registeredCount = events.filter(event => event.is_registered).length;
+    const registeredCount = events.filter(event => event.is_registered && event.registration_type === 'presenter').length;
     
     document.getElementById('totalEventsCount').textContent = totalCount;
     document.getElementById('registeredEventsCount').textContent = registeredCount;
     
-    console.log('Stats updated:', { total: totalCount, registered: registeredCount });
+    console.log('Presenter Stats updated:', { total: totalCount, presentations: registeredCount });
 }
 
 // Render current active view
@@ -947,9 +824,9 @@ function renderCurrentView() {
     }
 }
 
-// Render Calendar View
+// Render Calendar View (same as audience but with presenter styling)
 function renderCalendarView(events) {
-    console.log('Rendering calendar view with', events.length, 'events');
+    console.log('Rendering presenter calendar view with', events.length, 'events');
     
     const calendarElement = document.getElementById('event-calendar');
     const monthYearElement = document.getElementById('current-month-year');
@@ -1000,7 +877,7 @@ function renderCalendarView(events) {
         
         if (dayEvents.length > 0) {
             dayEvents.slice(0, 3).forEach(event => {
-                const eventClass = event.is_registered ? 'event-registered' : 'event-available';
+                const eventClass = (event.is_registered && event.registration_type === 'presenter') ? 'event-registered' : 'event-available';
                 calendarHTML += `
                     <div class="calendar-event ${eventClass}" onclick="showEventDetailModal('${event.id}')" title="${event.title}">
                         <div class="event-time">${event.time}</div>
@@ -1024,12 +901,12 @@ function renderCalendarView(events) {
     calendarHTML += '</div>';
     calendarElement.innerHTML = calendarHTML;
     
-    console.log('Calendar rendered successfully');
+    console.log('Presenter calendar rendered successfully');
 }
 
-// Render List View
+// Render List View (presenter-specific)
 function renderListView(events) {
-    console.log('Rendering list view with', events.length, 'events');
+    console.log('Rendering presenter list view with', events.length, 'events');
     
     const listContainer = document.getElementById('event-list-container');
     
@@ -1044,7 +921,7 @@ function renderListView(events) {
                 <i class="fas fa-calendar-times fa-4x mb-3"></i>
                 <h5>Tidak ada event ditemukan</h5>
                 <p>Coba ubah kriteria pencarian atau filter Anda</p>
-                <button class="btn btn-primary" onclick="clearSearch()">
+                <button class="btn btn-success" onclick="clearSearch()">
                     <i class="fas fa-undo me-2"></i>Reset Pencarian
                 </button>
             </div>
@@ -1063,15 +940,16 @@ function renderListView(events) {
             day: 'numeric'
         });
         
-        const statusBadge = event.is_registered ? 
-            '<span class="badge bg-success"><i class="fas fa-check me-1"></i>Terdaftar</span>' : 
-            '<span class="badge bg-primary"><i class="fas fa-calendar-plus me-1"></i>Tersedia</span>';
+        const isPresenting = event.is_registered && event.registration_type === 'presenter';
+        const statusBadge = isPresenting ? 
+            '<span class="badge bg-success"><i class="fas fa-check me-1"></i>Presenting</span>' : 
+            '<span class="badge bg-success"><i class="fas fa-microphone me-1"></i>Available for Presenter Registration</span>';
         
         const formatBadge = getFormatBadge(event.format);
         const categoryBadge = getCategoryBadge(event.category);
         
         const isPast = eventDate < new Date();
-        const cardClass = isPast ? 'border-secondary' : (event.is_registered ? 'border-success' : 'border-primary');
+        const cardClass = isPast ? 'border-secondary' : (isPresenting ? 'border-success' : 'border-success');
         
         listHTML += `
             <div class="event-item card mb-3 ${cardClass}">
@@ -1080,12 +958,13 @@ function renderListView(events) {
                         <div class="col-md-8">
                             <div class="d-flex align-items-start">
                                 <div class="event-icon me-3">
-                                    <i class="fas fa-${getEventIcon(event.category)} fa-2x text-primary"></i>
+                                    <i class="fas fa-${getEventIcon(event.category)} fa-2x text-success"></i>
                                 </div>
                                 <div class="event-info flex-grow-1">
                                     <h6 class="event-title mb-2">
                                         ${event.title}
                                         ${isPast ? '<small class="text-muted">(Sudah Berakhir)</small>' : ''}
+                                        ${isPresenting ? '<small class="text-success">(Anda Presenter)</small>' : ''}
                                     </h6>
                                     <div class="event-meta text-muted mb-2">
                                         <div class="row">
@@ -1101,7 +980,7 @@ function renderListView(events) {
                                             </div>
                                             <div class="col-sm-6">
                                                 <i class="fas fa-money-bill me-1"></i>
-                                                ${event.registration_fee > 0 ? `Rp ${parseInt(event.registration_fee).toLocaleString('id-ID')}` : 'Gratis'}
+                                                ${event.presenter_fee > 0 ? `Honor: Rp ${parseInt(event.presenter_fee).toLocaleString('id-ID')}` : 'Volunteer'}
                                             </div>
                                         </div>
                                     </div>
@@ -1110,35 +989,30 @@ function renderListView(events) {
                                         ${statusBadge}
                                         ${formatBadge}
                                         ${categoryBadge}
-                                        ${event.speaker ? `<span class="badge bg-info"><i class="fas fa-user me-1"></i>${truncateText(event.speaker, 30)}</span>` : ''}
+                                        ${event.call_for_papers ? '<span class="badge bg-warning"><i class="fas fa-file-alt me-1"></i>Call for Papers</span>' : ''}
                                     </div>
-                                    ${event.current_participants && event.max_participants ? `
-                                        <div class="mt-2">
-                                            <small class="text-muted">Peserta: ${event.current_participants}/${event.max_participants}</small>
-                                            <div class="progress mt-1" style="height: 4px;">
-                                                <div class="progress-bar" style="width: ${(event.current_participants / event.max_participants) * 100}%"></div>
-                                            </div>
-                                        </div>
-                                    ` : ''}
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-4 text-end">
                             <div class="event-actions">
-                                <button class="btn btn-outline-primary btn-sm d-block mb-2" onclick="showEventDetailModal('${event.id}')">
+                                <button class="btn btn-outline-success btn-sm d-block mb-2" onclick="showEventDetailModal('${event.id}')">
                                     <i class="fas fa-info-circle me-1"></i>Detail Lengkap
                                 </button>
-                                ${!event.is_registered && !isPast ? 
+                                ${!isPresenting && !isPast && event.call_for_papers ? 
                                     `<button class="btn btn-success btn-sm d-block" onclick="showRegistrationModal('${event.id}')">
-                                        <i class="fas fa-user-plus me-1"></i>Daftar Sekarang
+                                        <i class="fas fa-microphone me-1"></i>Daftar Presenter
                                     </button>` : 
-                                    event.is_registered ? 
+                                    isPresenting ? 
                                         `<button class="btn btn-success btn-sm d-block" disabled>
-                                            <i class="fas fa-check me-1"></i>Sudah Terdaftar
+                                            <i class="fas fa-check me-1"></i>Terdaftar
                                         </button>
-                                        <small class="text-muted d-block mt-1">Status: ${event.registration_status || 'Confirmed'}</small>` :
+                                        <small class="text-muted d-block mt-1">Status: ${event.registration_status || 'Confirmed'}</small>
+                                        <a href="/presenter/abstracts" class="btn btn-outline-primary btn-sm d-block mt-1">
+                                            <i class="fas fa-file-alt me-1"></i>Submit Abstract
+                                        </a>` :
                                         `<button class="btn btn-secondary btn-sm d-block" disabled>
-                                            <i class="fas fa-clock me-1"></i>Berakhir
+                                            <i class="fas fa-clock me-1"></i>${isPast ? 'Berakhir' : 'No Call for Papers'}
                                         </button>`
                                 }
                             </div>
@@ -1152,12 +1026,12 @@ function renderListView(events) {
     listHTML += '</div>';
     listContainer.innerHTML = listHTML;
     
-    console.log('List view rendered successfully');
+    console.log('Presenter list view rendered successfully');
 }
 
-// Render Timeline View
+// Render Timeline View (presenter-specific)
 function renderTimelineView(events) {
-    console.log('Rendering timeline view with', events.length, 'events');
+    console.log('Rendering presenter timeline view with', events.length, 'events');
     
     const timelineContainer = document.getElementById('event-timeline-container');
     
@@ -1172,7 +1046,7 @@ function renderTimelineView(events) {
                 <i class="fas fa-stream fa-4x mb-3"></i>
                 <h5>Tidak ada event ditemukan</h5>
                 <p>Coba ubah filter atau kriteria pencarian Anda</p>
-                <button class="btn btn-primary" onclick="resetTimelineFilter()">
+                <button class="btn btn-success" onclick="resetTimelineFilter()">
                     <i class="fas fa-undo me-2"></i>Reset Filter
                 </button>
             </div>
@@ -1192,6 +1066,7 @@ function renderTimelineView(events) {
         const eventDate = new Date(event.date);
         const isLast = index === sortedEvents.length - 1;
         const isPast = eventDate < new Date();
+        const isPresenting = event.is_registered && event.registration_type === 'presenter';
         const timelineClass = isPast ? 'timeline-past' : 'timeline-future';
         
         const formattedDate = eventDate.toLocaleDateString('id-ID', {
@@ -1203,8 +1078,8 @@ function renderTimelineView(events) {
         
         timelineHTML += `
             <div class="timeline-item ${timelineClass}">
-                <div class="timeline-marker ${event.is_registered ? 'registered' : 'available'}">
-                    <i class="fas ${event.is_registered ? 'fa-check' : 'fa-calendar'}"></i>
+                <div class="timeline-marker ${isPresenting ? 'registered' : 'available'}">
+                    <i class="fas ${isPresenting ? 'fa-microphone' : 'fa-calendar'}"></i>
                 </div>
                 ${!isLast ? '<div class="timeline-line"></div>' : ''}
                 <div class="timeline-content">
@@ -1215,6 +1090,7 @@ function renderTimelineView(events) {
                                     <h6 class="timeline-title">
                                         ${event.title}
                                         ${isPast ? '<small class="text-muted ms-2">(Berakhir)</small>' : ''}
+                                        ${isPresenting ? '<small class="text-success ms-2">(Presenting)</small>' : ''}
                                     </h6>
                                     <div class="timeline-meta text-muted mb-3">
                                         <div class="row">
@@ -1230,54 +1106,40 @@ function renderTimelineView(events) {
                                             </div>
                                             <div class="col-6">
                                                 <i class="fas fa-money-bill me-1"></i>
-                                                ${event.registration_fee > 0 ? `Rp ${parseInt(event.registration_fee).toLocaleString('id-ID')}` : 'Gratis'}
+                                                ${event.presenter_fee > 0 ? `Honor: Rp ${parseInt(event.presenter_fee).toLocaleString('id-ID')}` : 'Volunteer'}
                                             </div>
                                         </div>
                                     </div>
                                     <p class="timeline-description mb-3">${truncateText(event.description, 200)}</p>
-                                    ${event.speaker ? `
-                                        <div class="mb-3">
-                                            <strong><i class="fas fa-user me-1"></i>Speaker:</strong>
-                                            <span class="text-muted">${event.speaker}</span>
-                                        </div>
-                                    ` : ''}
                                     <div class="timeline-badges">
-                                        ${event.is_registered ? 
-                                            '<span class="badge bg-success"><i class="fas fa-check me-1"></i>Terdaftar</span>' : 
-                                            '<span class="badge bg-primary"><i class="fas fa-calendar-plus me-1"></i>Tersedia</span>'
+                                        ${isPresenting ? 
+                                            '<span class="badge bg-success"><i class="fas fa-microphone me-1"></i>Presenting</span>' : 
+                                            '<span class="badge bg-success"><i class="fas fa-calendar-plus me-1"></i>Available</span>'
                                         }
                                         ${getFormatBadge(event.format)}
                                         ${getCategoryBadge(event.category)}
+                                        ${event.call_for_papers ? '<span class="badge bg-warning"><i class="fas fa-file-alt me-1"></i>Call for Papers</span>' : ''}
                                         ${isPast ? '<span class="badge bg-secondary"><i class="fas fa-history me-1"></i>Berakhir</span>' : ''}
                                     </div>
-                                    ${event.current_participants && event.max_participants ? `
-                                        <div class="mt-3">
-                                            <small class="text-muted">Peserta: ${event.current_participants}/${event.max_participants}</small>
-                                            <div class="progress mt-1" style="height: 6px;">
-                                                <div class="progress-bar" style="width: ${(event.current_participants / event.max_participants) * 100}%"></div>
-                                            </div>
-                                        </div>
-                                    ` : ''}
                                 </div>
                                 <div class="col-md-4 text-end">
                                     <div class="timeline-actions">
-                                        <button class="btn btn-outline-primary btn-sm d-block mb-2" onclick="showEventDetailModal('${event.id}')">
+                                        <button class="btn btn-outline-success btn-sm d-block mb-2" onclick="showEventDetailModal('${event.id}')">
                                             <i class="fas fa-info-circle me-1"></i>Detail
                                         </button>
-                                        ${!event.is_registered && !isPast ? 
+                                        ${!isPresenting && !isPast && event.call_for_papers ? 
                                             `<button class="btn btn-success btn-sm d-block mb-2" onclick="showRegistrationModal('${event.id}')">
-                                                <i class="fas fa-user-plus me-1"></i>Daftar
+                                                <i class="fas fa-microphone me-1"></i>Daftar Presenter
                                             </button>` : 
-                                            event.is_registered ? 
+                                            isPresenting ? 
                                                 `<button class="btn btn-success btn-sm d-block mb-2" disabled>
                                                     <i class="fas fa-check me-1"></i>Terdaftar
                                                 </button>
-                                                ${event.payment_status === 'paid' ? 
-                                                    '<small class="text-success d-block"><i class="fas fa-check-circle me-1"></i>Lunas</small>' :
-                                                    '<small class="text-warning d-block"><i class="fas fa-clock me-1"></i>Pending</small>'
-                                                }` :
+                                                <a href="/presenter/abstracts" class="btn btn-outline-primary btn-sm d-block mb-2">
+                                                    <i class="fas fa-file-alt me-1"></i>Submit Abstract
+                                                </a>` :
                                                 `<button class="btn btn-secondary btn-sm d-block mb-2" disabled>
-                                                    <i class="fas fa-clock me-1"></i>Berakhir
+                                                    <i class="fas fa-clock me-1"></i>Tidak Tersedia
                                                 </button>`
                                         }
                                     </div>
@@ -1293,608 +1155,13 @@ function renderTimelineView(events) {
     timelineHTML += '</div>';
     timelineContainer.innerHTML = timelineHTML;
     
-    console.log('Timeline view rendered successfully');
+    console.log('Presenter timeline view rendered successfully');
 }
 
-// Show event detail in modal
-function showEventDetailModal(eventId) {
-    console.log('Showing event detail for ID:', eventId);
-    
-    const event = allEvents.find(e => e.id == eventId);
-    if (!event) {
-        showAlert('Event tidak ditemukan', 'danger');
-        return;
-    }
-    
-    const eventDate = new Date(event.date);
-    const formattedDate = eventDate.toLocaleDateString('id-ID', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    });
-    
-    const isPast = eventDate < new Date();
-    
-    const detailHTML = `
-        <div class="event-detail-content">
-            <div class="row">
-                <div class="col-md-8">
-                    <div class="mb-4">
-                        <h4 class="mb-2">${event.title}</h4>
-                        <div class="event-badges mb-3">
-                            ${event.is_registered ? 
-                                '<span class="badge bg-success fs-6"><i class="fas fa-check me-1"></i>Sudah Terdaftar</span>' : 
-                                '<span class="badge bg-primary fs-6"><i class="fas fa-calendar-plus me-1"></i>Tersedia untuk Registrasi</span>'
-                            }
-                            ${getFormatBadge(event.format)}
-                            ${getCategoryBadge(event.category)}
-                            ${isPast ? '<span class="badge bg-secondary fs-6"><i class="fas fa-history me-1"></i>Berakhir</span>' : ''}
-                        </div>
-                    </div>
-                    
-                    <div class="event-detail-meta mb-4">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <div class="p-3 bg-light rounded">
-                                    <strong><i class="fas fa-calendar text-primary me-2"></i>Tanggal:</strong><br>
-                                    <span class="fs-6">${formattedDate}</span>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="p-3 bg-light rounded">
-                                    <strong><i class="fas fa-clock text-primary me-2"></i>Waktu:</strong><br>
-                                    <span class="fs-6">${event.time} WIB</span>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="p-3 bg-light rounded">
-                                    <strong><i class="fas fa-${event.format === 'online' ? 'video' : 'map-marker-alt'} text-primary me-2"></i>Lokasi:</strong><br>
-                                    <span class="fs-6">${event.format === 'online' ? 'Online (Link akan dikirim)' : event.location || 'TBA'}</span>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="p-3 bg-light rounded">
-                                    <strong><i class="fas fa-money-bill text-primary me-2"></i>Biaya Registrasi:</strong><br>
-                                    <span class="fs-6 ${event.registration_fee > 0 ? 'text-success fw-bold' : 'text-success fw-bold'}">
-                                        ${event.registration_fee > 0 ? `Rp ${parseInt(event.registration_fee).toLocaleString('id-ID')}` : 'GRATIS'}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    ${event.speaker ? `
-                        <div class="mb-4">
-                            <h6 class="mb-2"><i class="fas fa-user text-primary me-2"></i>Speaker/Pemateri:</h6>
-                            <p class="text-muted">${event.speaker}</p>
-                        </div>
-                    ` : ''}
-                    
-                    <div class="mb-4">
-                        <h6 class="mb-2"><i class="fas fa-info-circle text-primary me-2"></i>Deskripsi Event:</h6>
-                        <p class="text-muted">${event.description}</p>
-                    </div>
-                    
-                    ${event.current_participants && event.max_participants ? `
-                        <div class="mb-4">
-                            <h6 class="mb-2"><i class="fas fa-users text-primary me-2"></i>Kapasitas Peserta:</h6>
-                            <div class="d-flex align-items-center">
-                                <div class="flex-grow-1 me-3">
-                                    <div class="progress" style="height: 8px;">
-                                        <div class="progress-bar ${(event.current_participants / event.max_participants) > 0.8 ? 'bg-warning' : 'bg-success'}" 
-                                             style="width: ${(event.current_participants / event.max_participants) * 100}%">
-                                        </div>
-                                    </div>
-                                </div>
-                                <span class="text-muted">${event.current_participants}/${event.max_participants}</span>
-                            </div>
-                        </div>
-                    ` : ''}
-                </div>
-                
-                <div class="col-md-4">
-                    <div class="card bg-light h-100">
-                        <div class="card-body text-center">
-                            <div class="mb-4">
-                                ${event.is_registered ? 
-                                    `<i class="fas fa-check-circle fa-4x text-success mb-3"></i>
-                                     <h5 class="text-success">Sudah Terdaftar</h5>
-                                     <div class="alert alert-success">
-                                         <strong>Status:</strong> ${event.registration_status || 'Confirmed'}<br>
-                                         ${event.payment_status ? `<strong>Pembayaran:</strong> ${event.payment_status === 'paid' ? 'Lunas' : 'Pending'}` : ''}
-                                     </div>` :
-                                    isPast ? 
-                                        `<i class="fas fa-clock fa-4x text-secondary mb-3"></i>
-                                         <h5 class="text-secondary">Event Sudah Berakhir</h5>
-                                         <p class="text-muted">Event ini sudah tidak tersedia untuk registrasi</p>` :
-                                        `<i class="fas fa-calendar-plus fa-4x text-primary mb-3"></i>
-                                         <h5 class="text-primary">Tersedia untuk Registrasi</h5>
-                                         <p class="text-muted">Klik tombol di bawah untuk mendaftar</p>`
-                                }
-                            </div>
-                            
-                            <div class="d-grid gap-2">
-                                ${!event.is_registered && !isPast ? 
-                                    `<button class="btn btn-success btn-lg" onclick="showRegistrationModal('${event.id}')">
-                                        <i class="fas fa-user-plus me-2"></i>Daftar Sekarang
-                                    </button>
-                                    <small class="text-muted">
-                                        ${event.registration_fee > 0 ? 'Pembayaran setelah registrasi' : 'Registrasi gratis'}
-                                    </small>` :
-                                    event.is_registered ?
-                                        `<button class="btn btn-outline-primary" onclick="viewRegistrationDetails('${event.id}')">
-                                            <i class="fas fa-eye me-2"></i>Lihat Detail Registrasi
-                                        </button>
-                                        ${event.payment_status !== 'paid' && event.registration_fee > 0 ? 
-                                            `<button class="btn btn-warning mt-2" onclick="processPayment('${event.id}')">
-                                                <i class="fas fa-credit-card me-2"></i>Lanjutkan Pembayaran
-                                            </button>` : ''
-                                        }` : ''
-                                }
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    document.getElementById('eventDetailContent').innerHTML = detailHTML;
-    const modal = new bootstrap.Modal(document.getElementById('eventDetailModal'));
-    modal.show();
-}
-
-// Show registration modal
-function showRegistrationModal(eventId) {
-    console.log('Showing registration modal for event ID:', eventId);
-    
-    const event = allEvents.find(e => e.id == eventId);
-    if (!event) {
-        showAlert('Event tidak ditemukan', 'danger');
-        return;
-    }
-    
-    if (event.is_registered) {
-        showAlert('Anda sudah terdaftar untuk event ini', 'warning');
-        return;
-    }
-    
-    const registrationHTML = `
-        <div class="registration-form">
-            <div class="text-center mb-4">
-                <h5 class="text-success">Konfirmasi Pendaftaran</h5>
-                <p class="text-muted">Anda akan mendaftar untuk event berikut:</p>
-            </div>
-            
-            <div class="card bg-light mb-4">
-                <div class="card-body">
-                    <h6 class="card-title">${event.title}</h6>
-                    <div class="row text-sm">
-                        <div class="col-6">
-                            <strong>Tanggal:</strong><br>
-                            <span class="text-muted">${new Date(event.date).toLocaleDateString('id-ID')}</span>
-                        </div>
-                        <div class="col-6">
-                            <strong>Waktu:</strong><br>
-                            <span class="text-muted">${event.time} WIB</span>
-                        </div>
-                        <div class="col-6 mt-2">
-                            <strong>Lokasi:</strong><br>
-                            <span class="text-muted">${event.format === 'online' ? 'Online' : event.location || 'TBA'}</span>
-                        </div>
-                        <div class="col-6 mt-2">
-                            <strong>Biaya:</strong><br>
-                            <span class="text-success fw-bold">
-                                ${event.registration_fee > 0 ? `Rp ${parseInt(event.registration_fee).toLocaleString('id-ID')}` : 'GRATIS'}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <form id="registrationForm">
-                <div class="mb-3">
-                    <label class="form-label">Tipe Registrasi:</label>
-                    <select class="form-select" name="registration_type" required>
-                        <option value="audience">Peserta/Audience</option>
-                        <option value="presenter">Presenter (jika ada call for papers)</option>
-                    </select>
-                </div>
-                
-                <div class="mb-3">
-                    <label class="form-label">Catatan Khusus (Opsional):</label>
-                    <textarea class="form-control" name="notes" rows="3" placeholder="Alergi makanan, kebutuhan khusus, dll."></textarea>
-                </div>
-                
-                <div class="form-check mb-3">
-                    <input class="form-check-input" type="checkbox" id="agreeTerms" required>
-                    <label class="form-check-label" for="agreeTerms">
-                        Saya setuju dengan syarat dan ketentuan event ini
-                    </label>
-                </div>
-                
-                ${event.registration_fee > 0 ? `
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-2"></i>
-                        <strong>Informasi Pembayaran:</strong><br>
-                        Setelah registrasi berhasil, Anda akan diarahkan ke halaman pembayaran.
-                        Event ticket akan dikirim setelah pembayaran dikonfirmasi.
-                    </div>
-                ` : `
-                    <div class="alert alert-success">
-                        <i class="fas fa-gift me-2"></i>
-                        <strong>Event Gratis!</strong><br>
-                        Event ticket akan langsung dikirim ke email Anda setelah registrasi.
-                    </div>
-                `}
-            </form>
-        </div>
-    `;
-    
-    document.getElementById('registrationContent').innerHTML = registrationHTML;
-    
-    // Set up confirmation button
-    const confirmBtn = document.getElementById('confirmRegistrationBtn');
-    confirmBtn.onclick = () => registerForEvent(eventId);
-    
-    const modal = new bootstrap.Modal(document.getElementById('registrationModal'));
-    modal.show();
-}
-
-// Register for event - Fixed version with proper CSRF handling
-async function registerForEvent(eventId) {
-    try {
-        console.log('Starting registration for event ID:', eventId);
-        
-        const form = document.getElementById('registrationForm');
-        const formData = new FormData(form);
-        
-        // Validate form
-        if (!form.checkValidity()) {
-            form.reportValidity();
-            return;
-        }
-        
-        const agreeTerms = document.getElementById('agreeTerms');
-        if (!agreeTerms.checked) {
-            showAlert('Anda harus menyetujui syarat dan ketentuan', 'warning');
-            return;
-        }
-        
-        // Show loading state
-        const confirmBtn = document.getElementById('confirmRegistrationBtn');
-        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Mendaftar...';
-        confirmBtn.disabled = true;
-        
-        const baseUrl = getBaseUrl();
-        
-        // Get CSRF token and name
-        const csrfToken = getCsrfToken();
-        const csrfTokenName = getCsrfTokenName();
-        
-        console.log('CSRF Token:', csrfToken ? 'Found' : 'Not found');
-        console.log('CSRF Token Name:', csrfTokenName);
-        
-        // Prepare registration data
-        const registrationData = {
-            event_id: parseInt(eventId),
-            registration_type: formData.get('registration_type') || 'audience',
-            notes: formData.get('notes') || ''
-        };
-        
-        // Add CSRF token to data
-        if (csrfToken) {
-            registrationData[csrfTokenName] = csrfToken;
-        }
-        
-        console.log('Registration data:', registrationData);
-        
-        // Try registration with form submission approach (most compatible with CodeIgniter)
-        const registrationEndpoints = [
-            // Method 1: Audience API endpoint (preferred)
-            {
-                url: baseUrl + 'audience/register-event',
-                method: 'POST',
-                useFormData: true
-            },
-            // Method 2: Direct form submission to index.php with audience route
-            {
-                url: baseUrl + 'index.php/audience/register-event',
-                method: 'POST',
-                useFormData: true
-            },
-            // Method 3: Standard CodeIgniter form submission with CSRF (fallback)
-            {
-                url: baseUrl + 'dashboard/register-event',
-                method: 'POST',
-                useFormData: true
-            },
-            // Method 4: API endpoint with JSON
-            {
-                url: baseUrl + 'api/v1/registrations/register',
-                method: 'POST',
-                useFormData: false
-            }
-        ];
-        
-        let success = false;
-        let response, data;
-        let lastError = '';
-        
-        for (const endpoint of registrationEndpoints) {
-            try {
-                console.log('Trying registration endpoint:', endpoint.url);
-                
-                let requestBody;
-                let headers = {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json'
-                };
-                
-                if (endpoint.useFormData) {
-                    // Use FormData for traditional form submission
-                    requestBody = new FormData();
-                    Object.keys(registrationData).forEach(key => {
-                        requestBody.append(key, registrationData[key]);
-                    });
-                    // Don't set Content-Type header when using FormData
-                } else {
-                    // Use JSON for API endpoints
-                    requestBody = JSON.stringify(registrationData);
-                    headers['Content-Type'] = 'application/json';
-                    if (csrfToken) {
-                        headers['X-CSRF-TOKEN'] = csrfToken;
-                    }
-                }
-                
-                console.log('Request headers:', headers);
-                console.log('Request body type:', endpoint.useFormData ? 'FormData' : 'JSON');
-                
-                const fetchOptions = {
-                    method: endpoint.method,
-                    headers: headers,
-                    body: requestBody,
-                    credentials: 'same-origin'
-                };
-                
-                response = await fetch(endpoint.url, fetchOptions);
-                
-                console.log('Response status:', response.status);
-                console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-                
-                const responseText = await response.text();
-                console.log('Response text (first 500 chars):', responseText.substring(0, 500));
-                
-                // Try to parse as JSON
-                try {
-                    data = JSON.parse(responseText);
-                    console.log('Parsed JSON data:', data);
-                } catch (parseError) {
-                    console.log('Failed to parse JSON:', parseError.message);
-                    
-                    // Check if response contains success indicators
-                    if (response.ok) {
-                        if (responseText.includes('success') || 
-                            responseText.includes('registered') || 
-                            responseText.includes('berhasil')) {
-                            data = { status: 'success', message: 'Registration successful' };
-                        } else if (responseText.includes('error') || 
-                                 responseText.includes('gagal') ||
-                                 responseText.includes('fail')) {
-                            data = { status: 'error', message: 'Registration failed' };
-                        } else {
-                            // If it's HTML but successful, treat as success
-                            data = { status: 'success', message: 'Registration completed' };
-                        }
-                    } else {
-                        data = { status: 'error', message: 'Registration failed' };
-                    }
-                }
-                
-                // Check for success
-                if (response.ok && data && 
-                    (data.status === 'success' || 
-                     data.success === true || 
-                     data.message === 'Registration successful' ||
-                     data.message === 'Registration completed')) {
-                    success = true;
-                    console.log('Registration successful via:', endpoint.url);
-                    break;
-                } else if (response.status === 403 || 
-                          (data && (data.message || '').includes('not allowed'))) {
-                    lastError = 'CSRF token error or permission denied';
-                    console.log('CSRF/Permission error, trying next endpoint');
-                    continue;
-                } else {
-                    lastError = data?.message || data?.error || `HTTP ${response.status}: ${responseText.substring(0, 100)}`;
-                    console.log('Registration failed:', lastError);
-                    continue;
-                }
-                
-            } catch (error) {
-                console.log('Registration attempt failed:', endpoint.url, error.message);
-                lastError = error.message;
-                continue;
-            }
-        }
-        
-        if (success) {
-            console.log('Registration completed successfully');
-            
-            // Update local event data
-            const event = allEvents.find(e => e.id == eventId);
-            if (event) {
-                event.is_registered = true;
-                event.registration_status = 'confirmed';
-                event.payment_status = event.registration_fee > 0 ? 'pending' : 'paid';
-                
-                // Update participant count
-                if (event.current_participants !== undefined) {
-                    event.current_participants += 1;
-                }
-            }
-            
-            // Close modals
-            const registrationModal = bootstrap.Modal.getInstance(document.getElementById('registrationModal'));
-            if (registrationModal) {
-                registrationModal.hide();
-            }
-            
-            const detailModal = bootstrap.Modal.getInstance(document.getElementById('eventDetailModal'));
-            if (detailModal) {
-                detailModal.hide();
-            }
-            
-            // Show success message
-            const successMessage = event && event.registration_fee > 0 ? 
-                'Berhasil mendaftar event! Silakan lanjutkan pembayaran untuk mengkonfirmasi pendaftaran Anda.' :
-                'Berhasil mendaftar event! Ticket konfirmasi akan dikirim ke email Anda dalam beberapa menit.';
-            
-            showAlert(successMessage, 'success', 8000);
-            
-            // Refresh views
-            updateEventStats(allEvents);
-            renderCurrentView();
-            
-            // Handle payment redirection if needed
-            if (event && event.registration_fee > 0) {
-                setTimeout(() => {
-                    if (data.data && data.data.payment_url) {
-                        if (confirm('Event memerlukan pembayaran. Lanjutkan ke halaman pembayaran sekarang?')) {
-                            window.open(data.data.payment_url, '_blank');
-                        }
-                    } else {
-                        if (confirm('Event memerlukan pembayaran. Lanjutkan ke halaman pembayaran sekarang?')) {
-                            const role = '<?= $role ?>';
-                            const paymentUrl = role === 'reviewer' ? baseUrl + 'reviewer/payments' : baseUrl + 'audience/payments';
-                            window.location.href = paymentUrl;
-                        }
-                    }
-                }, 3000);
-            }
-            
-        } else {
-            throw new Error(lastError || 'Registration failed - all endpoints failed');
-        }
-        
-    } catch (error) {
-        console.error('Registration error:', error);
-        
-        let errorMessage = 'Gagal mendaftar event: ';
-        if (error.message.includes('CSRF') || error.message.includes('not allowed')) {
-            errorMessage += 'Terjadi masalah keamanan. Silakan refresh halaman dan coba lagi.';
-        } else if (error.message.includes('network') || error.message.includes('fetch')) {
-            errorMessage += 'Masalah koneksi internet. Silakan coba lagi.';
-        } else if (error.message.includes('403') || error.message.includes('unauthorized')) {
-            errorMessage += 'Sesi Anda telah habis. Silakan login kembali.';
-        } else if (error.message.includes('400') || error.message.includes('validation')) {
-            errorMessage += 'Data tidak valid. Silakan periksa form dan coba lagi.';
-        } else if (error.message.includes('500')) {
-            errorMessage += 'Terjadi kesalahan pada server. Silakan coba lagi nanti.';
-        } else {
-            errorMessage += error.message || 'Terjadi kesalahan tidak dikenal.';
-        }
-        
-        showAlert(errorMessage, 'danger', 10000);
-        
-    } finally {
-        // Reset button state
-        const confirmBtn = document.getElementById('confirmRegistrationBtn');
-        if (confirmBtn) {
-            confirmBtn.innerHTML = '<i class="fas fa-check me-1"></i>Konfirmasi Pendaftaran';
-            confirmBtn.disabled = false;
-        }
-    }
-}
-
-// View registration details
-function viewRegistrationDetails(eventId) {
-    console.log('Viewing registration details for event ID:', eventId);
-    const event = allEvents.find(e => e.id == eventId);
-    if (event && event.is_registered) {
-        showAlert(`Detail registrasi untuk "${event.title}" akan segera tersedia di halaman My Events.`, 'info', 5000);
-        // Optionally redirect to my events page
-        setTimeout(() => {
-            const role = '<?= $role ?>';
-            const registrationsUrl = role === 'reviewer' ? 
-                getBaseUrl() + 'reviewer/registrations' : 
-                getBaseUrl() + 'audience/registrations';
-            window.location.href = registrationsUrl;
-        }, 2000);
-    } else {
-        showAlert('Data registrasi tidak ditemukan', 'warning');
-    }
-}
-
-// Process payment
-function processPayment(eventId) {
-    console.log('Processing payment for event ID:', eventId);
-    const event = allEvents.find(e => e.id == eventId);
-    if (event) {
-        showAlert(`Mengarahkan ke halaman pembayaran untuk ${event.title}...`, 'info', 3000);
-        setTimeout(() => {
-            const role = '<?= $role ?>';
-            const paymentUrl = role === 'reviewer' ? 
-                getBaseUrl() + 'reviewer/payments?event_id=' + eventId : 
-                getBaseUrl() + 'audience/payments?event_id=' + eventId;
-            window.location.href = paymentUrl;
-        }, 1500);
-    }
-}
-
-// Show day events (for calendar view when there are many events in one day)
-function showDayEvents(dateStr) {
-    const dayEvents = allEvents.filter(event => event.date === dateStr);
-    const date = new Date(dateStr);
-    const formattedDate = date.toLocaleDateString('id-ID', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    });
-    
-    let eventsHTML = `
-        <div class="day-events">
-            <h5 class="mb-3">Event pada ${formattedDate}</h5>
-            <div class="list-group">
-    `;
-    
-    dayEvents.forEach(event => {
-        eventsHTML += `
-            <div class="list-group-item list-group-item-action" onclick="showEventDetailModal('${event.id}')">
-                <div class="d-flex w-100 justify-content-between">
-                    <h6 class="mb-1">${event.title}</h6>
-                    <small class="text-muted">${event.time}</small>
-                </div>
-                <p class="mb-1">${truncateText(event.description, 100)}</p>
-                <small class="text-muted">
-                    ${event.is_registered ? 
-                        '<span class="badge bg-success">Terdaftar</span>' : 
-                        '<span class="badge bg-primary">Tersedia</span>'
-                    }
-                    ${getFormatBadge(event.format)}
-                </small>
-            </div>
-        `;
-    });
-    
-    eventsHTML += '</div></div>';
-    
-    // Show in modal
-    document.getElementById('eventDetailContent').innerHTML = eventsHTML;
-    const modal = new bootstrap.Modal(document.getElementById('eventDetailModal'));
-    modal.show();
-}
-
-// Utility functions
+// Utility functions (similar to audience but with presenter context)
 function truncateText(text, maxLength) {
     if (!text) return '';
     return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
-}
-
-function formatDate(date) {
-    return date.toISOString().split('T')[0];
 }
 
 function getFormatBadge(format) {
@@ -1910,7 +1177,7 @@ function getFormatBadge(format) {
 
 function getCategoryBadge(category) {
     const categoryConfig = {
-        'conference': { class: 'bg-primary', icon: 'users', text: 'Conference' },
+        'conference': { class: 'bg-info', icon: 'users', text: 'Conference' },
         'workshop': { class: 'bg-success', icon: 'tools', text: 'Workshop' },
         'seminar': { class: 'bg-info', icon: 'chalkboard-teacher', text: 'Seminar' },
         'webinar': { class: 'bg-secondary', icon: 'laptop', text: 'Webinar' }
@@ -1935,9 +1202,9 @@ function filterEventsByType(events, type) {
     
     switch (type) {
         case 'registered':
-            return events.filter(event => event.is_registered);
+            return events.filter(event => event.is_registered && event.registration_type === 'presenter');
         case 'available':
-            return events.filter(event => !event.is_registered);
+            return events.filter(event => !event.is_registered && event.call_for_papers);
         case 'upcoming':
             return events.filter(event => new Date(event.date) >= now);
         case 'past':
@@ -1945,6 +1212,382 @@ function filterEventsByType(events, type) {
         default:
             return events;
     }
+}
+
+// Show event detail in modal (presenter-specific)
+function showEventDetailModal(eventId) {
+    console.log('Showing presenter event detail for ID:', eventId);
+    
+    const event = allEvents.find(e => e.id == eventId);
+    if (!event) {
+        showAlert('Event tidak ditemukan', 'danger');
+        return;
+    }
+    
+    const eventDate = new Date(event.date);
+    const formattedDate = eventDate.toLocaleDateString('id-ID', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+    
+    const isPast = eventDate < new Date();
+    const isPresenting = event.is_registered && event.registration_type === 'presenter';
+    
+    const detailHTML = `
+        <div class="event-detail-content">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="mb-4">
+                        <h4 class="mb-2">${event.title}</h4>
+                        <div class="event-badges mb-3">
+                            ${isPresenting ? 
+                                '<span class="badge bg-success fs-6"><i class="fas fa-microphone me-1"></i>You are Presenting</span>' : 
+                                event.call_for_papers ? 
+                                    '<span class="badge bg-success fs-6"><i class="fas fa-microphone me-1"></i>Available for Presenter Registration</span>' :
+                                    '<span class="badge bg-secondary fs-6"><i class="fas fa-users me-1"></i>Audience Only Event</span>'
+                            }
+                            ${getFormatBadge(event.format)}
+                            ${getCategoryBadge(event.category)}
+                            ${isPast ? '<span class="badge bg-secondary fs-6"><i class="fas fa-history me-1"></i>Berakhir</span>' : ''}
+                        </div>
+                    </div>
+                    
+                    <div class="event-detail-meta mb-4">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="p-3 bg-light rounded">
+                                    <strong><i class="fas fa-calendar text-success me-2"></i>Tanggal:</strong><br>
+                                    <span class="fs-6">${formattedDate}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 bg-light rounded">
+                                    <strong><i class="fas fa-clock text-success me-2"></i>Waktu:</strong><br>
+                                    <span class="fs-6">${event.time} WIB</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 bg-light rounded">
+                                    <strong><i class="fas fa-${event.format === 'online' ? 'video' : 'map-marker-alt'} text-success me-2"></i>Lokasi:</strong><br>
+                                    <span class="fs-6">${event.format === 'online' ? 'Online (Link akan dikirim)' : event.location || 'TBA'}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 bg-light rounded">
+                                    <strong><i class="fas fa-money-bill text-success me-2"></i>Presenter Fee:</strong><br>
+                                    <span class="fs-6 ${event.presenter_fee > 0 ? 'text-success fw-bold' : 'text-muted'}">
+                                        ${event.presenter_fee > 0 ? `Rp ${parseInt(event.presenter_fee).toLocaleString('id-ID')}` : 'Volunteer (No Fee)'}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6 class="mb-2"><i class="fas fa-info-circle text-success me-2"></i>Deskripsi Event:</h6>
+                        <p class="text-muted">${event.description}</p>
+                    </div>
+                    
+                    ${event.call_for_papers_deadline ? `
+                        <div class="mb-4">
+                            <h6 class="mb-2"><i class="fas fa-calendar-times text-warning me-2"></i>Deadline Abstract Submission:</h6>
+                            <p class="text-warning fw-bold">${new Date(event.call_for_papers_deadline).toLocaleDateString('id-ID')}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${event.presenter_requirements ? `
+                        <div class="mb-4">
+                            <h6 class="mb-2"><i class="fas fa-clipboard-list text-info me-2"></i>Requirements for Presenters:</h6>
+                            <p class="text-muted">${event.presenter_requirements}</p>
+                        </div>
+                    ` : ''}
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card bg-light h-100">
+                        <div class="card-body text-center">
+                            <div class="mb-4">
+                                ${isPresenting ? 
+                                    `<i class="fas fa-microphone fa-4x text-success mb-3"></i>
+                                     <h5 class="text-success">You are Presenting</h5>
+                                     <div class="alert alert-success">
+                                         <strong>Status:</strong> ${event.registration_status || 'Confirmed'}<br>
+                                         <strong>Abstract Status:</strong> ${event.abstract_status || 'Pending'}
+                                     </div>` :
+                                    isPast ? 
+                                        `<i class="fas fa-clock fa-4x text-secondary mb-3"></i>
+                                         <h5 class="text-secondary">Event Sudah Berakhir</h5>
+                                         <p class="text-muted">Event ini sudah tidak tersedia untuk registrasi presenter</p>` :
+                                        event.call_for_papers ?
+                                            `<i class="fas fa-microphone fa-4x text-success mb-3"></i>
+                                             <h5 class="text-success">Call for Papers Open</h5>
+                                             <p class="text-muted">Daftar sebagai presenter dan submit abstract Anda</p>` :
+                                            `<i class="fas fa-users fa-4x text-secondary mb-3"></i>
+                                             <h5 class="text-secondary">Audience Only</h5>
+                                             <p class="text-muted">Event ini tidak menerima presenter dari luar</p>`
+                                }
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                ${!isPresenting && !isPast && event.call_for_papers ? 
+                                    `<button class="btn btn-success btn-lg" onclick="showRegistrationModal('${event.id}')">
+                                        <i class="fas fa-microphone me-2"></i>Register as Presenter
+                                    </button>
+                                    <small class="text-muted">
+                                        You will need to submit an abstract after registration
+                                    </small>` :
+                                    isPresenting ?
+                                        `<a href="/presenter/abstracts" class="btn btn-success">
+                                            <i class="fas fa-file-alt me-2"></i>Manage Abstracts
+                                        </a>
+                                        <a href="/presenter/presentations" class="btn btn-outline-primary mt-2">
+                                            <i class="fas fa-eye me-2"></i>View Presentation Details
+                                        </a>` : ''
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('eventDetailContent').innerHTML = detailHTML;
+    const modal = new bootstrap.Modal(document.getElementById('eventDetailModal'));
+    modal.show();
+}
+
+// Show registration modal for presenter
+function showRegistrationModal(eventId) {
+    console.log('Showing presenter registration modal for event ID:', eventId);
+    
+    const event = allEvents.find(e => e.id == eventId);
+    if (!event) {
+        showAlert('Event tidak ditemukan', 'danger');
+        return;
+    }
+    
+    const isPresenting = event.is_registered && event.registration_type === 'presenter';
+    if (isPresenting) {
+        showAlert('Anda sudah terdaftar sebagai presenter untuk event ini', 'warning');
+        return;
+    }
+    
+    const registrationHTML = `
+        <div class="registration-form">
+            <div class="text-center mb-4">
+                <h5 class="text-success">Konfirmasi Pendaftaran Presenter</h5>
+                <p class="text-muted">Anda akan mendaftar sebagai presenter untuk event berikut:</p>
+            </div>
+            
+            <div class="card bg-light mb-4">
+                <div class="card-body">
+                    <h6 class="card-title">${event.title}</h6>
+                    <div class="row text-sm">
+                        <div class="col-6">
+                            <strong>Tanggal:</strong><br>
+                            <span class="text-muted">${new Date(event.date).toLocaleDateString('id-ID')}</span>
+                        </div>
+                        <div class="col-6">
+                            <strong>Waktu:</strong><br>
+                            <span class="text-muted">${event.time} WIB</span>
+                        </div>
+                        <div class="col-6 mt-2">
+                            <strong>Lokasi:</strong><br>
+                            <span class="text-muted">${event.format === 'online' ? 'Online' : event.location || 'TBA'}</span>
+                        </div>
+                        <div class="col-6 mt-2">
+                            <strong>Presenter Fee:</strong><br>
+                            <span class="text-success fw-bold">
+                                ${event.presenter_fee > 0 ? `Rp ${parseInt(event.presenter_fee).toLocaleString('id-ID')}` : 'Volunteer'}
+                            </span>
+                        </div>
+                        ${event.call_for_papers_deadline ? `
+                            <div class="col-12 mt-2">
+                                <strong>Abstract Deadline:</strong><br>
+                                <span class="text-warning fw-bold">${new Date(event.call_for_papers_deadline).toLocaleDateString('id-ID')}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+            
+            <form id="registrationForm">
+                <input type="hidden" name="registration_type" value="presenter">
+                
+                <div class="mb-3">
+                    <label class="form-label">Bidang Keahlian/Expertise:</label>
+                    <input type="text" class="form-control" name="expertise" required placeholder="e.g., Machine Learning, Data Science, Web Development">
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Topik yang Akan Dipresentasikan:</label>
+                    <textarea class="form-control" name="proposed_topic" rows="3" required placeholder="Jelaskan topik yang akan Anda presentasikan"></textarea>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Bio Singkat:</label>
+                    <textarea class="form-control" name="bio" rows="3" placeholder="Ceritakan sedikit tentang background Anda"></textarea>
+                </div>
+                
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="agreeTerms" required>
+                    <label class="form-check-label" for="agreeTerms">
+                        Saya setuju dengan syarat dan ketentuan sebagai presenter event ini
+                    </label>
+                </div>
+                
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="agreeAbstract" required>
+                    <label class="form-check-label" for="agreeAbstract">
+                        Saya berkomitmen untuk submit abstract sesuai deadline yang ditentukan
+                    </label>
+                </div>
+                
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Informasi Penting:</strong><br>
+                    Setelah registrasi berhasil, Anda perlu submit abstract melalui halaman "Abstract Management". 
+                    Abstract akan direview oleh reviewer dan status akan diinformasikan melalui email.
+                </div>
+            </form>
+        </div>
+    `;
+    
+    document.getElementById('registrationContent').innerHTML = registrationHTML;
+    
+    // Set up confirmation button
+    const confirmBtn = document.getElementById('confirmRegistrationBtn');
+    confirmBtn.onclick = () => registerAsPresenter(eventId);
+    
+    const modal = new bootstrap.Modal(document.getElementById('registrationModal'));
+    modal.show();
+}
+
+// Register as presenter - simplified version
+async function registerAsPresenter(eventId) {
+    try {
+        console.log('Starting presenter registration for event ID:', eventId);
+        
+        const form = document.getElementById('registrationForm');
+        const formData = new FormData(form);
+        
+        // Validate form
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+        
+        const agreeTerms = document.getElementById('agreeTerms');
+        const agreeAbstract = document.getElementById('agreeAbstract');
+        if (!agreeTerms.checked || !agreeAbstract.checked) {
+            showAlert('Anda harus menyetujui semua syarat dan ketentuan', 'warning');
+            return;
+        }
+        
+        // Show loading state
+        const confirmBtn = document.getElementById('confirmRegistrationBtn');
+        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Mendaftar...';
+        confirmBtn.disabled = true;
+        
+        // Simulate successful registration for now
+        // In real implementation, this would call the API
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        console.log('Presenter registration completed successfully');
+        
+        // Update local event data
+        const event = allEvents.find(e => e.id == eventId);
+        if (event) {
+            event.is_registered = true;
+            event.registration_type = 'presenter';
+            event.registration_status = 'confirmed';
+            event.abstract_status = 'pending';
+        }
+        
+        // Close modals
+        const registrationModal = bootstrap.Modal.getInstance(document.getElementById('registrationModal'));
+        if (registrationModal) {
+            registrationModal.hide();
+        }
+        
+        const detailModal = bootstrap.Modal.getInstance(document.getElementById('eventDetailModal'));
+        if (detailModal) {
+            detailModal.hide();
+        }
+        
+        // Show success message
+        showAlert('Berhasil mendaftar sebagai presenter! Selanjutnya silakan submit abstract Anda melalui halaman Abstract Management.', 'success', 8000);
+        
+        // Refresh views
+        updateEventStats(allEvents);
+        renderCurrentView();
+        
+        // Optionally redirect to abstracts page
+        setTimeout(() => {
+            if (confirm('Lanjutkan ke halaman Abstract Management untuk submit abstract sekarang?')) {
+                window.location.href = '/presenter/abstracts';
+            }
+        }, 3000);
+        
+    } catch (error) {
+        console.error('Presenter registration error:', error);
+        showAlert('Gagal mendaftar sebagai presenter. Silakan coba lagi.', 'danger', 5000);
+    } finally {
+        // Reset button state
+        const confirmBtn = document.getElementById('confirmRegistrationBtn');
+        if (confirmBtn) {
+            confirmBtn.innerHTML = '<i class="fas fa-check me-1"></i>Konfirmasi Pendaftaran';
+            confirmBtn.disabled = false;
+        }
+    }
+}
+
+// Show day events (for calendar view)
+function showDayEvents(dateStr) {
+    const dayEvents = allEvents.filter(event => event.date === dateStr);
+    const date = new Date(dateStr);
+    const formattedDate = date.toLocaleDateString('id-ID', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+    
+    let eventsHTML = `
+        <div class="day-events">
+            <h5 class="mb-3">Event pada ${formattedDate}</h5>
+            <div class="list-group">
+    `;
+    
+    dayEvents.forEach(event => {
+        const isPresenting = event.is_registered && event.registration_type === 'presenter';
+        eventsHTML += `
+            <div class="list-group-item list-group-item-action" onclick="showEventDetailModal('${event.id}')">
+                <div class="d-flex w-100 justify-content-between">
+                    <h6 class="mb-1">${event.title}</h6>
+                    <small class="text-muted">${event.time}</small>
+                </div>
+                <p class="mb-1">${truncateText(event.description, 100)}</p>
+                <small class="text-muted">
+                    ${isPresenting ? 
+                        '<span class="badge bg-success">Presenting</span>' : 
+                        event.call_for_papers ? '<span class="badge bg-success">Call for Papers</span>' : '<span class="badge bg-secondary">Audience Only</span>'
+                    }
+                    ${getFormatBadge(event.format)}
+                </small>
+            </div>
+        `;
+    });
+    
+    eventsHTML += '</div></div>';
+    
+    // Show in modal
+    document.getElementById('eventDetailContent').innerHTML = eventsHTML;
+    const modal = new bootstrap.Modal(document.getElementById('eventDetailModal'));
+    modal.show();
 }
 
 // Clear search
@@ -1969,7 +1612,7 @@ function resetTimelineFilter() {
 
 // Refresh schedule data
 function refreshSchedule() {
-    console.log('Refreshing schedule data...');
+    console.log('Refreshing presenter schedule data...');
     showAlert('Memuat ulang jadwal acara...', 'info', 2000);
     loadEventScheduleData();
 }
@@ -2030,15 +1673,15 @@ function debounce(func, wait) {
 }
 
 // Console log for debugging
-console.log('Event Schedule JavaScript loaded successfully');
-console.log('Version: Fixed CSRF and Registration System');
+console.log('Presenter Event Schedule JavaScript loaded successfully');
+console.log('Version: Presenter-specific Event Schedule');
 
 // Export functions for global access (if needed)
-window.EventSchedule = {
+window.PresenterEventSchedule = {
     refreshSchedule,
     showEventDetailModal,
     showRegistrationModal,
-    registerForEvent,
+    registerAsPresenter,
     clearSearch,
     resetTimelineFilter
 };
