@@ -229,8 +229,8 @@
 
                 <!-- Back Link -->
                 <div class="back-link">
-                    <a href="/payment/<?= $payment['registration_id'] ?>" class="text-muted">
-                        <i class="fas fa-arrow-left me-1"></i>Back to Payment Gateway
+                    <a href="<?= base_url('audience/dashboard') ?>" class="text-muted">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
                     </a>
                 </div>
             </div>
@@ -255,11 +255,13 @@ function simulatePayment(result) {
 }
 
 function processSuccessfulPayment() {
-    fetch('/payment/complete/<?= $payment['id'] ?>', {
+    // Prepare data with CSRF token
+    const formData = new FormData();
+    formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+    
+    fetch('<?= base_url('payment/complete/' . $payment['id']) ?>', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        }
+        body: formData
     })
     .then(response => response.json())
     .then(data => {

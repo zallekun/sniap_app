@@ -308,7 +308,17 @@ class AuthController extends BaseController
      */
     private function getRedirectUrl($role)
     {
-    return '/dashboard';
+        switch ($role) {
+            case 'admin':
+                return '/admin/dashboard';
+            case 'reviewer':
+                return '/reviewer/dashboard';
+            case 'presenter':
+                return '/presenter/dashboard';
+            default:
+                // For audience/participant users
+                return '/audience/dashboard';
+        }
     }
 
 

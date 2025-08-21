@@ -27,7 +27,7 @@
     <!-- Top Navigation -->
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
         <div class="container-fluid">
-            <a class="navbar-brand fw-bold text-primary" href="/dashboard">
+            <a class="navbar-brand fw-bold text-primary" href="<?= base_url('audience/dashboard') ?>">
                 <i class="fas fa-graduation-cap me-2"></i>
                 SNIA Conference
             </a>
@@ -39,7 +39,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="/dashboard">
+                        <a class="nav-link" href="<?= base_url('audience/dashboard') ?>">
                             <i class="fas fa-home me-1"></i> Dashboard
                         </a>
                     </li>

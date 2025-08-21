@@ -1140,7 +1140,11 @@ class DashboardController extends BaseController
         if (!$userId) {
             return $this->response->setJSON([
                 'status' => 'error',
-                'message' => 'Unauthorized'
+                'message' => 'Unauthorized - Please login first',
+                'debug' => [
+                    'session_data' => $this->session->get(),
+                    'user_id' => $userId
+                ]
             ])->setStatusCode(401);
         }
 
@@ -1153,7 +1157,6 @@ class DashboardController extends BaseController
                          e.title as event_title, e.event_date, e.registration_fee as event_price,
                          p.id as payment_id, p.amount as payment_amount, p.payment_status, 
                          p.payment_method, p.transaction_id, p.created_at as payment_date,
-                         p.external_id, p.invoice_url, p.notes,
                          COALESCE(p.payment_status, \'pending\') as final_status')
                 ->join('events e', 'e.id = r.event_id', 'inner')
                 ->join('payments p', 'p.registration_id = r.id', 'left')
@@ -1173,12 +1176,12 @@ class DashboardController extends BaseController
                     'registration_type' => $payment['registration_type'],
                     'amount' => $payment['payment_amount'] ?? $payment['event_price'] ?? 0,
                     'status' => $payment['final_status'],
-                    'payment_status' => $payment['payment_status'] ?? 'pending', // Add this for consistency
+                    'payment_status' => $payment['payment_status'] ?? 'pending',
                     'payment_method' => $payment['payment_method'] ?? 'N/A',
                     'transaction_id' => $payment['transaction_id'] ?? null,
-                    'external_id' => $payment['external_id'] ?? null,
-                    'invoice_url' => $payment['invoice_url'] ?? null,
-                    'notes' => $payment['notes'] ?? null,
+                    'external_id' => null, // Remove this for now
+                    'invoice_url' => null, // Remove this for now  
+                    'notes' => null, // Remove this for now
                     'created_at' => $payment['payment_date'] ?? $payment['registration_date'],
                     'registration_date' => $payment['registration_date']
                 ];
@@ -1191,9 +1194,11 @@ class DashboardController extends BaseController
             ]);
         } catch (\Exception $e) {
             log_message('error', 'Get payment history API error: ' . $e->getMessage());
+            log_message('error', 'Stack trace: ' . $e->getTraceAsString());
             return $this->response->setJSON([
                 'status' => 'error',
-                'message' => 'Failed to load payment history'
+                'message' => 'Failed to load payment history: ' . $e->getMessage(),
+                'debug' => ENVIRONMENT === 'development' ? $e->getTraceAsString() : null
             ])->setStatusCode(500);
         }
     }

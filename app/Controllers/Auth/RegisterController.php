@@ -579,7 +579,7 @@ class RegisterController extends BaseController
             case 'presenter':
                 return '/presenter/dashboard';
             default:
-                return '/dashboard';
+                return '/audience/dashboard';
         }
     }
 }

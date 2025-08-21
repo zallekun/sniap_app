@@ -264,7 +264,7 @@ class PaymentController extends BaseController
                 'data' => [
                     'payment_id' => $paymentId,
                     'transaction_id' => $transactionId,
-                    'redirect_url' => base_url('/audience/payments?success=1')
+                    'redirect_url' => base_url('/audience/dashboard?payment=success')
                 ]
             ]);
 

@@ -47,7 +47,7 @@ class AuthFilter implements FilterInterface
             
             if (!in_array($userRole, $requiredRoles)) {
                 // User doesn't have required role
-                return redirect()->to('/dashboard')->with('error', 'You do not have permission to access this page.');
+                return redirect()->to('/audience/dashboard')->with('error', 'You do not have permission to access this page.');
             }
         }
 

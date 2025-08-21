@@ -271,9 +271,9 @@ $routes->group('', ['namespace' => 'App\Controllers'], function($routes) {
     $routes->get('auth/check-email', 'Auth\RegisterController::checkEmail');
 
     // =================
-    // MAIN DASHBOARD & PROFILE
+    // PROFILE MANAGEMENT
     // =================
-    $routes->get('dashboard', 'DashboardController::index', ['filter' => 'auth']);
+    // Note: Main dashboard moved to /audience/dashboard for consistency
     $routes->get('profile/edit', 'User\ProfileController::edit', ['filter' => 'auth']);
     $routes->post('profile/update', 'User\ProfileController::update', ['filter' => 'auth']);
     
@@ -392,8 +392,7 @@ $routes->group('', ['namespace' => 'App\Controllers'], function($routes) {
 
     // Audience Routes
     $routes->group('audience', ['filter' => 'auth'], function($routes) {
-        // Main pages
-        $routes->get('/', 'DashboardController::index');
+        // Main dashboard - single entry point
         $routes->get('dashboard', 'DashboardController::index');
         $routes->get('registrations', 'DashboardController::audienceRegistrations');
         $routes->get('events', 'DashboardController::eventSchedulePage');

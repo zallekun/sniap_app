@@ -212,8 +212,8 @@
 
                 <!-- Back Link -->
                 <div class="text-center mt-3">
-                    <a href="/audience/registrations" class="text-muted">
-                        <i class="fas fa-arrow-left me-1"></i>Back to My Registrations
+                    <a href="<?= base_url('audience/dashboard') ?>" class="text-muted">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
                     </a>
                 </div>
             </div>
@@ -253,8 +253,11 @@ function processPayment() {
         amount: <?= $registration['registration_fee'] ?>
     };
 
+    // Add CSRF token
+    paymentData.<?= csrf_token() ?> = '<?= csrf_hash() ?>';
+    
     // Process payment
-    fetch('/payment/process', {
+    fetch('<?= base_url('payment/process') ?>', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',

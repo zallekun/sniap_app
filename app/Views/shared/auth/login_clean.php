@@ -134,7 +134,7 @@
                 
                 // Redirect after short delay
                 setTimeout(() => {
-                    window.location.href = data.redirect || '/dashboard';
+                    window.location.href = data.redirect || '/audience/dashboard';
                 }, 1000);
             } else {
                 // Show error message

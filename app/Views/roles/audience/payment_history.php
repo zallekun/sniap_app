@@ -184,14 +184,16 @@ function updatePaymentStatistics(payments) {
     
     payments.forEach(payment => {
         const status = payment.status?.toLowerCase();
+        const paymentStatus = payment.payment_status?.toLowerCase(); 
         const amount = parseFloat(payment.amount || 0);
         
-        if (status === 'paid' || status === 'success') {
+        // Check both status fields for success
+        if (status === 'success' || paymentStatus === 'success' || status === 'paid') {
             successfulCount++;
             totalPaid += amount;
-        } else if (status === 'pending') {
+        } else if (status === 'pending' || paymentStatus === 'pending') {
             pendingCount++;
-        } else if (status === 'failed' || status === 'cancelled') {
+        } else if (status === 'failed' || status === 'cancelled' || paymentStatus === 'failed') {
             failedCount++;
         }
     });
