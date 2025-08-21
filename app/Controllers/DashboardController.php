@@ -1153,6 +1153,7 @@ class DashboardController extends BaseController
                          e.title as event_title, e.event_date, e.registration_fee as event_price,
                          p.id as payment_id, p.amount as payment_amount, p.payment_status, 
                          p.payment_method, p.transaction_id, p.created_at as payment_date,
+                         p.external_id, p.invoice_url, p.notes,
                          COALESCE(p.payment_status, \'pending\') as final_status')
                 ->join('events e', 'e.id = r.event_id', 'inner')
                 ->join('payments p', 'p.registration_id = r.id', 'left')
@@ -1172,9 +1173,12 @@ class DashboardController extends BaseController
                     'registration_type' => $payment['registration_type'],
                     'amount' => $payment['payment_amount'] ?? $payment['event_price'] ?? 0,
                     'status' => $payment['final_status'],
+                    'payment_status' => $payment['payment_status'] ?? 'pending', // Add this for consistency
                     'payment_method' => $payment['payment_method'] ?? 'N/A',
+                    'transaction_id' => $payment['transaction_id'] ?? null,
                     'external_id' => $payment['external_id'] ?? null,
                     'invoice_url' => $payment['invoice_url'] ?? null,
+                    'notes' => $payment['notes'] ?? null,
                     'created_at' => $payment['payment_date'] ?? $payment['registration_date'],
                     'registration_date' => $payment['registration_date']
                 ];
@@ -1190,6 +1194,55 @@ class DashboardController extends BaseController
             return $this->response->setJSON([
                 'status' => 'error',
                 'message' => 'Failed to load payment history'
+            ])->setStatusCode(500);
+        }
+    }
+
+    /**
+     * API: Get payment details by ID
+     */
+    public function getPaymentDetailsApi($paymentId)
+    {
+        $userId = $this->session->get('user_id');
+        if (!$userId) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Unauthorized'
+            ])->setStatusCode(401);
+        }
+
+        try {
+            $db = \Config\Database::connect();
+            
+            // Get payment details with comprehensive info
+            $payment = $db->table('payments p')
+                ->select('p.*, r.registration_type, r.user_id, r.event_id,
+                         e.title as event_title, e.event_date, e.location as event_location,
+                         u.first_name, u.last_name, u.email')
+                ->join('registrations r', 'r.id = p.registration_id', 'inner')
+                ->join('events e', 'e.id = r.event_id', 'inner')
+                ->join('users u', 'u.id = r.user_id', 'inner')
+                ->where('p.id', $paymentId)
+                ->where('r.user_id', $userId) // Security: only user's own payments
+                ->get()
+                ->getRowArray();
+
+            if (!$payment) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Payment not found or access denied'
+                ])->setStatusCode(404);
+            }
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'data' => $payment
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'Get payment details API error: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Failed to load payment details'
             ])->setStatusCode(500);
         }
     }

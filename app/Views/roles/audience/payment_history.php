@@ -119,6 +119,31 @@
     </div>
 </div>
 
+<!-- Payment Detail Modal -->
+<div class="modal fade" id="paymentDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-file-invoice-dollar me-2"></i>Payment Details
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="paymentDetailContent">
+                    <!-- Dynamic content will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="downloadInvoiceBtn" style="display: none;">
+                    <i class="fas fa-download me-2"></i>Download Invoice
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     loadPaymentHistory();
@@ -244,8 +269,111 @@ function getPaymentStatusBadge(status) {
 }
 
 function viewPaymentDetails(paymentId) {
-    // You can implement a modal or redirect to payment details page
-    alert(`Payment details for ID: ${paymentId}\n\nThis feature will be implemented to show detailed payment information.`);
+    // Fetch payment details from API
+    fetch(`<?= base_url('audience/api/payments/details/') ?>${paymentId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                showPaymentDetailModal(data.data);
+            } else {
+                alert('Failed to load payment details: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading payment details:', error);
+            alert('Error loading payment details. Please try again.');
+        });
+}
+
+function showPaymentDetailModal(payment) {
+    const eventDate = new Date(payment.event_date).toLocaleDateString('id-ID', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+    
+    const paymentDate = new Date(payment.created_at).toLocaleDateString('id-ID', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    
+    const statusBadge = getPaymentStatusBadge(payment.payment_status);
+    const amount = parseFloat(payment.amount || 0);
+    
+    const content = `
+        <div class="row">
+            <div class="col-md-6">
+                <h6 class="text-muted">Payment ID</h6>
+                <p class="fw-bold">#${payment.id}</p>
+                
+                <h6 class="text-muted">Transaction ID</h6>
+                <p class="fw-bold">${payment.transaction_id || 'N/A'}</p>
+                
+                <h6 class="text-muted">Event</h6>
+                <p class="fw-bold">${escapeHtml(payment.event_title)}</p>
+                
+                <h6 class="text-muted">Event Date</h6>
+                <p>${eventDate}</p>
+            </div>
+            <div class="col-md-6">
+                <h6 class="text-muted">Amount</h6>
+                <p class="fw-bold text-primary fs-4">Rp ${amount.toLocaleString('id-ID')}</p>
+                
+                <h6 class="text-muted">Payment Method</h6>
+                <p class="text-capitalize">${escapeHtml(payment.payment_method || 'N/A')}</p>
+                
+                <h6 class="text-muted">Status</h6>
+                <p>${statusBadge}</p>
+                
+                <h6 class="text-muted">Payment Date</h6>
+                <p>${paymentDate}</p>
+            </div>
+        </div>
+        
+        ${payment.notes ? `
+            <div class="row mt-3">
+                <div class="col-12">
+                    <h6 class="text-muted">Notes</h6>
+                    <p class="text-muted">${escapeHtml(payment.notes)}</p>
+                </div>
+            </div>
+        ` : ''}
+        
+        <div class="row mt-3">
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Payment Information:</strong><br>
+                    ${payment.payment_status === 'success' ? 
+                        'Your payment has been successfully processed. You can now access the event.' :
+                        payment.payment_status === 'pending' ? 
+                        'Your payment is being processed. Please wait for confirmation.' :
+                        'There was an issue with your payment. Please contact support if you need assistance.'
+                    }
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('paymentDetailContent').innerHTML = content;
+    
+    // Handle download invoice button
+    const downloadBtn = document.getElementById('downloadInvoiceBtn');
+    if (payment.invoice_url) {
+        downloadBtn.style.display = 'inline-block';
+        downloadBtn.onclick = () => window.open(payment.invoice_url, '_blank');
+    } else {
+        downloadBtn.style.display = 'none';
+    }
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('paymentDetailModal'));
+    modal.show();
 }
 
 function showError(message) {

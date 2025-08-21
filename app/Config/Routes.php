@@ -406,6 +406,7 @@ $routes->group('', ['namespace' => 'App\Controllers'], function($routes) {
         $routes->get('api/events', 'DashboardController::getUpcomingEventsApi');
         $routes->get('api/certificates', 'DashboardController::getCertificatesApi');
         $routes->get('api/payments', 'DashboardController::getPaymentHistoryApi');
+        $routes->get('api/payments/details/(:num)', 'DashboardController::getPaymentDetailsApi/$1');
         $routes->post('cancel-registration', 'DashboardController::cancelRegistration');
     });
 
