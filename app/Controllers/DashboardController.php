@@ -970,6 +970,28 @@ class DashboardController extends BaseController
     }
 
     /**
+     * Certificates page
+     */
+    public function certificates()
+    {
+        $userId = $this->session->get('user_id');
+        if (!$userId) {
+            return redirect()->to('/login');
+        }
+
+        $user = $this->userModel->find($userId);
+        
+        $data = [
+            'title' => 'My Certificates - SNIA Conference',
+            'user' => $user,
+            'userRole' => $user['role'],
+            'userName' => trim($user['first_name'] . ' ' . $user['last_name'])
+        ];
+
+        return view('roles/audience/certificates', $data);
+    }
+
+    /**
      * API: Get audience registrations
      */
     public function getAudienceRegistrationsApi()
@@ -1086,11 +1108,12 @@ class DashboardController extends BaseController
             $db = \Config\Database::connect();
             
             $certificates = $db->table('certificates c')
-                ->select('c.*, r.registration_type, e.title as event_title, e.event_date')
+                ->select('c.*, r.registration_type, e.title as event_title, e.event_date, e.location')
                 ->join('registrations r', 'r.id = c.registration_id', 'inner')
                 ->join('events e', 'e.id = r.event_id', 'inner')
                 ->where('r.user_id', $userId)
-                ->orderBy('c.issued_at', 'DESC')
+                ->where('c.certificate_number IS NOT NULL') // Only show generated certificates
+                ->orderBy('c.generated_at', 'DESC')
                 ->get()
                 ->getResultArray();
 

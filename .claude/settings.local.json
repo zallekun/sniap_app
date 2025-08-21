@@ -14,7 +14,8 @@
       "Bash(echo:*)",
       "Bash(git add:*)",
       "Bash(grep:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(psql:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits",

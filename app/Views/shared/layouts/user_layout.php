@@ -74,7 +74,7 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="/certificates">
+                                <a class="nav-link" href="<?= base_url('audience/certificates') ?>">
                                     <i class="fas fa-certificate me-1"></i> Certificates
                                 </a>
                             </li>
